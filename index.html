@@ -24,7 +24,7 @@
     <link rel="stylesheet" type="text/css" href="css/az-preloader.css"/>
     <link rel="stylesheet" type="text/css" href="css/az-profile.css"/>
     <link rel="stylesheet" type="text/css" href="css/az-app.css"/>
-    <link rel="stylesheet" type="text/css" href="css/az-progress.css"/>
+    <link rel="stylesheet" type="text/css" href="css/az-home-arrows.css"/>
     <link rel="preload" href="assets/img/amir/az-logo.webp" as="image" type="image/webp"/>
     <link rel="preload" href="assets/img/amir/profile.jpg" as="image" type="image/jpeg"/>
     <style>
@@ -295,21 +295,21 @@
           <span class="glass-nav__sheen" aria-hidden="true"></span>
           <span class="glass-nav__indicator" aria-hidden="true"></span>
 
-          <a class="glass-nav__tab" role="listitem" href="#work" data-nav="work">
+          <a class="glass-nav__tab" role="listitem" href="#work" data-nav="work" data-tooltip="Work">
             <span class="glass-nav__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M22 13a18.15 18.15 0 0 1-20 0"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
             </span>
             <span class="glass-nav__name">Work</span>
           </a>
 
-          <a class="glass-nav__tab" role="listitem" href="#about" data-nav="about">
+          <a class="glass-nav__tab" role="listitem" href="#about" data-nav="about" data-tooltip="About">
             <span class="glass-nav__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
             </span>
             <span class="glass-nav__name">About</span>
           </a>
 
-          <a class="glass-nav__home is-active" role="listitem" href="#home" aria-label="Home" aria-current="page" data-nav="home">
+          <a class="glass-nav__home is-active" role="listitem" href="#home" aria-label="Home" aria-current="page" data-nav="home" data-tooltip="Home">
             <span class="glass-nav__home-glass" aria-hidden="true"></span>
             <span class="glass-nav__home-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
@@ -420,7 +420,7 @@
                   </div>
                 </div>
                 <!-- - slider FOOTER -->
-                <!-- slider COUNTER (kept for Rhye sync; visually replaced by az-progress) -->
+                <!-- slider COUNTER (kept for Rhye sync; visually hidden) -->
                 <div class="slider__wrapper-counter slider-fullscreen-projects__counter" aria-hidden="true">
                   <div class="slider__counter slider__counter_current">
                     <div class="js-slider-fullscreen-projects__counter-current swiper-container">
@@ -431,24 +431,25 @@
                   <div class="slider__counter slider__counter_total js-slider-fullscreen-projects__counter-total"></div>
                 </div>
                 <!-- - slider COUNTER -->
-                <div class="az-progress" id="az-progress" role="tablist" aria-label="Project slides" hidden></div>
-                <!-- slider ARROWS -->
-                <div class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev">
-                  <div class="arrow arrow-left js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
-                    <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                      <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
-                    </svg>
-                    <div class="arrow__pointer arrow-left__pointer"></div>
-                    <div class="arrow__triangle"></div>
+                <!-- slider ARROWS (single pair; mobile clusters above dock) -->
+                <div class="az-home-arrows" role="group" aria-label="Project slides">
+                  <div class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev" aria-label="Previous project">
+                    <div class="arrow arrow-left js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
+                      <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
+                      </svg>
+                      <div class="arrow__pointer arrow-left__pointer"></div>
+                      <div class="arrow__triangle"></div>
+                    </div>
                   </div>
-                </div>
-                <div class="slider__arrow slider__arrow_right slider__arrow_absolute js-slider__arrow-next">
-                  <div class="arrow arrow-right js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
-                    <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                      <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
-                    </svg>
-                    <div class="arrow__pointer arrow-right__pointer"></div>
-                    <div class="arrow__triangle"></div>
+                  <div class="slider__arrow slider__arrow_right slider__arrow_absolute js-slider__arrow-next" aria-label="Next project">
+                    <div class="arrow arrow-right js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
+                      <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
+                      </svg>
+                      <div class="arrow__pointer arrow-right__pointer"></div>
+                      <div class="arrow__triangle"></div>
+                    </div>
                   </div>
                 </div>
                 <!-- - slider ARROWS -->
@@ -468,11 +469,11 @@
 
           <!-- WORK VIEW -->
           <section class="az-view" id="view-work" data-view="work" aria-label="Work" hidden aria-hidden="true">
-            <div class="az-panel">
+            <div class="az-panel az-panel_work">
               <p class="az-panel__eyebrow">Selected work</p>
-              <h1 class="az-panel__title">Projects.</h1>
+              <h1 class="az-panel__title">Selected projects.</h1>
               <p class="az-panel__lead">A selection of websites, applications, APIs, and automation tools.</p>
-              <ul class="az-work-grid" id="az-work-grid"></ul>
+              <div class="az-work-browser" id="az-work-browser"></div>
             </div>
           </section>
 
@@ -741,7 +742,6 @@
     <script src="js/az-profile.js"></script>
     <script src="js/az-projects.js"></script>
     <script src="js/az-app.js"></script>
-    <script src="js/az-progress.js"></script>
     <!-- - COMPONENTS -->
     <script src="https://maps.googleapis.com/maps/api/js?callback=Function.prototype&amp;key=AIzaSyBwR_TrF6h7-pMxkKv_q2t8BXX3w6QuFOc" async></script>
 </body>

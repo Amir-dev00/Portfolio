@@ -16,13 +16,23 @@
     project: document.getElementById("view-project"),
   };
 
-  var workGrid = document.getElementById("az-work-grid");
+  var workBrowser = document.getElementById("az-work-browser");
   var projectRoot = document.getElementById("az-project-root");
   var indicator = nav && nav.querySelector(".glass-nav__indicator");
   var currentKey = null;
   var animating = false;
   var pendingRoute = null;
   var transitionTimer = 0;
+  var homeSliderWanted = true;
+  var nativeScrollWanted = false;
+  var homeSliderPoll = 0;
+  var scrollModePoll = 0;
+  var workIndex = 0;
+  var workLastSlug = "";
+  var workBound = false;
+  var workFadeTimer = 0;
+  var WORK_ROW_H = 48;
+  var WORK_VISIBLE = 5;
 
   function normalizeHash(raw) {
     var hash = String(raw || "").replace(/^#/, "").replace(/^\/+/, "");
@@ -60,11 +70,21 @@
     return el && el.swiper ? el.swiper : null;
   }
 
-  function setHomeSliderLive(live) {
-    var swiper = getHomeSwiper();
-    if (!swiper) return;
+  function getPageScrollbar() {
+    var pw = document.getElementById("page-wrapper");
+    if (!pw || !window.Scrollbar || typeof window.Scrollbar.get !== "function") return null;
     try {
-      if (live) {
+      return window.Scrollbar.get(pw) || null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function applyHomeSliderLive() {
+    var swiper = getHomeSwiper();
+    if (!swiper) return false;
+    try {
+      if (homeSliderWanted) {
         if (typeof swiper.update === "function") swiper.update();
         if (swiper.autoplay && typeof swiper.autoplay.start === "function") swiper.autoplay.start();
         if ("allowTouchMove" in swiper) swiper.allowTouchMove = true;
@@ -82,6 +102,97 @@
     } catch (err) {
       /* Rhye swiper internals may differ across builds. */
     }
+    return true;
+  }
+
+  function setHomeSliderLive(live) {
+    homeSliderWanted = !!live;
+    if (applyHomeSliderLive()) {
+      if (homeSliderPoll) {
+        window.clearInterval(homeSliderPoll);
+        homeSliderPoll = 0;
+      }
+      return;
+    }
+    // Swiper can boot after the first route paint (esp. direct #work).
+    if (homeSliderPoll) window.clearInterval(homeSliderPoll);
+    var tries = 0;
+    homeSliderPoll = window.setInterval(function () {
+      tries += 1;
+      if (applyHomeSliderLive() || tries > 50) {
+        window.clearInterval(homeSliderPoll);
+        homeSliderPoll = 0;
+      }
+    }, 100);
+  }
+
+  function initPageScrollbar() {
+    var pw = document.getElementById("page-wrapper");
+    if (!pw || !window.Scrollbar || typeof window.Scrollbar.init !== "function") return null;
+    if (getPageScrollbar()) return getPageScrollbar();
+    var opts = (window.theme && window.theme.smoothScroll) || {};
+    try {
+      return window.Scrollbar.init(pw, {
+        damping: opts.damping != null ? opts.damping : 0.12,
+        renderByPixels: opts.renderByPixels !== false,
+        continuousScrolling: !!opts.continuousScrolling,
+        plugins: opts.plugins || {
+          edgeEasing: true,
+          lockscroll: { lock: false },
+          softscroll: {},
+        },
+      });
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function applyPageScrollMode() {
+    var pw = document.getElementById("page-wrapper");
+    if (!pw) return false;
+    var sb = getPageScrollbar();
+
+    if (nativeScrollWanted) {
+      document.documentElement.classList.add("az-native-scroll");
+      if (sb) {
+        try {
+          if (typeof sb.setPosition === "function") sb.setPosition(0, 0);
+        } catch (err) {}
+        try {
+          sb.destroy();
+        } catch (err) {}
+        sb = null;
+      }
+      // Drop leftover smooth-scrollbar inline lock so CSS can open native overflow.
+      if (pw.style.overflow === "hidden") pw.style.overflow = "";
+      if (pw.style.height && /px$/.test(pw.style.height)) pw.style.height = "";
+      return !getPageScrollbar();
+    }
+
+    document.documentElement.classList.remove("az-native-scroll");
+    if (!sb) sb = initPageScrollbar();
+    if (sb && typeof sb.update === "function") {
+      try {
+        sb.update();
+      } catch (err) {}
+    }
+    return !!sb;
+  }
+
+  function setNativePageScroll(native) {
+    nativeScrollWanted = !!native;
+    applyPageScrollMode();
+    if (scrollModePoll) window.clearInterval(scrollModePoll);
+    var tries = 0;
+    scrollModePoll = window.setInterval(function () {
+      tries += 1;
+      var done = applyPageScrollMode();
+      // Poll briefly: Rhye may init Scrollbar after the first route paint.
+      if (tries > 40 || (done && tries >= 4)) {
+        window.clearInterval(scrollModePoll);
+        scrollModePoll = 0;
+      }
+    }, 100);
   }
 
   function moveIndicator(navKey) {
@@ -102,28 +213,48 @@
       (isHome && target.querySelector(".glass-nav__home-glass")) ||
       target.querySelector(".glass-nav__icon, .glass-nav__action-icon, .glass-nav__home-icon") ||
       target;
+    var label = target.querySelector(".glass-nav__name");
+
+    // Neutralize hover/tap transforms so the capsule stays centered on stable layout.
+    var prevMagX = target.style.getPropertyValue("--mag-x");
+    var prevMagY = target.style.getPropertyValue("--mag-y");
+    var prevTransform = target.style.transform;
+    target.style.setProperty("--mag-x", "0px");
+    target.style.setProperty("--mag-y", "0px");
+    target.style.transform = "none";
 
     var barBox = bar.getBoundingClientRect();
     var iconBox = icon.getBoundingClientRect();
-    var iconCx = iconBox.left + iconBox.width / 2 - barBox.left;
-    var iconCy = iconBox.top + iconBox.height / 2 - barBox.top;
+    var labelBox = label ? label.getBoundingClientRect() : null;
 
-    // Glass oval hugs the icon only — equal side padding, label stays under it.
+    target.style.setProperty("--mag-x", prevMagX || "0px");
+    target.style.setProperty("--mag-y", prevMagY || "0px");
+    target.style.transform = prevTransform;
+
     var ovalW;
     var ovalH;
+    var x;
+    var y;
+
     if (isHome) {
       ovalW = Math.round(iconBox.width);
       ovalH = Math.round(iconBox.height);
+      x = iconBox.left + iconBox.width / 2 - barBox.left - ovalW / 2;
+      y = iconBox.top + iconBox.height / 2 - barBox.top - ovalH / 2;
     } else {
-      var padX = Math.max(11, Math.round(iconBox.width * 0.75));
-      var padY = 2;
-      ovalH = Math.round(iconBox.height + padY * 2);
-      ovalW = Math.round(Math.max(iconBox.width + padX * 2, ovalH + 14));
+      var left = labelBox ? Math.min(iconBox.left, labelBox.left) : iconBox.left;
+      var right = labelBox ? Math.max(iconBox.right, labelBox.right) : iconBox.right;
+      var top = labelBox ? Math.min(iconBox.top, labelBox.top) : iconBox.top;
+      var bottom = labelBox ? Math.max(iconBox.bottom, labelBox.bottom) : iconBox.bottom;
+      var contentW = right - left;
+      var contentH = bottom - top;
+      var padX = Math.max(8, Math.round(contentW * 0.18));
+      var padY = Math.max(7, Math.round(contentH * 0.14));
+      ovalW = Math.round(contentW + padX * 2);
+      ovalH = Math.round(contentH + padY * 2);
+      x = (left + right) / 2 - barBox.left - ovalW / 2;
+      y = (top + bottom) / 2 - barBox.top - ovalH / 2;
     }
-
-    var x = iconCx - ovalW / 2;
-    // Bias upward so the oval sits on the icon and clears the label beneath.
-    var y = iconCy - ovalH / 2 - (isHome ? 0 : 2);
 
     indicator.classList.toggle("is-home", isHome);
     indicator.style.width = ovalW + "px";
@@ -159,38 +290,233 @@
       .replace(/"/g, "&quot;");
   }
 
-  function renderWorkGrid() {
-    if (!workGrid || workGrid.dataset.ready === "1") return;
-    var projects = window.AZ_PROJECTS || [];
-    workGrid.innerHTML = projects
-      .map(function (project) {
+  function getProjects() {
+    return window.AZ_PROJECTS || [];
+  }
+
+  function indexForSlug(slug) {
+    var projects = getProjects();
+    for (var i = 0; i < projects.length; i += 1) {
+      if (projects[i].slug === slug) return i;
+    }
+    return 0;
+  }
+
+  function techTagsHtml(project) {
+    return (project.technologies || [])
+      .slice(0, 5)
+      .map(function (tech) {
+        return '<span class="az-work-tag">' + escapeHtml(tech) + "</span>";
+      })
+      .join("");
+  }
+
+  function spotlightHtml(project) {
+    var href = "#work/" + encodeURIComponent(project.slug);
+    return (
+      '<a class="az-work-spotlight__cover" href="' +
+      href +
+      '" aria-label="Open ' +
+      escapeHtml(project.title) +
+      '">' +
+      '<img src="' +
+      escapeHtml(project.image) +
+      '" alt="" width="960" height="600" decoding="async"/>' +
+      "</a>" +
+      '<div class="az-work-spotlight__copy">' +
+      '<p class="az-work-spotlight__eyebrow">Selected work</p>' +
+      "<h2>" +
+      escapeHtml(project.title) +
+      "</h2>" +
+      "<p>" +
+      escapeHtml(project.shortDescription) +
+      "</p>" +
+      '<div class="az-work-tags">' +
+      techTagsHtml(project) +
+      "</div>" +
+      '<a class="az-work-explore" href="' +
+      href +
+      '">Explore project <span aria-hidden="true">↗</span></a>' +
+      "</div>"
+    );
+  }
+
+  function buildWorkBrowser() {
+    if (!workBrowser) return;
+    var projects = getProjects();
+    var rows = projects
+      .map(function (project, index) {
         return (
-          '<li>' +
-          '<a class="az-work-card" href="#work/' +
-          encodeURIComponent(project.slug) +
-          '">' +
-          '<div class="az-work-card__media">' +
-          '<img src="' +
-          escapeHtml(project.image) +
-          '" alt="" loading="lazy" decoding="async" width="640" height="400"/>' +
-          "</div>" +
-          '<div class="az-work-card__body">' +
-          '<span class="az-work-card__category">' +
-          escapeHtml(project.category) +
-          "</span>" +
-          '<h3 class="az-work-card__title">' +
+          '<button type="button" class="az-work-row" role="option" data-index="' +
+          index +
+          '" data-slug="' +
+          escapeHtml(project.slug) +
+          '" aria-selected="false">' +
+          '<span class="az-work-row__name">' +
           escapeHtml(project.title) +
-          "</h3>" +
-          '<p class="az-work-card__text">' +
-          escapeHtml(project.shortDescription) +
-          "</p>" +
-          "</div>" +
-          "</a>" +
-          "</li>"
+          "</span>" +
+          "<small>" +
+          escapeHtml(project.category) +
+          "</small>" +
+          '<span class="az-work-row__chev" aria-hidden="true">↗</span>' +
+          "</button>"
         );
       })
       .join("");
-    workGrid.dataset.ready = "1";
+
+    workBrowser.innerHTML =
+      '<div class="az-work-spotlight" role="region" aria-live="polite" aria-atomic="true"></div>' +
+      '<div class="az-work-wheel-heading">' +
+      '<span class="az-work-count">' +
+      projects.length +
+      " projects</span>" +
+      '<div class="az-work-wheel-controls">' +
+      '<button type="button" class="az-work-browse" data-dir="-1" aria-label="Previous project">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 14.5L12 8.5l6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      "</button>" +
+      '<button type="button" class="az-work-browse" data-dir="1" aria-label="Next project">' +
+      '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9.5L12 15.5l6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      "</button>" +
+      "</div>" +
+      "</div>" +
+      '<div class="az-work-wheel" role="listbox" tabindex="0" aria-label="Select a project; use up and down arrow keys">' +
+      '<div class="az-work-wheel__track">' +
+      rows +
+      "</div>" +
+      "</div>";
+  }
+
+  function updateWorkWheel() {
+    if (!workBrowser) return;
+    var track = workBrowser.querySelector(".az-work-wheel__track");
+    var rows = workBrowser.querySelectorAll(".az-work-row");
+    if (!track || !rows.length) return;
+
+    var centerOffset = (WORK_VISIBLE / 2 - 0.5) * WORK_ROW_H;
+    var y = centerOffset - workIndex * WORK_ROW_H;
+    track.style.transform = "translate3d(0," + y + "px,0)";
+
+    rows.forEach(function (row, i) {
+      var distance = Math.abs(i - workIndex);
+      var selected = i === workIndex;
+      row.classList.toggle("is-selected", selected);
+      row.setAttribute("aria-selected", selected ? "true" : "false");
+      row.tabIndex = selected ? 0 : -1;
+      var opacity = selected ? 1 : Math.max(0.14, 1 - distance * 0.28);
+      row.style.opacity = String(opacity);
+      row.style.setProperty("--az-row-distance", String(distance));
+    });
+  }
+
+  function updateWorkSpotlight(animate) {
+    if (!workBrowser) return;
+    var projects = getProjects();
+    var project = projects[workIndex];
+    if (!project) return;
+    var spotlight = workBrowser.querySelector(".az-work-spotlight");
+    if (!spotlight) return;
+
+    workLastSlug = project.slug;
+    spotlight.setAttribute("aria-label", project.title);
+
+    if (!animate || REDUCE) {
+      spotlight.innerHTML = spotlightHtml(project);
+      spotlight.classList.remove("is-fading");
+      return;
+    }
+
+    spotlight.classList.add("is-fading");
+    if (workFadeTimer) window.clearTimeout(workFadeTimer);
+    workFadeTimer = window.setTimeout(function () {
+      spotlight.innerHTML = spotlightHtml(project);
+      window.requestAnimationFrame(function () {
+        spotlight.classList.remove("is-fading");
+      });
+    }, 140);
+  }
+
+  function setWorkIndex(nextIndex, animate) {
+    var projects = getProjects();
+    if (!projects.length) return;
+    var clamped = Math.max(0, Math.min(projects.length - 1, nextIndex));
+    var changed = clamped !== workIndex;
+    workIndex = clamped;
+    updateWorkWheel();
+    if (changed || animate === "force") updateWorkSpotlight(animate !== false);
+  }
+
+  function bindWorkBrowser() {
+    if (!workBrowser || workBound) return;
+    workBound = true;
+    var touchStartY = 0;
+    var touchActive = false;
+
+    workBrowser.addEventListener("click", function (event) {
+      var browse = event.target.closest(".az-work-browse");
+      if (browse) {
+        event.preventDefault();
+        setWorkIndex(workIndex + (parseInt(browse.getAttribute("data-dir"), 10) || 0), true);
+        return;
+      }
+      var row = event.target.closest(".az-work-row");
+      if (row) {
+        event.preventDefault();
+        setWorkIndex(parseInt(row.getAttribute("data-index"), 10) || 0, true);
+      }
+    });
+
+    workBrowser.addEventListener("keydown", function (event) {
+      var target = event.target;
+      if (!workBrowser.contains(target)) return;
+      if (event.key !== "ArrowUp" && event.key !== "ArrowDown" && event.key !== "Home" && event.key !== "End") {
+        return;
+      }
+      // Scope keys to the selector / browse controls, not the whole page.
+      if (!target.closest(".az-work-wheel, .az-work-browse, .az-work-row")) return;
+      event.preventDefault();
+      if (event.key === "ArrowUp") setWorkIndex(workIndex - 1, true);
+      else if (event.key === "ArrowDown") setWorkIndex(workIndex + 1, true);
+      else if (event.key === "Home") setWorkIndex(0, true);
+      else if (event.key === "End") setWorkIndex(getProjects().length - 1, true);
+    });
+
+    workBrowser.addEventListener(
+      "touchstart",
+      function (event) {
+        if (!event.target.closest(".az-work-wheel")) return;
+        if (!event.touches || !event.touches.length) return;
+        touchActive = true;
+        touchStartY = event.touches[0].clientY;
+      },
+      { passive: true }
+    );
+
+    workBrowser.addEventListener(
+      "touchend",
+      function (event) {
+        if (!touchActive) return;
+        touchActive = false;
+        if (!event.changedTouches || !event.changedTouches.length) return;
+        if (!event.target.closest(".az-work-wheel")) return;
+        var dy = event.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dy) < 28) return;
+        setWorkIndex(workIndex + (dy < 0 ? 1 : -1), true);
+      },
+      { passive: true }
+    );
+  }
+
+  function renderWorkGrid() {
+    if (!workBrowser) return;
+    if (workBrowser.dataset.ready !== "1") {
+      buildWorkBrowser();
+      bindWorkBrowser();
+      workBrowser.dataset.ready = "1";
+    }
+    var restoreSlug = workLastSlug;
+    if (restoreSlug) workIndex = indexForSlug(restoreSlug);
+    updateWorkWheel();
+    updateWorkSpotlight(false);
   }
 
   function renderProject(slug) {
@@ -256,14 +582,18 @@
   }
 
   function afterShow(route) {
+    var isHome = route.name === "home";
     document.documentElement.dataset.azRoute = route.name === "project" ? "work" : route.name;
-    document.documentElement.classList.toggle("az-route-home", route.name === "home");
-    setHomeSliderLive(route.name === "home");
-    if (route.name === "home") {
-      window.scrollTo(0, 0);
-    } else {
-      window.scrollTo(0, 0);
-    }
+    document.documentElement.classList.toggle("az-route-home", isHome);
+    // Work/project/about/contact: release Rhye smooth-scrollbar so the document scrolls natively.
+    // Home: restore smooth-scrollbar + Swiper mousewheel/touch.
+    setNativePageScroll(!isHome);
+    setHomeSliderLive(isHome);
+    window.scrollTo(0, 0);
+    window.requestAnimationFrame(function () {
+      applyPageScrollMode();
+      if (!isHome) window.scrollTo(0, 0);
+    });
   }
 
   function showView(route, instant) {
@@ -287,7 +617,10 @@
     }
 
     if (route.name === "work") renderWorkGrid();
-    if (route.name === "project") renderProject(route.slug);
+    if (route.name === "project") {
+      if (route.slug) workLastSlug = route.slug;
+      renderProject(route.slug);
+    }
 
     var prev = document.querySelector(".az-view.is-active");
     setDocumentTitle(route);

@@ -50,7 +50,9 @@ html.cursor-disabled button {
   left: 0;
   right: 0;
   bottom: calc(10px + env(safe-area-inset-bottom));
-  width: min(280px, calc(100vw - 48px));
+  /* Use % (layout viewport), not 100vw, so classic scrollbar gutters
+     do not widen the dock past the visible area or shift its center. */
+  width: min(280px, calc(100% - 48px));
   margin-inline: auto;
   color: var(--glass-fg);
   pointer-events: none;
@@ -136,8 +138,8 @@ html.cursor-disabled button {
   z-index: 0;
   top: 0;
   left: 0;
-  width: 32px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
   background: color-mix(in srgb, #f4f1ea 14%, transparent);
@@ -320,11 +322,14 @@ html.cursor-disabled button {
   transform: scale(0.94);
 }
 
+.glass-nav__tab[data-tooltip]::after,
+.glass-nav__home[data-tooltip]::after,
 .glass-nav__action[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
   left: 50%;
   bottom: calc(100% + 10px);
+  z-index: 2;
   padding: 6px 9px;
   border-radius: 8px;
   background: rgba(12, 12, 12, 0.92);
@@ -392,6 +397,8 @@ html.cursor-disabled button {
     transform: translateY(-1px);
   }
 
+  .glass-nav__tab[data-tooltip]:hover::after,
+  .glass-nav__home[data-tooltip]:hover::after,
   .glass-nav__action[data-tooltip]:hover::after {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -401,7 +408,7 @@ html.cursor-disabled button {
 @media (min-width: 768px) {
   .glass-nav {
     bottom: calc(20px + env(safe-area-inset-bottom));
-    width: min(420px, calc(100vw - 28px));
+    width: min(420px, calc(100% - 28px));
   }
 
   .glass-nav__bar {
@@ -458,7 +465,7 @@ html.cursor-disabled button {
 
 @media (max-width: 360px) {
   .glass-nav {
-    width: min(260px, calc(100vw - 40px));
+    width: min(260px, calc(100% - 40px));
   }
 
   .glass-nav__name {
@@ -480,6 +487,8 @@ html.cursor-disabled button {
   .glass-nav__home-glass,
   .glass-nav__action,
   .glass-nav__action-icon,
+  .glass-nav__tab[data-tooltip]::after,
+  .glass-nav__home[data-tooltip]::after,
   .glass-nav__action[data-tooltip]::after,
   .glass-nav__indicator {
     animation: none;
@@ -494,6 +503,8 @@ html.cursor-disabled button {
   .glass-nav__home-glass,
   .glass-nav__action,
   .glass-nav__action-icon,
+  .glass-nav__tab[data-tooltip]::after,
+  .glass-nav__home[data-tooltip]::after,
   .glass-nav__action[data-tooltip]::after {
     transform: none;
   }
