@@ -1,0 +1,19 @@
+# Local archives / backups
+Old-Portfolio/
+Portfolio.zip
+
+# Editor / agent tooling
+.agents/
+.cursor/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.log
+
+# Secrets / env
+.env
+.env.*
+*.pem
+*.key
