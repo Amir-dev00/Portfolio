@@ -46,6 +46,10 @@ html.az-native-scroll #page-wrapper.js-smooth-scroll {
 html[data-az-route]:not([data-az-route="home"]) .page-wrapper__content,
 html.az-native-scroll .page-wrapper__content {
   overflow: visible !important;
+  /* Rhye starts .page-wrapper__content at opacity:0 until OS animations;
+     non-home hash routes skip that path, so force the SPA content visible. */
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 html[data-az-route]:not([data-az-route="home"]) .scroll-content,
@@ -154,7 +158,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 .az-panel__lead {
   margin: 0 0 28px;
   max-width: 42rem;
-  font-family: Raleway, sans-serif;
+  font-family: Raleway, "Vazirmatn", sans-serif;
   font-size: clamp(14px, 2vw, 17px);
   line-height: 1.65;
   color: rgba(244, 241, 234, 0.72);
@@ -374,7 +378,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   border-radius: 12px;
   background: transparent;
   color: rgba(244, 241, 234, 0.78);
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
@@ -504,59 +508,185 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   color: rgba(244, 241, 234, 0.78);
 }
 
-.az-contact-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+/* —— Contact (itsamir-style single column) —— */
+
+.az-panel_contact {
+  width: min(560px, calc(100% - 40px));
+  margin-inline: auto;
+  text-align: start;
+  padding-bottom: calc(128px + env(safe-area-inset-bottom));
 }
 
-.az-contact-card {
+.az-contact-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-family: Raleway, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(226, 208, 182, 0.62);
+}
+
+.az-contact-eyebrow::before {
+  content: "";
+  width: 16px;
+  height: 1px;
+  background: rgba(226, 208, 182, 0.55);
+  flex: 0 0 auto;
+}
+
+.az-panel_contact .az-panel__title {
+  margin-bottom: 12px;
+}
+
+.az-contact-intro {
+  margin-bottom: 22px;
+  max-width: none;
+}
+
+.az-contact-actions {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 108px;
-  padding: 18px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  color: inherit;
-  text-decoration: none;
-  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 28px;
 }
 
-.az-contact-card:focus-visible {
+.az-contact-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: #f4f1ea;
+  font-family: Raleway, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.az-contact-pill_primary {
+  border-color: transparent;
+  background: rgba(244, 241, 234, 0.92);
+  color: #111;
+}
+
+.az-contact-pill__arrow {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.az-contact-pill:focus-visible,
+.az-contact-link:focus-visible {
   outline: 2px solid #f4f1ea;
   outline-offset: 3px;
 }
 
-.az-contact-card__label {
-  font-family: Raleway, sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(226, 208, 182, 0.58);
+.az-contact-links {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.az-contact-card__value {
+.az-contact-link {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 22px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms ease, opacity 160ms ease;
+}
+
+.az-contact-link__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: rgba(244, 241, 234, 0.72);
+}
+
+.az-contact-link__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.az-contact-link__copy strong {
   font-family: Raleway, sans-serif;
   font-size: 15px;
   font-weight: 600;
-  color: #f4f1ea;
-  word-break: break-word;
+  letter-spacing: 0.01em;
+  color: #f7f3ea;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.az-contact-card__hint {
+.az-contact-link__copy small {
   font-family: Raleway, sans-serif;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(244, 241, 234, 0.48);
+}
+
+.az-contact-link__arrow {
+  font-size: 15px;
+  color: rgba(244, 241, 234, 0.38);
+}
+
+.az-contact-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 0;
+  font-family: Raleway, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
   color: rgba(244, 241, 234, 0.55);
 }
 
+.az-contact-note__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ecf8e;
+  box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.16);
+  flex: 0 0 auto;
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .az-contact-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255, 230, 190, 0.28);
-    background: rgba(255, 255, 255, 0.07);
+  .az-contact-pill_primary:hover {
+    background: #fff;
+  }
+
+  .az-contact-pill:not(.az-contact-pill_primary):hover {
+    border-color: rgba(255, 255, 255, 0.34);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .az-contact-link:hover {
+    opacity: 0.92;
+  }
+
+  .az-contact-link:hover .az-contact-link__arrow {
+    color: rgba(244, 241, 234, 0.72);
   }
 }
 
@@ -637,7 +767,6 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
 @media (max-width: 760px) {
   .az-work-spotlight,
-  .az-contact-grid,
   .az-about {
     grid-template-columns: 1fr;
   }
@@ -649,6 +778,24 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
   .az-panel_work {
     width: min(980px, calc(100% - 28px));
+  }
+
+  .az-panel_contact {
+    width: min(560px, calc(100% - 32px));
+    padding-bottom: calc(128px + env(safe-area-inset-bottom));
+  }
+
+  .az-contact-actions {
+    gap: 8px;
+  }
+
+  .az-contact-link {
+    gap: 12px;
+    padding: 18px 0;
+  }
+
+  .az-contact-link__copy strong {
+    font-size: 14px;
   }
 
   .az-work-spotlight__cover {
@@ -702,7 +849,8 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   .az-work-spotlight__cover img,
   .az-work-wheel__track,
   .az-work-row,
-  .az-contact-card {
+  .az-contact-pill,
+  .az-contact-link {
     transition: none !important;
     animation: none !important;
   }
@@ -710,8 +858,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   .az-view,
   .az-view.is-visible,
   .az-view.is-leaving,
-  .az-work-spotlight__cover img,
-  .az-contact-card {
+  .az-work-spotlight__cover img {
     transform: none !important;
   }
 

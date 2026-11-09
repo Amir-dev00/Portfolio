@@ -3,10 +3,24 @@
   "use strict";
 
   var REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var TITLE_BASE = "Amirhossein Zamanzade | Developer";
   var app = document.getElementById("az-app");
   var nav = document.getElementById("glass-nav");
   if (!app) return;
+
+  function tt(key, vars) {
+    if (window.AZ_i18n && typeof window.AZ_i18n.t === "function") {
+      return window.AZ_i18n.t(key, vars);
+    }
+    return key;
+  }
+
+  function localizeProject(project) {
+    if (!project) return project;
+    if (window.AZ_i18n && typeof window.AZ_i18n.localizeProject === "function") {
+      return window.AZ_i18n.localizeProject(project);
+    }
+    return project;
+  }
 
   var views = {
     home: document.getElementById("view-home"),
@@ -56,13 +70,15 @@
   }
 
   function setDocumentTitle(route) {
-    if (route.name === "work") document.title = "Work — " + TITLE_BASE;
-    else if (route.name === "about") document.title = "About — " + TITLE_BASE;
-    else if (route.name === "contact") document.title = "Contact — " + TITLE_BASE;
+    if (route.name === "work") document.title = tt("title.work");
+    else if (route.name === "about") document.title = tt("title.about");
+    else if (route.name === "contact") document.title = tt("title.contact");
     else if (route.name === "project") {
       var project = window.AZ_getProjectBySlug && window.AZ_getProjectBySlug(route.slug);
-      document.title = (project ? project.title + " — " : "") + TITLE_BASE;
-    } else document.title = TITLE_BASE;
+      document.title = project
+        ? tt("title.project", { name: project.title })
+        : tt("title.base");
+    } else document.title = tt("title.base");
   }
 
   function getHomeSwiper() {
@@ -291,7 +307,7 @@
   }
 
   function getProjects() {
-    return window.AZ_PROJECTS || [];
+    return (window.AZ_PROJECTS || []).map(localizeProject);
   }
 
   function indexForSlug(slug) {
@@ -316,15 +332,17 @@
     return (
       '<a class="az-work-spotlight__cover" href="' +
       href +
-      '" aria-label="Open ' +
-      escapeHtml(project.title) +
+      '" aria-label="' +
+      escapeHtml(tt("work.open", { name: project.title })) +
       '">' +
       '<img src="' +
       escapeHtml(project.image) +
       '" alt="" width="960" height="600" decoding="async"/>' +
       "</a>" +
       '<div class="az-work-spotlight__copy">' +
-      '<p class="az-work-spotlight__eyebrow">Selected work</p>' +
+      '<p class="az-work-spotlight__eyebrow">' +
+      escapeHtml(tt("work.spotlight.eyebrow")) +
+      "</p>" +
       "<h2>" +
       escapeHtml(project.title) +
       "</h2>" +
@@ -336,7 +354,9 @@
       "</div>" +
       '<a class="az-work-explore" href="' +
       href +
-      '">Explore project <span aria-hidden="true">↗</span></a>' +
+      '">' +
+      escapeHtml(tt("work.explore")) +
+      ' <span aria-hidden="true">↗</span></a>' +
       "</div>"
     );
   }
@@ -368,18 +388,24 @@
       '<div class="az-work-spotlight" role="region" aria-live="polite" aria-atomic="true"></div>' +
       '<div class="az-work-wheel-heading">' +
       '<span class="az-work-count">' +
-      projects.length +
-      " projects</span>" +
+      escapeHtml(tt("work.count", { n: projects.length })) +
+      "</span>" +
       '<div class="az-work-wheel-controls">' +
-      '<button type="button" class="az-work-browse" data-dir="-1" aria-label="Previous project">' +
+      '<button type="button" class="az-work-browse" data-dir="-1" aria-label="' +
+      escapeHtml(tt("work.prev")) +
+      '">' +
       '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 14.5L12 8.5l6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
       "</button>" +
-      '<button type="button" class="az-work-browse" data-dir="1" aria-label="Next project">' +
+      '<button type="button" class="az-work-browse" data-dir="1" aria-label="' +
+      escapeHtml(tt("work.next")) +
+      '">' +
       '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9.5L12 15.5l6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
       "</button>" +
       "</div>" +
       "</div>" +
-      '<div class="az-work-wheel" role="listbox" tabindex="0" aria-label="Select a project; use up and down arrow keys">' +
+      '<div class="az-work-wheel" role="listbox" tabindex="0" aria-label="' +
+      escapeHtml(tt("work.listbox")) +
+      '">' +
       '<div class="az-work-wheel__track">' +
       rows +
       "</div>" +
@@ -450,6 +476,10 @@
     workBound = true;
     var touchStartY = 0;
     var touchActive = false;
+    var wheelLockUntil = 0;
+    var wheelAccum = 0;
+    var WHEEL_STEP = 48;
+    var WHEEL_COOLDOWN_MS = 320;
 
     workBrowser.addEventListener("click", function (event) {
       var browse = event.target.closest(".az-work-browse");
@@ -479,6 +509,61 @@
       else if (event.key === "Home") setWorkIndex(0, true);
       else if (event.key === "End") setWorkIndex(getProjects().length - 1, true);
     });
+
+    workBrowser.addEventListener(
+      "wheel",
+      function (event) {
+        // Only hijack wheel while the pointer is over the project list itself.
+        if (!event.target.closest(".az-work-wheel")) return;
+
+        var projects = getProjects();
+        if (!projects.length) return;
+
+        var dy = event.deltaY;
+        if (!dy) return;
+        // Prefer vertical intent; ignore mostly-horizontal trackpad pans.
+        if (Math.abs(event.deltaX) > Math.abs(dy)) return;
+
+        var goingNext = dy > 0;
+        var atStart = workIndex <= 0;
+        var atEnd = workIndex >= projects.length - 1;
+
+        // Normalize line/page modes to pixel-ish units.
+        var delta = dy;
+        if (event.deltaMode === 1) delta *= 16;
+        else if (event.deltaMode === 2) delta *= WHEEL_STEP;
+
+        // First/last stop: hand scrolling back to the page. Stop leftover Rhye
+        // smooth-scroll listeners from eating the gesture without moving.
+        if ((goingNext && atEnd) || (!goingNext && atStart)) {
+          wheelAccum = 0;
+          event.preventDefault();
+          event.stopPropagation();
+          window.scrollBy(0, delta);
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        var now = performance.now();
+        if (now < wheelLockUntil) {
+          wheelAccum = 0;
+          return;
+        }
+
+        // Reverse direction mid-gesture: start a fresh accumulation.
+        if (wheelAccum && (wheelAccum > 0) !== (delta > 0)) wheelAccum = 0;
+        wheelAccum += delta;
+
+        if (Math.abs(wheelAccum) < WHEEL_STEP) return;
+
+        wheelAccum = 0;
+        wheelLockUntil = now + WHEEL_COOLDOWN_MS;
+        setWorkIndex(workIndex + (goingNext ? 1 : -1), true);
+      },
+      { passive: false }
+    );
 
     workBrowser.addEventListener(
       "touchstart",
@@ -521,13 +606,20 @@
 
   function renderProject(slug) {
     if (!projectRoot) return false;
-    var project = window.AZ_getProjectBySlug && window.AZ_getProjectBySlug(slug);
+    var raw = window.AZ_getProjectBySlug && window.AZ_getProjectBySlug(slug);
+    var project = localizeProject(raw);
     if (!project) {
       projectRoot.innerHTML =
         '<div class="az-panel">' +
-        '<a class="az-project__back" href="#work">← Back to Work</a>' +
-        '<h1 class="az-panel__title">Project not found</h1>' +
-        '<p class="az-panel__lead">That project is unavailable. Return to the work grid to continue.</p>' +
+        '<a class="az-project__back" href="#work">' +
+        escapeHtml(tt("project.back")) +
+        "</a>" +
+        '<h1 class="az-panel__title">' +
+        escapeHtml(tt("project.missing.title")) +
+        "</h1>" +
+        '<p class="az-panel__lead">' +
+        escapeHtml(tt("project.missing.lead")) +
+        "</p>" +
         "</div>";
       return false;
     }
@@ -536,12 +628,16 @@
       (project.githubUrl
         ? '<a class="az-btn az-btn_primary" href="' +
           escapeHtml(project.githubUrl) +
-          '" target="_blank" rel="noopener">GitHub</a>'
+          '" target="_blank" rel="noopener">' +
+          escapeHtml(tt("project.github")) +
+          "</a>"
         : "") +
       (project.liveUrl
         ? '<a class="az-btn" href="' +
           escapeHtml(project.liveUrl) +
-          '" target="_blank" rel="noopener">Live</a>'
+          '" target="_blank" rel="noopener">' +
+          escapeHtml(tt("project.live")) +
+          "</a>"
         : "") +
       "</div>";
     var tech = (project.technologies || [])
@@ -551,7 +647,9 @@
       .join("");
     projectRoot.innerHTML =
       '<article class="az-panel az-project">' +
-      '<a class="az-project__back" href="#work">← Back to Work</a>' +
+      '<a class="az-project__back" href="#work">' +
+      escapeHtml(tt("project.back")) +
+      "</a>" +
       '<p class="az-panel__eyebrow">' +
       escapeHtml(project.category) +
       " · " +
@@ -569,7 +667,9 @@
       escapeHtml(project.title) +
       '" decoding="async"/></div>' +
       '<ul class="az-about__meta">' +
-      "<li><strong>Role:</strong> " +
+      "<li><strong>" +
+      escapeHtml(tt("project.role")) +
+      "</strong> " +
       escapeHtml(project.role) +
       "</li>" +
       "</ul>" +
@@ -579,6 +679,22 @@
       actions +
       "</article>";
     return true;
+  }
+
+  function refreshLocalizedUi() {
+    var route = normalizeHash(window.location.hash);
+    setDocumentTitle(route);
+    if (workBrowser && workBrowser.dataset.ready === "1") {
+      var slug = workLastSlug;
+      buildWorkBrowser();
+      if (slug) workIndex = indexForSlug(slug);
+      updateWorkWheel();
+      updateWorkSpotlight(false);
+    }
+    if (route.name === "project") renderProject(route.slug);
+    window.requestAnimationFrame(function () {
+      setDockActive(route);
+    });
   }
 
   function afterShow(route) {
@@ -698,6 +814,9 @@
   window.addEventListener("resize", function () {
     var route = normalizeHash(window.location.hash);
     setDockActive(route);
+  });
+  window.addEventListener("az:langchange", function () {
+    refreshLocalizedUi();
   });
 
   // Ensure an initial hash exists for shareable Home without forcing reload loops.

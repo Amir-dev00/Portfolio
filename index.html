@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="az-preloader-open">
+<html lang="en" dir="ltr" class="az-preloader-open az-lang-en">
   
 <!-- Mirrored from https://artemsemkin.com/rhye/html/index.html by HTTrack Website Copier/3.x [XR&CO], Mon, 09 Nov 2026 08:30:04 GMT -->
 <head>
@@ -13,9 +13,21 @@
     <script>
       /* Open before any stylesheet/script so cached reloads still paint the AZ loader. */
       document.documentElement.classList.add("az-preloader-open", "az-loading");
+      /* Restore EN/FA before first paint to avoid direction flash. */
+      (function () {
+        try {
+          var lang = localStorage.getItem("az-lang") === "fa" ? "fa" : "en";
+          var html = document.documentElement;
+          html.lang = lang;
+          html.dir = lang === "fa" ? "rtl" : "ltr";
+          html.dataset.azLang = lang;
+          html.classList.toggle("az-lang-fa", lang === "fa");
+          html.classList.toggle("az-lang-en", lang === "en");
+        } catch (err) {}
+      })();
     </script>
     <!-- Google Fonts -->
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Cinzel:400,700%7CRaleway:500,500i,600,700%7CMaterial+Icons&amp;display=swap"/>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&amp;family=Raleway:ital,wght@0,500;0,600;0,700;1,500&amp;family=Vazirmatn:wght@400;500;600;700&amp;family=Material+Icons&amp;display=swap"/>
     <!-- Template Vendor's Stylesheet -->
     <link rel="stylesheet" type="text/css" href="css/vendor.css"/>
     <!-- Template Main Stylesheet -->
@@ -25,6 +37,7 @@
     <link rel="stylesheet" type="text/css" href="css/az-profile.css"/>
     <link rel="stylesheet" type="text/css" href="css/az-app.css"/>
     <link rel="stylesheet" type="text/css" href="css/az-home-arrows.css"/>
+    <link rel="stylesheet" type="text/css" href="css/az-i18n.css"/>
     <link rel="preload" href="assets/img/amir/az-logo.webp" as="image" type="image/webp"/>
     <link rel="preload" href="assets/img/amir/profile.jpg" as="image" type="image/jpeg"/>
     <style>
@@ -68,7 +81,7 @@
   <body>
     <div data-barba="wrapper">
       <!-- PAGE PRELOADER — AZ circular brand loader (Rhye still owns progress + dismissal) -->
-      <div class="preloader az-preloader az-preloader--ring" id="js-preloader" data-arts-theme-text="light" aria-label="Loading Amirhossein's portfolio">
+      <div class="preloader az-preloader az-preloader--ring" id="js-preloader" data-arts-theme-text="light" aria-label="Loading Amirhossein's portfolio" data-i18n-attr="aria-label:preloader.aria">
         <div class="preloader__content az-preloader__layout">
           <div class="preloader__header az-preloader__center">
             <div class="az-preloader__disc" aria-hidden="true">
@@ -89,21 +102,26 @@
               <span class="az-preloader__ring-head" aria-hidden="true"></span>
             </div>
 
-            <span class="az-preloader__load-label">LOADING EXPERIENCE</span>
-            <div class="preloader__counter az-preloader__percentage" aria-label="Loading progress">
+            <span class="az-preloader__load-label" data-i18n="preloader.label">LOADING EXPERIENCE</span>
+            <div class="preloader__counter az-preloader__percentage" aria-label="Loading progress" data-i18n-attr="aria-label:preloader.progress">
               <span class="preloader__counter-number preloader__counter-current">0</span>
               <span class="preloader__counter-divider az-preloader__counter-sep" aria-hidden="true">/</span>
               <span class="preloader__counter-number preloader__counter-total">100</span>
             </div>
             <div class="az-preloader__identity">
               <div class="preloader__heading az-preloader__name">AMIRHOSSEIN ZAMANZADE</div>
-              <div class="preloader__subline az-preloader__role">SOFTWARE ENGINEER</div>
+              <div class="preloader__subline az-preloader__role" data-i18n="preloader.role">SOFTWARE ENGINEER</div>
             </div>
           </div>
         </div>
         <div class="preloader__circle" aria-hidden="true"></div>
       </div>
       <!-- - PAGE PRELOADER -->
+
+      <div class="az-lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:lang.switcher">
+        <button type="button" class="az-lang-switch__btn is-active" data-lang="en" aria-pressed="true" aria-label="Read this site in English" data-i18n-attr="aria-label:lang.aria.en">English</button>
+        <button type="button" class="az-lang-switch__btn" data-lang="fa" aria-pressed="false" aria-label="نمایش سایت به فارسی" data-i18n-attr="aria-label:lang.aria.fa">فارسی</button>
+      </div>
       <!-- Loading Spinner -->
       <svg class="spinner d-lg-none" id="js-spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
         <circle class="spinner__path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
@@ -290,44 +308,44 @@
         <!-- - fullscreen overlay container -->
       </header>
       <!-- - PAGE HEADER -->
-      <nav class="glass-nav" id="glass-nav" aria-label="Primary">
+      <nav class="glass-nav" id="glass-nav" aria-label="Primary" data-i18n-attr="aria-label:nav.primary">
         <div class="glass-nav__bar" role="list">
           <span class="glass-nav__sheen" aria-hidden="true"></span>
           <span class="glass-nav__indicator" aria-hidden="true"></span>
 
-          <a class="glass-nav__tab" role="listitem" href="#work" data-nav="work" data-tooltip="Work">
+          <a class="glass-nav__tab" role="listitem" href="#work" data-nav="work" data-tooltip="Work" data-i18n-attr="data-tooltip:nav.tooltip.work">
             <span class="glass-nav__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M22 13a18.15 18.15 0 0 1-20 0"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
             </span>
-            <span class="glass-nav__name">Work</span>
+            <span class="glass-nav__name" data-i18n="nav.work">Work</span>
           </a>
 
-          <a class="glass-nav__tab" role="listitem" href="#about" data-nav="about" data-tooltip="About">
+          <a class="glass-nav__tab" role="listitem" href="#about" data-nav="about" data-tooltip="About" data-i18n-attr="data-tooltip:nav.tooltip.about">
             <span class="glass-nav__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
             </span>
-            <span class="glass-nav__name">About</span>
+            <span class="glass-nav__name" data-i18n="nav.about">About</span>
           </a>
 
-          <a class="glass-nav__home is-active" role="listitem" href="#home" aria-label="Home" aria-current="page" data-nav="home" data-tooltip="Home">
+          <a class="glass-nav__home is-active" role="listitem" href="#home" aria-label="Home" aria-current="page" data-nav="home" data-tooltip="Home" data-i18n-attr="aria-label:nav.home;data-tooltip:nav.tooltip.home">
             <span class="glass-nav__home-glass" aria-hidden="true"></span>
             <span class="glass-nav__home-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
             </span>
           </a>
 
-          <a class="glass-nav__action glass-nav__cv" role="listitem" href="assets/cv/Amirhossein-Zamanzade-CV.pdf" download="Amirhossein-Zamanzade-CV.pdf" aria-label="Download CV" data-tooltip="Download CV" data-nav="cv">
+          <a class="glass-nav__action glass-nav__cv" role="listitem" href="assets/cv/Amirhossein-Zamanzade-CV.pdf" download="Amirhossein-Zamanzade-CV.pdf" aria-label="Download CV" data-tooltip="Download CV" data-nav="cv" data-i18n-attr="aria-label:nav.aria.cv;data-tooltip:nav.tooltip.cv">
             <span class="glass-nav__action-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg>
             </span>
-            <span class="glass-nav__name">CV</span>
+            <span class="glass-nav__name" data-i18n="nav.cv">CV</span>
           </a>
 
-          <a class="glass-nav__action glass-nav__contact" role="listitem" href="#contact" aria-label="Contact" data-tooltip="Contact" data-nav="contact">
+          <a class="glass-nav__action glass-nav__contact" role="listitem" href="#contact" aria-label="Contact" data-tooltip="Contact" data-nav="contact" data-i18n-attr="aria-label:nav.contact;data-tooltip:nav.tooltip.contact">
             <span class="glass-nav__action-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
             </span>
-            <span class="glass-nav__name">Contact</span>
+            <span class="glass-nav__name" data-i18n="nav.contact">Contact</span>
           </a>
         </div>
       </nav>
@@ -335,11 +353,11 @@
       <div class="js-smooth-scroll bg-dark-1" id="page-wrapper" data-barba="container">
         <main class="page-wrapper__content az-app" id="az-app">
           <!-- HOME VIEW -->
-          <section class="az-view is-active is-visible" id="view-home" data-view="home" aria-label="Home">
+          <section class="az-view is-active is-visible" id="view-home" data-view="home" aria-label="Home" data-i18n-attr="aria-label:nav.home">
           <!-- section PROJECTS SLIDER FULLSCREEN -->
           <section id="selected-work" class="section section-fullheight section-projects section-projects-slider bg-dark-1 overflow" data-arts-theme-text="light" data-arts-os-animation>
             <div class="section-fullheight__inner section-fullheight__inner_mobile text-center">
-              <aside class="az-profile" id="az-profile" aria-label="Amirhossein Zamanzade, Software Engineer">
+              <aside class="az-profile" id="az-profile" aria-label="Amirhossein Zamanzade, Software Engineer" data-i18n-attr="aria-label:home.profile.aria">
                 <div class="az-profile__orb">
                   <span class="az-profile__glow" aria-hidden="true"></span>
                   <span class="az-profile__ring" aria-hidden="true"></span>
@@ -352,13 +370,14 @@
                       alt="Portrait of Amirhossein Zamanzade"
                       decoding="async"
                       fetchpriority="low"
+                      data-i18n-attr="alt:about.portrait.alt"
                     />
                     <span class="az-profile__shine" aria-hidden="true"></span>
                   </div>
                 </div>
                 <div class="az-profile__meta">
                   <p class="az-profile__name">Amirhossein Zamanzade</p>
-                  <p class="az-profile__role">Software Engineer</p>
+                  <p class="az-profile__role" data-i18n="home.profile.role">Software Engineer</p>
                 </div>
               </aside>
               <div class="slider slider-fullscreen-projects js-slider-fullscreen-projects js-slider">
@@ -432,8 +451,8 @@
                 </div>
                 <!-- - slider COUNTER -->
                 <!-- slider ARROWS (single pair; mobile clusters above dock) -->
-                <div class="az-home-arrows" role="group" aria-label="Project slides">
-                  <div class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev" aria-label="Previous project">
+                <div class="az-home-arrows" role="group" aria-label="Project slides" data-i18n-attr="aria-label:home.arrows">
+                  <div class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev" aria-label="Previous project" data-i18n-attr="aria-label:home.prev">
                     <div class="arrow arrow-left js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
                       <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
@@ -442,7 +461,7 @@
                       <div class="arrow__triangle"></div>
                     </div>
                   </div>
-                  <div class="slider__arrow slider__arrow_right slider__arrow_absolute js-slider__arrow-next" aria-label="Next project">
+                  <div class="slider__arrow slider__arrow_right slider__arrow_absolute js-slider__arrow-next" aria-label="Next project" data-i18n-attr="aria-label:home.next">
                     <div class="arrow arrow-right js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
                       <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
@@ -468,44 +487,44 @@
           <!-- - HOME VIEW -->
 
           <!-- WORK VIEW -->
-          <section class="az-view" id="view-work" data-view="work" aria-label="Work" hidden aria-hidden="true">
+          <section class="az-view" id="view-work" data-view="work" aria-label="Work" hidden aria-hidden="true" data-i18n-attr="aria-label:work.aria">
             <div class="az-panel az-panel_work">
-              <p class="az-panel__eyebrow">Selected work</p>
-              <h1 class="az-panel__title">Selected projects.</h1>
-              <p class="az-panel__lead">A selection of websites, applications, APIs, and automation tools.</p>
+              <p class="az-panel__eyebrow" data-i18n="work.eyebrow">Selected work</p>
+              <h1 class="az-panel__title" data-i18n="work.title">Selected projects.</h1>
+              <p class="az-panel__lead" data-i18n="work.lead">A selection of websites, applications, APIs, and automation tools.</p>
               <div class="az-work-browser" id="az-work-browser"></div>
             </div>
           </section>
 
           <!-- PROJECT DETAIL VIEW -->
-          <section class="az-view" id="view-project" data-view="project" aria-label="Project" hidden aria-hidden="true">
+          <section class="az-view" id="view-project" data-view="project" aria-label="Project" hidden aria-hidden="true" data-i18n-attr="aria-label:project.aria">
             <div id="az-project-root"></div>
           </section>
 
           <!-- ABOUT VIEW -->
-          <section class="az-view" id="view-about" data-view="about" aria-label="About" hidden aria-hidden="true">
+          <section class="az-view" id="view-about" data-view="about" aria-label="About" hidden aria-hidden="true" data-i18n-attr="aria-label:about.aria">
             <div class="az-panel">
-              <p class="az-panel__eyebrow">About</p>
-              <h1 class="az-panel__title">Software engineer.</h1>
+              <p class="az-panel__eyebrow" data-i18n="about.eyebrow">About</p>
+              <h1 class="az-panel__title" data-i18n="about.title">Software engineer.</h1>
               <div class="az-about">
                 <div>
                   <div class="az-about__portrait">
-                    <img src="assets/img/amir/profile.jpg" width="640" height="640" alt="Portrait of Amirhossein Zamanzade" decoding="async"/>
+                    <img src="assets/img/amir/profile.jpg" width="640" height="640" alt="Portrait of Amirhossein Zamanzade" decoding="async" data-i18n-attr="alt:about.portrait.alt"/>
                   </div>
                   <ul class="az-about__meta">
-                    <li><strong>Location:</strong> Tehran, Iran</li>
-                    <li><strong>Education:</strong> B.Sc. Computer Science, Amirkabir University of Technology</li>
-                    <li><strong>Status:</strong> Available for freelance</li>
+                    <li><strong data-i18n="about.meta.location.label">Location:</strong> <span data-i18n="about.meta.location.value">Tehran, Iran</span></li>
+                    <li><strong data-i18n="about.meta.education.label">Education:</strong> <span data-i18n="about.meta.education.value">B.Sc. Computer Science, Amirkabir University of Technology</span></li>
+                    <li><strong data-i18n="about.meta.status.label">Status:</strong> <span data-i18n="about.meta.status.value">Available for freelance</span></li>
                   </ul>
                 </div>
                 <div>
-                  <p class="az-panel__lead" style="margin-bottom:16px">
+                  <p class="az-panel__lead" style="margin-bottom:16px" data-i18n="about.p1">
                     I’m Amirhossein Zamanzade, a Computer Science student and Full-Stack Developer focused on fast, scalable, and user-centric products. I care about clean architecture, modern tooling, and interfaces that feel refined.
                   </p>
-                  <p class="az-panel__lead" style="margin-bottom:0">
+                  <p class="az-panel__lead" style="margin-bottom:0" data-i18n="about.p2">
                     This portfolio reflects my learning journey across web, desktop, APIs, and automation — and a place to connect for collaboration.
                   </p>
-                  <ul class="az-skills" aria-label="Skills">
+                  <ul class="az-skills" aria-label="Skills" data-i18n-attr="aria-label:about.skills">
                     <li>HTML</li><li>CSS</li><li>JavaScript</li><li>React</li><li>Python</li><li>Java</li>
                     <li>Node.js</li><li>PHP</li><li>Laravel</li><li>.NET</li><li>MySQL</li><li>PostgreSQL</li>
                     <li>MongoDB</li><li>Bootstrap</li><li>Tailwind</li><li>JavaFX</li>
@@ -516,43 +535,69 @@
           </section>
 
           <!-- CONTACT VIEW -->
-          <section class="az-view" id="view-contact" data-view="contact" aria-label="Contact" hidden aria-hidden="true">
-            <div class="az-panel">
-              <p class="az-panel__eyebrow">Contact</p>
-              <h1 class="az-panel__title">Let’s talk.</h1>
-              <p class="az-panel__lead">For collaborations, roles, or technical inquiries — reach out through any channel below.</p>
-              <div class="az-contact-grid">
-                <a class="az-contact-card" href="mailto:itsamirzamani@gmail.com">
-                  <span class="az-contact-card__label">Email</span>
-                  <span class="az-contact-card__value">itsamirzamani@gmail.com</span>
-                  <span class="az-contact-card__hint">Direct message</span>
+          <section class="az-view" id="view-contact" data-view="contact" aria-label="Contact" hidden aria-hidden="true" data-i18n-attr="aria-label:contact.aria">
+            <div class="az-panel az-panel_contact">
+              <p class="az-contact-eyebrow" data-i18n="contact.eyebrow">Let’s connect</p>
+              <h1 class="az-panel__title" data-i18n="contact.title">Let’s talk.</h1>
+              <p class="az-panel__lead az-contact-intro" data-i18n="contact.intro">Have a project or a role in mind? Let’s talk.</p>
+
+              <div class="az-contact-actions">
+                <a class="az-contact-pill az-contact-pill_primary" href="mailto:itsamirzamani@gmail.com">
+                  <span data-i18n="contact.emailMe">Email me</span>
+                  <span class="az-contact-pill__arrow" aria-hidden="true">↗</span>
                 </a>
-                <a class="az-contact-card" href="https://github.com/Amir-dev00" target="_blank" rel="noopener">
-                  <span class="az-contact-card__label">GitHub</span>
-                  <span class="az-contact-card__value">Amir-dev00</span>
-                  <span class="az-contact-card__hint">Code &amp; repositories</span>
-                </a>
-                <a class="az-contact-card" href="https://linkedin.com/in/amirhossein-zamanzade" target="_blank" rel="noopener">
-                  <span class="az-contact-card__label">LinkedIn</span>
-                  <span class="az-contact-card__value">Amirhossein Zamanzade</span>
-                  <span class="az-contact-card__hint">Professional profile</span>
-                </a>
-                <a class="az-contact-card" href="https://t.me/Amir_dev00" target="_blank" rel="noopener">
-                  <span class="az-contact-card__label">Telegram</span>
-                  <span class="az-contact-card__value">@Amir_dev00</span>
-                  <span class="az-contact-card__hint">Quick chat</span>
-                </a>
-                <a class="az-contact-card" href="assets/cv/Amirhossein-Zamanzade-CV.pdf" download="Amirhossein-Zamanzade-CV.pdf">
-                  <span class="az-contact-card__label">CV</span>
-                  <span class="az-contact-card__value">Download PDF</span>
-                  <span class="az-contact-card__hint">Resume file</span>
-                </a>
-                <a class="az-contact-card" href="tel:+989966892614">
-                  <span class="az-contact-card__label">Phone</span>
-                  <span class="az-contact-card__value">+98 996 689 2614</span>
-                  <span class="az-contact-card__hint">Tehran, Iran</span>
+                <a class="az-contact-pill" href="assets/cv/Amirhossein-Zamanzade-CV.pdf" download="Amirhossein-Zamanzade-CV.pdf" data-i18n="contact.downloadCv">
+                  Download CV
                 </a>
               </div>
+
+              <div class="az-contact-links">
+                <a class="az-contact-link" href="mailto:itsamirzamani@gmail.com">
+                  <span class="az-contact-link__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                  </span>
+                  <span class="az-contact-link__copy">
+                    <strong class="az-ltr">itsamirzamani@gmail.com</strong>
+                    <small data-i18n="contact.emailMe">Email me</small>
+                  </span>
+                  <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
+                </a>
+                <a class="az-contact-link" href="https://linkedin.com/in/amirhossein-zamanzade" target="_blank" rel="noopener">
+                  <span class="az-contact-link__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 11v5M8 8v.01M12 16v-5c0-1.5 1.2-2 2.5-2s2.5.5 2.5 2v5"/></svg>
+                  </span>
+                  <span class="az-contact-link__copy">
+                    <strong data-i18n="contact.linkedin">LinkedIn</strong>
+                    <small data-i18n="contact.linkedin.sub">Start a conversation</small>
+                  </span>
+                  <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
+                </a>
+                <a class="az-contact-link" href="https://github.com/Amir-dev00" target="_blank" rel="noopener">
+                  <span class="az-contact-link__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+                  </span>
+                  <span class="az-contact-link__copy">
+                    <strong data-i18n="contact.github">GitHub</strong>
+                    <small data-i18n="contact.github.sub">Code &amp; repositories</small>
+                  </span>
+                  <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
+                </a>
+                <a class="az-contact-link" href="https://t.me/Amir_dev00" target="_blank" rel="noopener">
+                  <span class="az-contact-link__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 4.5 2.8 11.8c-.7.3-.7 1.3.1 1.5l4.7 1.5 1.8 5.3c.2.7 1.1.9 1.6.3l2.7-2.9 4.8 3.5c.6.4 1.4.1 1.6-.6L22 5.4c.2-.8-.6-1.4-1.3-1.1Z"/><path d="m7.6 14.8 9.5-6.3"/></svg>
+                  </span>
+                  <span class="az-contact-link__copy">
+                    <strong data-i18n="contact.telegram">Telegram</strong>
+                    <small data-i18n="contact.telegram.sub">Quick chat · @Amir_dev00</small>
+                  </span>
+                  <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
+                </a>
+              </div>
+
+              <p class="az-contact-note">
+                <span class="az-contact-note__dot" aria-hidden="true"></span>
+                <span data-i18n="contact.note">Available for freelance collaborations.</span>
+              </p>
             </div>
           </section>
         </main>
@@ -733,6 +778,7 @@
     </script>
     <!-- - Slider Textures Shaders -->
     <!-- VENDOR SCRIPTS -->
+    <script src="js/az-i18n.js"></script>
     <script src="js/az-preloader.js"></script>
     <script src="js/navbar-glass.js"></script>
     <script src="js/vendor.js"></script>
