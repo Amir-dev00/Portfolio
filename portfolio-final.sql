@@ -1,0 +1,672 @@
+-- AZ Portfolio CMS
+-- Import into an empty database via phpMyAdmin.
+-- Character set: utf8mb4
+-- No CREATE DATABASE / no DEFINER / no default admin password.
+-- Create the first owner with tools/make-owner-hash.php (see INSTALL-CPANEL.md).
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS=0;
+-- MariaDB dump 10.19  Distrib 10.4.32-MariaDB, for Win64 (AMD64)
+--
+-- Host: localhost    Database: portfolio_cms
+-- ------------------------------------------------------
+-- Server version	10.4.32-MariaDB
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `cache`
+--
+
+DROP TABLE IF EXISTS `cache`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cache` (
+  `key` varchar(255) NOT NULL,
+  `value` mediumtext NOT NULL,
+  `expiration` bigint(20) NOT NULL,
+  PRIMARY KEY (`key`),
+  KEY `cache_expiration_index` (`expiration`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cache`
+--
+
+LOCK TABLES `cache` WRITE;
+/*!40000 ALTER TABLE `cache` DISABLE KEYS */;
+/*!40000 ALTER TABLE `cache` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `cache_locks`
+--
+
+DROP TABLE IF EXISTS `cache_locks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cache_locks` (
+  `key` varchar(255) NOT NULL,
+  `owner` varchar(255) NOT NULL,
+  `expiration` bigint(20) NOT NULL,
+  PRIMARY KEY (`key`),
+  KEY `cache_locks_expiration_index` (`expiration`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cache_locks`
+--
+
+LOCK TABLES `cache_locks` WRITE;
+/*!40000 ALTER TABLE `cache_locks` DISABLE KEYS */;
+/*!40000 ALTER TABLE `cache_locks` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `content_entries`
+--
+
+DROP TABLE IF EXISTS `content_entries`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `content_entries` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `group` varchar(64) NOT NULL,
+  `key` varchar(128) NOT NULL,
+  `value_en` text DEFAULT NULL,
+  `value_fa` text DEFAULT NULL,
+  `is_dirty` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `content_entries_group_key_unique` (`group`,`key`),
+  KEY `content_entries_group_index` (`group`)
+) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `content_entries`
+--
+
+LOCK TABLES `content_entries` WRITE;
+/*!40000 ALTER TABLE `content_entries` DISABLE KEYS */;
+INSERT INTO `content_entries` VALUES (1,'ui','meta.description','Portfolio of Amirhossein Zamanzade — Full-Stack Developer, Programmer, and Designer.','نمونه‌کارهای امیرحسین زمان‌زاده — توسعه‌دهنده فول‌استک، برنامه‌نویس و طراح.',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(2,'ui','title.base','Amirhossein Zamanzade | Developer','امیرحسین زمان‌زاده | توسعه‌دهنده',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(3,'ui','title.work','Work — Amirhossein Zamanzade | Developer','کارها — امیرحسین زمان‌زاده | توسعه‌دهنده',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(4,'ui','title.about','About — Amirhossein Zamanzade | Developer','درباره — امیرحسین زمان‌زاده | توسعه‌دهنده',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(5,'ui','title.contact','Contact — Amirhossein Zamanzade | Developer','تماس — امیرحسین زمان‌زاده | توسعه‌دهنده',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(6,'ui','title.project','{name} — Amirhossein Zamanzade | Developer','{name} — امیرحسین زمان‌زاده | توسعه‌دهنده',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(7,'ui','preloader.aria','Loading Amirhossein\'s portfolio','در حال بارگذاری نمونه‌کارهای امیرحسین',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(8,'ui','preloader.label','LOADING EXPERIENCE','در حال آماده‌سازی تجربه',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(9,'ui','preloader.progress','Loading progress','پیشرفت بارگذاری',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(10,'ui','preloader.role','SOFTWARE ENGINEER','مهندس نرم‌افزار',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(11,'ui','nav.primary','Primary','ناوبری اصلی',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(12,'ui','nav.work','Work','کارها',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(13,'ui','nav.about','About','درباره',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(14,'ui','nav.home','Home','خانه',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(15,'ui','nav.cv','CV','رزومه',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(16,'ui','nav.contact','Contact','تماس',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(17,'ui','nav.tooltip.work','Work','کارها',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(18,'ui','nav.tooltip.about','About','درباره',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(19,'ui','nav.tooltip.home','Home','خانه',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(20,'ui','nav.tooltip.cv','Download CV','دانلود رزومه',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(21,'ui','nav.tooltip.contact','Contact','تماس',0,'2026-11-09 10:46:56','2026-11-09 10:46:58'),(22,'ui','nav.aria.cv','Download CV','دانلود رزومه',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(23,'ui','lang.switcher','Language','زبان',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(24,'ui','lang.en','English','English',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(25,'ui','lang.fa','فارسی','فارسی',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(26,'ui','lang.aria.en','Read this site in English','Read this site in English',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(27,'ui','lang.aria.fa','نمایش سایت به فارسی','نمایش سایت به فارسی',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(28,'ui','home.profile.aria','Amirhossein Zamanzade, Software Engineer','امیرحسین زمان‌زاده، مهندس نرم‌افزار',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(29,'ui','home.profile.role','Software Engineer','مهندس نرم‌افزار',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(30,'ui','home.arrows','Project slides','اسلاید پروژه‌ها',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(31,'ui','home.prev','Previous project','پروژه قبلی',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(32,'ui','home.next','Next project','پروژه بعدی',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(33,'ui','work.aria','Work','کارها',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(34,'ui','work.eyebrow','Selected work','کارهای منتخب',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(35,'ui','work.title','Selected projects.','پروژه‌های منتخب.',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(36,'ui','work.lead','A selection of websites, applications, APIs, and automation tools.','گزیده‌ای از وب‌سایت‌ها، اپلیکیشن‌ها، APIها و ابزارهای اتوماسیون.',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(37,'ui','work.spotlight.eyebrow','Selected work','کار منتخب',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(38,'ui','work.explore','Explore project','مشاهده پروژه',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(39,'ui','work.open','Open {name}','باز کردن {name}',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(40,'ui','work.count','{n} projects','{n} پروژه',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(41,'ui','work.prev','Previous project','پروژه قبلی',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(42,'ui','work.next','Next project','پروژه بعدی',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(43,'ui','work.listbox','Select a project; use up and down arrow keys','انتخاب پروژه؛ با کلیدهای بالا و پایین جابه‌جا شوید',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(44,'ui','project.aria','Project','پروژه',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(45,'ui','project.back','← Back to Work','→ بازگشت به کارها',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(46,'ui','project.missing.title','Project not found','پروژه پیدا نشد',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(47,'ui','project.missing.lead','That project is unavailable. Return to the work grid to continue.','این پروژه در دسترس نیست. به فهرست کارها برگردید.',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(48,'ui','project.role','Role:','نقش:',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(49,'ui','project.github','GitHub','گیت‌هاب',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(50,'ui','project.live','Live','نسخه آنلاین',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(51,'ui','about.aria','About','درباره',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(52,'ui','about.eyebrow','About','درباره',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(53,'ui','about.title','Software engineer.','مهندس نرم‌افزار.',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(54,'ui','about.portrait.alt','Portrait of Amirhossein Zamanzade','پرتره امیرحسین زمان‌زاده',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(55,'ui','about.meta.location.label','Location:','موقعیت:',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(56,'ui','about.meta.location.value','Tehran, Iran','تهران، ایران',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(57,'ui','about.meta.education.label','Education:','تحصیلات:',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(58,'ui','about.meta.education.value','B.Sc. Computer Science, Amirkabir University of Technology','کارشناسی علوم کامپیوتر، دانشگاه صنعتی امیرکبیر',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(59,'ui','about.meta.status.label','Status:','وضعیت:',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(60,'ui','about.meta.status.value','Available for freelance','آماده‌ی همکاری فریلنس',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(61,'ui','about.p1','I’m Amirhossein Zamanzade, a Computer Science student and Full-Stack Developer focused on fast, scalable, and user-centric products. I care about clean architecture, modern tooling, and interfaces that feel refined.','من امیرحسین زمان‌زاده‌ام؛ دانشجوی علوم کامپیوتر و توسعه‌دهنده فول‌استک. روی محصولاتی سریع، مقیاس‌پذیر و کاربرمحور تمرکز می‌کنم و به معماری تمیز، ابزارهای مدرن و رابط‌هایی با حس پرداخت‌شده اهمیت می‌دهم.',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(62,'ui','about.p2','This portfolio reflects my learning journey across web, desktop, APIs, and automation — and a place to connect for collaboration.','این نمونه کار بازتاب مسیر یادگیری من در وب، دسکتاپ، API و اتوماسیون است — و جایی برای شروع همکاری.',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(63,'ui','about.skills','Skills','مهارت‌ها',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(64,'ui','contact.aria','Contact','تماس',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(65,'ui','contact.eyebrow','Let’s connect','بیایید در ارتباط باشیم',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(66,'ui','contact.title','Let’s talk.','صحبت کنیم.',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(67,'ui','contact.intro','Have a project or a role in mind? Let’s talk.','پروژه یا موقعیتی در ذهن دارید؟ صحبت کنیم.',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(68,'ui','contact.emailMe','Email me','ایمیل بزنید',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(69,'ui','contact.downloadCv','Download CV','دانلود رزومه',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(70,'ui','contact.linkedin','LinkedIn','لینکدین',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(71,'ui','contact.linkedin.sub','Start a conversation','شروع گفتگو',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(72,'ui','contact.github','GitHub','گیت‌هاب',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(73,'ui','contact.github.sub','Code & repositories','کد و مخازن',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(74,'ui','contact.telegram','Telegram','تلگرام',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(75,'ui','contact.telegram.sub','Quick chat · @Amir_dev00','گفتگوی سریع · @Amir_dev00',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(76,'ui','contact.note','Available for freelance collaborations.','آماده‌ی همکاری فریلنس هستم.',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(77,'ui','category.Websites','Websites','وب‌سایت‌ها',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(78,'ui','category.Applications','Applications','اپلیکیشن‌ها',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(79,'ui','category.APIs & Backend','APIs & Backend','API و بک‌اند',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(80,'ui','category.Automation / Bots','Automation / Bots','اتوماسیون / ربات',0,'2026-11-09 10:46:57','2026-11-09 10:46:58');
+/*!40000 ALTER TABLE `content_entries` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `content_revisions`
+--
+
+DROP TABLE IF EXISTS `content_revisions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `content_revisions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `entity_type` varchar(64) NOT NULL,
+  `entity_id` bigint(20) unsigned DEFAULT NULL,
+  `action` varchar(32) NOT NULL,
+  `before` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`before`)),
+  `after` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`after`)),
+  `user_id` bigint(20) unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `content_revisions_user_id_foreign` (`user_id`),
+  KEY `content_revisions_entity_type_entity_id_index` (`entity_type`,`entity_id`),
+  CONSTRAINT `content_revisions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `content_revisions`
+--
+
+LOCK TABLES `content_revisions` WRITE;
+/*!40000 ALTER TABLE `content_revisions` DISABLE KEYS */;
+INSERT INTO `content_revisions` VALUES (1,'publication',1,'publish',NULL,'{\"label\":\"Initial seed publish\"}',NULL,'2026-11-09 10:46:58','2026-11-09 10:46:58');
+/*!40000 ALTER TABLE `content_revisions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `failed_jobs`
+--
+
+DROP TABLE IF EXISTS `failed_jobs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `failed_jobs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) NOT NULL,
+  `connection` varchar(255) NOT NULL,
+  `queue` varchar(255) NOT NULL,
+  `payload` longtext NOT NULL,
+  `exception` longtext NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`),
+  KEY `failed_jobs_connection_queue_failed_at_index` (`connection`,`queue`,`failed_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `failed_jobs`
+--
+
+LOCK TABLES `failed_jobs` WRITE;
+/*!40000 ALTER TABLE `failed_jobs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `failed_jobs` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `job_batches`
+--
+
+DROP TABLE IF EXISTS `job_batches`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `job_batches` (
+  `id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `total_jobs` int(11) NOT NULL,
+  `pending_jobs` int(11) NOT NULL,
+  `failed_jobs` int(11) NOT NULL,
+  `failed_job_ids` longtext NOT NULL,
+  `options` mediumtext DEFAULT NULL,
+  `cancelled_at` int(11) DEFAULT NULL,
+  `created_at` int(11) NOT NULL,
+  `finished_at` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `job_batches`
+--
+
+LOCK TABLES `job_batches` WRITE;
+/*!40000 ALTER TABLE `job_batches` DISABLE KEYS */;
+/*!40000 ALTER TABLE `job_batches` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `jobs`
+--
+
+DROP TABLE IF EXISTS `jobs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `jobs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `queue` varchar(255) NOT NULL,
+  `payload` longtext NOT NULL,
+  `attempts` smallint(5) unsigned NOT NULL,
+  `reserved_at` int(10) unsigned DEFAULT NULL,
+  `available_at` int(10) unsigned NOT NULL,
+  `created_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `jobs_queue_index` (`queue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `jobs`
+--
+
+LOCK TABLES `jobs` WRITE;
+/*!40000 ALTER TABLE `jobs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `jobs` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `media_assets`
+--
+
+DROP TABLE IF EXISTS `media_assets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `media_assets` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `disk` varchar(32) NOT NULL DEFAULT 'local',
+  `path` varchar(255) NOT NULL,
+  `public_path` varchar(255) DEFAULT NULL,
+  `original_name` varchar(255) DEFAULT NULL,
+  `mime` varchar(128) DEFAULT NULL,
+  `size` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `alt_en` varchar(255) DEFAULT NULL,
+  `alt_fa` varchar(255) DEFAULT NULL,
+  `is_published` tinyint(1) NOT NULL DEFAULT 0,
+  `used_by` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`used_by`)),
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `media_assets`
+--
+
+LOCK TABLES `media_assets` WRITE;
+/*!40000 ALTER TABLE `media_assets` DISABLE KEYS */;
+INSERT INTO `media_assets` VALUES (1,'local','media/library/portfolio-w1.webp','media/published/img/portfolio-w1.webp','portfolio-w1.webp','image/webp',53250,'portfolio-w1','portfolio-w1',1,'[\"project-cover:personal-portfolio-website\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(2,'local','media/library/portfolio-1.webp','media/published/img/portfolio-1.webp','portfolio-1.webp','image/webp',11738,'portfolio-1','portfolio-1',1,'[\"project-cover:shopping-mall-desktop\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(3,'local','media/library/portfolio-7.webp','media/published/img/portfolio-7.webp','portfolio-7.webp','image/webp',11500,'portfolio-7','portfolio-7',1,'[\"project-cover:rest-api-microservice\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(4,'local','media/library/portfolio-4.webp','media/published/img/portfolio-4.webp','portfolio-4.webp','image/webp',33004,'portfolio-4','portfolio-4',1,'[\"project-cover:telegram-automation-bot\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(5,'local','media/library/portfolio-2.webp','media/published/img/portfolio-2.webp','portfolio-2.webp','image/webp',32502,'portfolio-2','portfolio-2',1,'[\"project-cover:expense-tracker-app\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(6,'local','media/library/portfolio-11.webp','media/published/img/portfolio-11.webp','portfolio-11.webp','image/webp',94050,'portfolio-11','portfolio-11',1,'[\"project-cover:e-commerce-website\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(7,'local','media/library/portfolio-8.webp','media/published/img/portfolio-8.webp','portfolio-8.webp','image/webp',91720,'portfolio-8','portfolio-8',1,'[\"project-cover:jwt-auth-backend\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(8,'local','media/library/portfolio-5.webp','media/published/img/portfolio-5.webp','portfolio-5.webp','image/webp',9354,'portfolio-5','portfolio-5',1,'[\"project-cover:web-scraping-bot\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(9,'local','media/library/portfolio-3.webp','media/published/img/portfolio-3.webp','portfolio-3.webp','image/webp',57238,'portfolio-3','portfolio-3',1,'[\"project-cover:task-manager-app\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(10,'local','media/library/portfolio-12.webp','media/published/img/portfolio-12.webp','portfolio-12.webp','image/webp',38250,'portfolio-12','portfolio-12',1,'[\"project-cover:landing-page-design\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(11,'local','media/library/portfolio-9.webp','media/published/img/portfolio-9.webp','portfolio-9.webp','image/webp',33266,'portfolio-9','portfolio-9',1,'[\"project-cover:restful-api-service\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(12,'local','media/library/portfolio-6.webp','media/published/img/portfolio-6.webp','portfolio-6.webp','image/webp',16826,'portfolio-6','portfolio-6',1,'[\"project-cover:discord-automation-bot\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(13,'local','media/library/profile.jpg','media/published/img/profile.jpg','profile.jpg','image/jpeg',98236,'profile','profile',1,'[\"profile\"]','2026-11-09 10:46:57','2026-11-09 10:46:57'),(14,'local','media/library/az-logo.webp','media/published/img/az-logo.webp','az-logo.webp','image/webp',82204,'az-logo','az-logo',1,'[\"logo\"]','2026-11-09 10:46:57','2026-11-09 10:46:57');
+/*!40000 ALTER TABLE `media_assets` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `migrations`
+--
+
+DROP TABLE IF EXISTS `migrations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `migrations` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `migration` varchar(255) NOT NULL,
+  `batch` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `migrations`
+--
+
+LOCK TABLES `migrations` WRITE;
+/*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
+INSERT INTO `migrations` VALUES (1,'0001_01_01_000000_create_users_table',1),(2,'0001_01_01_000001_create_cache_table',1),(3,'0001_01_01_000002_create_jobs_table',1),(4,'2026_11_09_000001_create_portfolio_cms_tables',1);
+/*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `password_reset_tokens`
+--
+
+DROP TABLE IF EXISTS `password_reset_tokens`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `password_reset_tokens` (
+  `email` varchar(255) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `password_reset_tokens`
+--
+
+LOCK TABLES `password_reset_tokens` WRITE;
+/*!40000 ALTER TABLE `password_reset_tokens` DISABLE KEYS */;
+/*!40000 ALTER TABLE `password_reset_tokens` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_media`
+--
+
+DROP TABLE IF EXISTS `project_media`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `project_media` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `project_id` bigint(20) unsigned NOT NULL,
+  `media_asset_id` bigint(20) unsigned NOT NULL,
+  `role` varchar(32) NOT NULL DEFAULT 'gallery',
+  `sort_order` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `project_media_project_id_foreign` (`project_id`),
+  KEY `project_media_media_asset_id_foreign` (`media_asset_id`),
+  CONSTRAINT `project_media_media_asset_id_foreign` FOREIGN KEY (`media_asset_id`) REFERENCES `media_assets` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `project_media_project_id_foreign` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_media`
+--
+
+LOCK TABLES `project_media` WRITE;
+/*!40000 ALTER TABLE `project_media` DISABLE KEYS */;
+/*!40000 ALTER TABLE `project_media` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_technologies`
+--
+
+DROP TABLE IF EXISTS `project_technologies`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `project_technologies` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `project_id` bigint(20) unsigned NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `sort_order` int(10) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `project_technologies_project_id_foreign` (`project_id`),
+  CONSTRAINT `project_technologies_project_id_foreign` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_technologies`
+--
+
+LOCK TABLES `project_technologies` WRITE;
+/*!40000 ALTER TABLE `project_technologies` DISABLE KEYS */;
+INSERT INTO `project_technologies` VALUES (1,1,'HTML5',0),(2,1,'CSS3',1),(3,1,'Bootstrap 5',2),(4,1,'JavaScript',3),(5,1,'AOS',4),(6,1,'Swiper',5),(7,2,'Java 21',0),(8,2,'JavaFX 21',1),(9,2,'Maven',2),(10,2,'PostgreSQL',3),(11,2,'JDBC',4),(12,3,'Node.js',0),(13,3,'Express',1),(14,3,'MongoDB',2),(15,3,'JWT',3),(16,3,'REST',4),(17,4,'Python',0),(18,4,'python-telegram-bot',1),(19,4,'SQLite',2),(20,4,'APScheduler',3),(21,5,'Java',0),(22,5,'JavaFX',1),(23,5,'SQLite',2),(24,5,'Maven',3),(25,6,'HTML',0),(26,6,'CSS',1),(27,6,'JavaScript',2),(28,6,'Bootstrap',3),(29,6,'PHP',4),(30,7,'Node.js',0),(31,7,'Express',1),(32,7,'PostgreSQL',2),(33,7,'JWT',3),(34,7,'bcrypt',4),(35,8,'Python',0),(36,8,'BeautifulSoup',1),(37,8,'Requests',2),(38,8,'Pandas',3),(39,9,'Java',0),(40,9,'JavaFX',1),(41,9,'SQLite',2),(42,9,'MVC',3),(43,10,'HTML',0),(44,10,'CSS',1),(45,10,'Bootstrap',2),(46,10,'JavaScript',3),(47,10,'Figma',4),(48,11,'Python',0),(49,11,'FastAPI',1),(50,11,'PostgreSQL',2),(51,11,'Pydantic',3),(52,11,'Docker',4),(53,12,'JavaScript',0),(54,12,'Discord.js',1),(55,12,'Node.js',2),(56,12,'MongoDB',3);
+/*!40000 ALTER TABLE `project_technologies` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_translations`
+--
+
+DROP TABLE IF EXISTS `project_translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `project_translations` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `project_id` bigint(20) unsigned NOT NULL,
+  `locale` varchar(5) NOT NULL,
+  `short_description` varchar(255) DEFAULT NULL,
+  `full_description` text DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `category_label` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `project_translations_project_id_locale_unique` (`project_id`,`locale`),
+  CONSTRAINT `project_translations_project_id_foreign` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_translations`
+--
+
+LOCK TABLES `project_translations` WRITE;
+/*!40000 ALTER TABLE `project_translations` DISABLE KEYS */;
+INSERT INTO `project_translations` VALUES (1,1,'en','Modern responsive portfolio built with Bootstrap','A personal portfolio website designed to showcase projects, skills, and professional experience. Built with a clean, dark-themed UI and fully responsive layout for desktop, tablet, and mobile devices.','Front-End Developer & Designer','Websites','2026-11-09 10:46:57','2026-11-09 10:46:57'),(2,1,'fa','نمونه‌کار ریسپانسیو مدرن با Bootstrap','یک وب‌سایت شخصی برای نمایش پروژه‌ها، مهارت‌ها و تجربه حرفه‌ای. با رابط تاریک تمیز و چیدمان کاملاً ریسپانسیو برای دسکتاپ، تبلت و موبایل.','توسعه‌دهنده فرانت‌اند و طراح','وب‌سایت‌ها','2026-11-09 10:46:57','2026-11-09 10:46:57'),(3,2,'en','JavaFX desktop shopping application with PostgreSQL','A desktop-based shopping mall application developed using Java and JavaFX. It covers authentication, product browsing, cart management, and order processing with PostgreSQL integration and role-based access.','Full-Stack Developer','Applications','2026-11-09 10:46:57','2026-11-09 10:46:57'),(4,2,'fa','اپلیکیشن خرید دسکتاپ با JavaFX و PostgreSQL','اپلیکیشن دسکتاپ مرکز خرید با Java و JavaFX؛ شامل احراز هویت، مرور محصول، سبد خرید و پردازش سفارش با PostgreSQL و دسترسی مبتنی بر نقش.','توسعه‌دهنده فول‌استک','اپلیکیشن‌ها','2026-11-09 10:46:57','2026-11-09 10:46:57'),(5,3,'en','Scalable backend API with authentication','A backend microservice exposing RESTful endpoints for resource management, user authentication, and data validation. Designed with modular architecture for easy maintenance and deployment.','Back-End Developer','APIs & Backend','2026-11-09 10:46:57','2026-11-09 10:46:57'),(6,3,'fa','API بک‌اند مقیاس‌پذیر با احراز هویت','میکروسرویس بک‌اند با endpointهای REST برای مدیریت منابع، احراز هویت کاربر و اعتبارسنجی داده؛ با معماری ماژولار برای نگهداری و استقرار آسان‌تر.','توسعه‌دهنده بک‌اند','API و بک‌اند','2026-11-09 10:46:57','2026-11-09 10:46:57'),(7,4,'en','Automated messaging and task bot for Telegram','A Telegram bot that automates repetitive tasks such as notifications, scheduled messages, and user interaction workflows. Built to improve productivity and streamline communication.','Bot Developer','Automation / Bots','2026-11-09 10:46:57','2026-11-09 10:46:57'),(8,4,'fa','ربات تلگرام برای پیام و کارهای خودکار','ربات تلگرامی که کارهای تکراری مثل اعلان‌ها، پیام‌های زمان‌بندی‌شده و جریان تعامل کاربر را خودکار می‌کند تا بهره‌وری و ارتباط ساده‌تر شود.','توسعه‌دهنده ربات','اتوماسیون / ربات','2026-11-09 10:46:57','2026-11-09 10:46:57'),(9,5,'en','Desktop app for personal finance tracking','A desktop application for tracking daily expenses, categorizing spending, and generating simple reports to help users understand financial habits over time.','Application Developer','Applications','2026-11-09 10:46:57','2026-11-09 10:46:57'),(10,5,'fa','اپلیکیشن دسکتاپ برای پیگیری هزینه‌های شخصی','اپلیکیشن دسکتاپ برای ثبت هزینه‌های روزانه، دسته‌بندی مخارج و گزارش‌های ساده تا عادت‌های مالی بهتر دیده شوند.','توسعه‌دهنده اپلیکیشن','اپلیکیشن‌ها','2026-11-09 10:46:57','2026-11-09 10:46:57'),(11,6,'en','Online store with product catalog and cart','A full-featured e-commerce website with product listings, shopping cart functionality, and a streamlined checkout experience focused on usability and modern web patterns.','Full-Stack Developer','Websites','2026-11-09 10:46:57','2026-11-09 10:46:57'),(12,6,'fa','فروشگاه آنلاین با کاتالوگ و سبد خرید','وب‌سایت فروشگاهی با فهرست محصولات، سبد خرید و تجربه پرداخت ساده؛ با تمرکز بر کاربردپذیری و الگوهای مدرن وب.','توسعه‌دهنده فول‌استک','وب‌سایت‌ها','2026-11-09 10:46:57','2026-11-09 10:46:57'),(13,7,'en','Secure authentication service with role management','A dedicated authentication backend providing user registration, login, token refresh, and role-based authorization as a reusable service for web applications.','Back-End Developer','APIs & Backend','2026-11-09 10:46:57','2026-11-09 10:46:57'),(14,7,'fa','سرویس احراز هویت امن با مدیریت نقش','بک‌اند اختصاصی احراز هویت برای ثبت‌نام، ورود، تازه‌سازی توکن و دسترسی مبتنی بر نقش؛ به‌عنوان سرویس قابل استفاده مجدد برای اپلیکیشن‌های وب.','توسعه‌دهنده بک‌اند','API و بک‌اند','2026-11-09 10:46:57','2026-11-09 10:46:57'),(15,8,'en','Automated data collection and reporting bot','An automation bot that scrapes targeted web data, processes it, and delivers formatted reports for monitoring prices, content changes, or research collection.','Automation Developer','Automation / Bots','2026-11-09 10:46:57','2026-11-09 10:46:57'),(16,8,'fa','ربات جمع‌آوری داده و گزارش‌گیری خودکار','ربات اتوماسیونی که داده هدف را از وب استخراج می‌کند، پردازش می‌نماید و گزارش‌های ساخت‌یافته برای پایش قیمت، تغییر محتوا یا پژوهش ارائه می‌دهد.','توسعه‌دهنده اتوماسیون','اتوماسیون / ربات','2026-11-09 10:46:57','2026-11-09 10:46:57'),(17,9,'en','Productivity app for task and project management','A task management desktop application for organizing to-do lists, setting priorities, and tracking project progress with clarity and minimal friction.','Application Developer','Applications','2026-11-09 10:46:57','2026-11-09 10:46:57'),(18,9,'fa','اپ بهره‌وری برای مدیریت کار و پروژه','اپلیکیشن دسکتاپ مدیریت کار برای فهرست کارها، اولویت‌بندی و پیگیری پیشرفت پروژه با وضوح و حداقل اصطکاک.','توسعه‌دهنده اپلیکیشن','اپلیکیشن‌ها','2026-11-09 10:46:57','2026-11-09 10:46:57'),(19,10,'en','High-conversion marketing landing page','A modern landing page design focused on clear messaging, strong visual hierarchy, and conversion-oriented layout for startups and product launches.','UI Designer & Front-End Developer','Websites','2026-11-09 10:46:57','2026-11-09 10:46:57'),(20,10,'fa','لندینگ مارکتینگ با تمرکز بر تبدیل','طراحی لندینگ مدرن با پیام روشن، سلسله‌مراتب بصری قوی و چیدمان تبدیل‌محور برای استارتاپ‌ها و معرفی محصول.','طراح UI و توسعه‌دهنده فرانت‌اند','وب‌سایت‌ها','2026-11-09 10:46:57','2026-11-09 10:46:57'),(21,11,'en','Modular API for third-party integrations','A modular REST API designed for integration with external services, including versioning, input validation, and structured response formats.','API Developer','APIs & Backend','2026-11-09 10:46:57','2026-11-09 10:46:57'),(22,11,'fa','API ماژولار برای یکپارچه‌سازی‌های خارجی','API REST ماژولار برای اتصال به سرویس‌های بیرونی؛ شامل نسخه‌بندی، اعتبارسنجی ورودی و قالب پاسخ ساخت‌یافته.','توسعه‌دهنده API','API و بک‌اند','2026-11-09 10:46:57','2026-11-09 10:46:57'),(23,12,'en','Community management and moderation bot','A Discord bot that automates community management tasks including welcome messages, moderation commands, and scheduled announcements.','Bot Developer','Automation / Bots','2026-11-09 10:46:57','2026-11-09 10:46:57'),(24,12,'fa','ربات مدیریت و نظارت جامعه در Discord','ربات Discord برای خودکارسازی مدیریت جامعه؛ از پیام خوش‌آمد تا دستورات نظارت و اعلان‌های زمان‌بندی‌شده.','توسعه‌دهنده ربات','اتوماسیون / ربات','2026-11-09 10:46:57','2026-11-09 10:46:57');
+/*!40000 ALTER TABLE `project_translations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `projects`
+--
+
+DROP TABLE IF EXISTS `projects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `projects` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `slug` varchar(255) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `category` varchar(64) DEFAULT NULL,
+  `year` varchar(16) DEFAULT NULL,
+  `live_url` varchar(255) DEFAULT NULL,
+  `github_url` varchar(255) DEFAULT NULL,
+  `sort_order` int(10) unsigned NOT NULL DEFAULT 0,
+  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
+  `is_dirty` tinyint(1) NOT NULL DEFAULT 0,
+  `archived_at` timestamp NULL DEFAULT NULL,
+  `cover_media_id` bigint(20) unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `projects_slug_unique` (`slug`),
+  KEY `projects_cover_media_id_foreign` (`cover_media_id`),
+  KEY `projects_archived_at_index` (`archived_at`),
+  CONSTRAINT `projects_cover_media_id_foreign` FOREIGN KEY (`cover_media_id`) REFERENCES `media_assets` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `projects`
+--
+
+LOCK TABLES `projects` WRITE;
+/*!40000 ALTER TABLE `projects` DISABLE KEYS */;
+INSERT INTO `projects` VALUES (1,'personal-portfolio-website','Personal Portfolio Website','Websites','2025','https://github.com/Amir-dev00/Portfolio','https://github.com/Amir-dev00',0,1,0,NULL,1,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(2,'shopping-mall-desktop','Shopping Mall Desktop','Applications','2025',NULL,'https://github.com/Amir-dev00',1,1,0,NULL,2,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(3,'rest-api-microservice','REST API Microservice','APIs & Backend','2024',NULL,'https://github.com/Amir-dev00',2,1,0,NULL,3,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(4,'telegram-automation-bot','Telegram Automation Bot','Automation / Bots','2024',NULL,'https://github.com/Amir-dev00',3,1,0,NULL,4,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(5,'expense-tracker-app','Expense Tracker App','Applications','2024',NULL,'https://github.com/Amir-dev00',4,0,0,NULL,5,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(6,'e-commerce-website','E-Commerce Website','Websites','2024',NULL,'https://github.com/Amir-dev00',5,0,0,NULL,6,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(7,'jwt-auth-backend','JWT Auth Backend','APIs & Backend','2024',NULL,'https://github.com/Amir-dev00',6,0,0,NULL,7,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(8,'web-scraping-bot','Web Scraping Bot','Automation / Bots','2024',NULL,'https://github.com/Amir-dev00',7,0,0,NULL,8,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(9,'task-manager-app','Task Manager App','Applications','2023',NULL,'https://github.com/Amir-dev00',8,0,0,NULL,9,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(10,'landing-page-design','Landing Page Design','Websites','2023',NULL,'https://github.com/Amir-dev00',9,0,0,NULL,10,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(11,'restful-api-service','RESTful API Service','APIs & Backend','2023',NULL,'https://github.com/Amir-dev00',10,0,0,NULL,11,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(12,'discord-automation-bot','Discord Automation Bot','Automation / Bots','2023',NULL,'https://github.com/Amir-dev00',11,0,0,NULL,12,'2026-11-09 10:46:57','2026-11-09 10:46:58');
+/*!40000 ALTER TABLE `projects` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `publications`
+--
+
+DROP TABLE IF EXISTS `publications`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `publications` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `label` varchar(255) DEFAULT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`payload`)),
+  `published_by` bigint(20) unsigned DEFAULT NULL,
+  `published_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `publications_published_by_foreign` (`published_by`),
+  CONSTRAINT `publications_published_by_foreign` FOREIGN KEY (`published_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `publications`
+--
+
+LOCK TABLES `publications` WRITE;
+/*!40000 ALTER TABLE `publications` DISABLE KEYS */;
+INSERT INTO `publications` VALUES (1,'Initial seed publish','{\"version\":1,\"built_at\":\"2026-11-09T14:16:57+00:00\",\"strings\":{\"en\":{\"about.aria\":\"About\",\"about.eyebrow\":\"About\",\"about.meta.education.label\":\"Education:\",\"about.meta.education.value\":\"B.Sc. Computer Science, Amirkabir University of Technology\",\"about.meta.location.label\":\"Location:\",\"about.meta.location.value\":\"Tehran, Iran\",\"about.meta.status.label\":\"Status:\",\"about.meta.status.value\":\"Available for freelance\",\"about.p1\":\"I\\u2019m Amirhossein Zamanzade, a Computer Science student and Full-Stack Developer focused on fast, scalable, and user-centric products. I care about clean architecture, modern tooling, and interfaces that feel refined.\",\"about.p2\":\"This portfolio reflects my learning journey across web, desktop, APIs, and automation \\u2014 and a place to connect for collaboration.\",\"about.portrait.alt\":\"Portrait of Amirhossein Zamanzade\",\"about.skills\":\"Skills\",\"about.title\":\"Software engineer.\",\"category.APIs & Backend\":\"APIs & Backend\",\"category.Applications\":\"Applications\",\"category.Automation \\/ Bots\":\"Automation \\/ Bots\",\"category.Websites\":\"Websites\",\"contact.aria\":\"Contact\",\"contact.downloadCv\":\"Download CV\",\"contact.emailMe\":\"Email me\",\"contact.eyebrow\":\"Let\\u2019s connect\",\"contact.github\":\"GitHub\",\"contact.github.sub\":\"Code & repositories\",\"contact.intro\":\"Have a project or a role in mind? Let\\u2019s talk.\",\"contact.linkedin\":\"LinkedIn\",\"contact.linkedin.sub\":\"Start a conversation\",\"contact.note\":\"Available for freelance collaborations.\",\"contact.telegram\":\"Telegram\",\"contact.telegram.sub\":\"Quick chat \\u00b7 @Amir_dev00\",\"contact.title\":\"Let\\u2019s talk.\",\"home.arrows\":\"Project slides\",\"home.next\":\"Next project\",\"home.prev\":\"Previous project\",\"home.profile.aria\":\"Amirhossein Zamanzade, Software Engineer\",\"home.profile.role\":\"Software Engineer\",\"lang.aria.en\":\"Read this site in English\",\"lang.aria.fa\":\"\\u0646\\u0645\\u0627\\u06cc\\u0634 \\u0633\\u0627\\u06cc\\u062a \\u0628\\u0647 \\u0641\\u0627\\u0631\\u0633\\u06cc\",\"lang.en\":\"English\",\"lang.fa\":\"\\u0641\\u0627\\u0631\\u0633\\u06cc\",\"lang.switcher\":\"Language\",\"meta.description\":\"Portfolio of Amirhossein Zamanzade \\u2014 Full-Stack Developer, Programmer, and Designer.\",\"nav.about\":\"About\",\"nav.aria.cv\":\"Download CV\",\"nav.contact\":\"Contact\",\"nav.cv\":\"CV\",\"nav.home\":\"Home\",\"nav.primary\":\"Primary\",\"nav.tooltip.about\":\"About\",\"nav.tooltip.contact\":\"Contact\",\"nav.tooltip.cv\":\"Download CV\",\"nav.tooltip.home\":\"Home\",\"nav.tooltip.work\":\"Work\",\"nav.work\":\"Work\",\"preloader.aria\":\"Loading Amirhossein\'s portfolio\",\"preloader.label\":\"LOADING EXPERIENCE\",\"preloader.progress\":\"Loading progress\",\"preloader.role\":\"SOFTWARE ENGINEER\",\"project.aria\":\"Project\",\"project.back\":\"\\u2190 Back to Work\",\"project.github\":\"GitHub\",\"project.live\":\"Live\",\"project.missing.lead\":\"That project is unavailable. Return to the work grid to continue.\",\"project.missing.title\":\"Project not found\",\"project.role\":\"Role:\",\"title.about\":\"About \\u2014 Amirhossein Zamanzade | Developer\",\"title.base\":\"Amirhossein Zamanzade | Developer\",\"title.contact\":\"Contact \\u2014 Amirhossein Zamanzade | Developer\",\"title.project\":\"{name} \\u2014 Amirhossein Zamanzade | Developer\",\"title.work\":\"Work \\u2014 Amirhossein Zamanzade | Developer\",\"work.aria\":\"Work\",\"work.count\":\"{n} projects\",\"work.explore\":\"Explore project\",\"work.eyebrow\":\"Selected work\",\"work.lead\":\"A selection of websites, applications, APIs, and automation tools.\",\"work.listbox\":\"Select a project; use up and down arrow keys\",\"work.next\":\"Next project\",\"work.open\":\"Open {name}\",\"work.prev\":\"Previous project\",\"work.spotlight.eyebrow\":\"Selected work\",\"work.title\":\"Selected projects.\"},\"fa\":{\"about.aria\":\"\\u062f\\u0631\\u0628\\u0627\\u0631\\u0647\",\"about.eyebrow\":\"\\u062f\\u0631\\u0628\\u0627\\u0631\\u0647\",\"about.meta.education.label\":\"\\u062a\\u062d\\u0635\\u06cc\\u0644\\u0627\\u062a:\",\"about.meta.education.value\":\"\\u06a9\\u0627\\u0631\\u0634\\u0646\\u0627\\u0633\\u06cc \\u0639\\u0644\\u0648\\u0645 \\u06a9\\u0627\\u0645\\u067e\\u06cc\\u0648\\u062a\\u0631\\u060c \\u062f\\u0627\\u0646\\u0634\\u06af\\u0627\\u0647 \\u0635\\u0646\\u0639\\u062a\\u06cc \\u0627\\u0645\\u06cc\\u0631\\u06a9\\u0628\\u06cc\\u0631\",\"about.meta.location.label\":\"\\u0645\\u0648\\u0642\\u0639\\u06cc\\u062a:\",\"about.meta.location.value\":\"\\u062a\\u0647\\u0631\\u0627\\u0646\\u060c \\u0627\\u06cc\\u0631\\u0627\\u0646\",\"about.meta.status.label\":\"\\u0648\\u0636\\u0639\\u06cc\\u062a:\",\"about.meta.status.value\":\"\\u0622\\u0645\\u0627\\u062f\\u0647\\u200c\\u06cc \\u0647\\u0645\\u06a9\\u0627\\u0631\\u06cc \\u0641\\u0631\\u06cc\\u0644\\u0646\\u0633\",\"about.p1\":\"\\u0645\\u0646 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647\\u200c\\u0627\\u0645\\u061b \\u062f\\u0627\\u0646\\u0634\\u062c\\u0648\\u06cc \\u0639\\u0644\\u0648\\u0645 \\u06a9\\u0627\\u0645\\u067e\\u06cc\\u0648\\u062a\\u0631 \\u0648 \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0641\\u0648\\u0644\\u200c\\u0627\\u0633\\u062a\\u06a9. \\u0631\\u0648\\u06cc \\u0645\\u062d\\u0635\\u0648\\u0644\\u0627\\u062a\\u06cc \\u0633\\u0631\\u06cc\\u0639\\u060c \\u0645\\u0642\\u06cc\\u0627\\u0633\\u200c\\u067e\\u0630\\u06cc\\u0631 \\u0648 \\u06a9\\u0627\\u0631\\u0628\\u0631\\u0645\\u062d\\u0648\\u0631 \\u062a\\u0645\\u0631\\u06a9\\u0632 \\u0645\\u06cc\\u200c\\u06a9\\u0646\\u0645 \\u0648 \\u0628\\u0647 \\u0645\\u0639\\u0645\\u0627\\u0631\\u06cc \\u062a\\u0645\\u06cc\\u0632\\u060c \\u0627\\u0628\\u0632\\u0627\\u0631\\u0647\\u0627\\u06cc \\u0645\\u062f\\u0631\\u0646 \\u0648 \\u0631\\u0627\\u0628\\u0637\\u200c\\u0647\\u0627\\u06cc\\u06cc \\u0628\\u0627 \\u062d\\u0633 \\u067e\\u0631\\u062f\\u0627\\u062e\\u062a\\u200c\\u0634\\u062f\\u0647 \\u0627\\u0647\\u0645\\u06cc\\u062a \\u0645\\u06cc\\u200c\\u062f\\u0647\\u0645.\",\"about.p2\":\"\\u0627\\u06cc\\u0646 \\u0646\\u0645\\u0648\\u0646\\u0647 \\u06a9\\u0627\\u0631 \\u0628\\u0627\\u0632\\u062a\\u0627\\u0628 \\u0645\\u0633\\u06cc\\u0631 \\u06cc\\u0627\\u062f\\u06af\\u06cc\\u0631\\u06cc \\u0645\\u0646 \\u062f\\u0631 \\u0648\\u0628\\u060c \\u062f\\u0633\\u06a9\\u062a\\u0627\\u067e\\u060c API \\u0648 \\u0627\\u062a\\u0648\\u0645\\u0627\\u0633\\u06cc\\u0648\\u0646 \\u0627\\u0633\\u062a \\u2014 \\u0648 \\u062c\\u0627\\u06cc\\u06cc \\u0628\\u0631\\u0627\\u06cc \\u0634\\u0631\\u0648\\u0639 \\u0647\\u0645\\u06a9\\u0627\\u0631\\u06cc.\",\"about.portrait.alt\":\"\\u067e\\u0631\\u062a\\u0631\\u0647 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647\",\"about.skills\":\"\\u0645\\u0647\\u0627\\u0631\\u062a\\u200c\\u0647\\u0627\",\"about.title\":\"\\u0645\\u0647\\u0646\\u062f\\u0633 \\u0646\\u0631\\u0645\\u200c\\u0627\\u0641\\u0632\\u0627\\u0631.\",\"category.APIs & Backend\":\"API \\u0648 \\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f\",\"category.Applications\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646\\u200c\\u0647\\u0627\",\"category.Automation \\/ Bots\":\"\\u0627\\u062a\\u0648\\u0645\\u0627\\u0633\\u06cc\\u0648\\u0646 \\/ \\u0631\\u0628\\u0627\\u062a\",\"category.Websites\":\"\\u0648\\u0628\\u200c\\u0633\\u0627\\u06cc\\u062a\\u200c\\u0647\\u0627\",\"contact.aria\":\"\\u062a\\u0645\\u0627\\u0633\",\"contact.downloadCv\":\"\\u062f\\u0627\\u0646\\u0644\\u0648\\u062f \\u0631\\u0632\\u0648\\u0645\\u0647\",\"contact.emailMe\":\"\\u0627\\u06cc\\u0645\\u06cc\\u0644 \\u0628\\u0632\\u0646\\u06cc\\u062f\",\"contact.eyebrow\":\"\\u0628\\u06cc\\u0627\\u06cc\\u06cc\\u062f \\u062f\\u0631 \\u0627\\u0631\\u062a\\u0628\\u0627\\u0637 \\u0628\\u0627\\u0634\\u06cc\\u0645\",\"contact.github\":\"\\u06af\\u06cc\\u062a\\u200c\\u0647\\u0627\\u0628\",\"contact.github.sub\":\"\\u06a9\\u062f \\u0648 \\u0645\\u062e\\u0627\\u0632\\u0646\",\"contact.intro\":\"\\u067e\\u0631\\u0648\\u0698\\u0647 \\u06cc\\u0627 \\u0645\\u0648\\u0642\\u0639\\u06cc\\u062a\\u06cc \\u062f\\u0631 \\u0630\\u0647\\u0646 \\u062f\\u0627\\u0631\\u06cc\\u062f\\u061f \\u0635\\u062d\\u0628\\u062a \\u06a9\\u0646\\u06cc\\u0645.\",\"contact.linkedin\":\"\\u0644\\u06cc\\u0646\\u06a9\\u062f\\u06cc\\u0646\",\"contact.linkedin.sub\":\"\\u0634\\u0631\\u0648\\u0639 \\u06af\\u0641\\u062a\\u06af\\u0648\",\"contact.note\":\"\\u0622\\u0645\\u0627\\u062f\\u0647\\u200c\\u06cc \\u0647\\u0645\\u06a9\\u0627\\u0631\\u06cc \\u0641\\u0631\\u06cc\\u0644\\u0646\\u0633 \\u0647\\u0633\\u062a\\u0645.\",\"contact.telegram\":\"\\u062a\\u0644\\u06af\\u0631\\u0627\\u0645\",\"contact.telegram.sub\":\"\\u06af\\u0641\\u062a\\u06af\\u0648\\u06cc \\u0633\\u0631\\u06cc\\u0639 \\u00b7 @Amir_dev00\",\"contact.title\":\"\\u0635\\u062d\\u0628\\u062a \\u06a9\\u0646\\u06cc\\u0645.\",\"home.arrows\":\"\\u0627\\u0633\\u0644\\u0627\\u06cc\\u062f \\u067e\\u0631\\u0648\\u0698\\u0647\\u200c\\u0647\\u0627\",\"home.next\":\"\\u067e\\u0631\\u0648\\u0698\\u0647 \\u0628\\u0639\\u062f\\u06cc\",\"home.prev\":\"\\u067e\\u0631\\u0648\\u0698\\u0647 \\u0642\\u0628\\u0644\\u06cc\",\"home.profile.aria\":\"\\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647\\u060c \\u0645\\u0647\\u0646\\u062f\\u0633 \\u0646\\u0631\\u0645\\u200c\\u0627\\u0641\\u0632\\u0627\\u0631\",\"home.profile.role\":\"\\u0645\\u0647\\u0646\\u062f\\u0633 \\u0646\\u0631\\u0645\\u200c\\u0627\\u0641\\u0632\\u0627\\u0631\",\"lang.aria.en\":\"Read this site in English\",\"lang.aria.fa\":\"\\u0646\\u0645\\u0627\\u06cc\\u0634 \\u0633\\u0627\\u06cc\\u062a \\u0628\\u0647 \\u0641\\u0627\\u0631\\u0633\\u06cc\",\"lang.en\":\"English\",\"lang.fa\":\"\\u0641\\u0627\\u0631\\u0633\\u06cc\",\"lang.switcher\":\"\\u0632\\u0628\\u0627\\u0646\",\"meta.description\":\"\\u0646\\u0645\\u0648\\u0646\\u0647\\u200c\\u06a9\\u0627\\u0631\\u0647\\u0627\\u06cc \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 \\u2014 \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0641\\u0648\\u0644\\u200c\\u0627\\u0633\\u062a\\u06a9\\u060c \\u0628\\u0631\\u0646\\u0627\\u0645\\u0647\\u200c\\u0646\\u0648\\u06cc\\u0633 \\u0648 \\u0637\\u0631\\u0627\\u062d.\",\"nav.about\":\"\\u062f\\u0631\\u0628\\u0627\\u0631\\u0647\",\"nav.aria.cv\":\"\\u062f\\u0627\\u0646\\u0644\\u0648\\u062f \\u0631\\u0632\\u0648\\u0645\\u0647\",\"nav.contact\":\"\\u062a\\u0645\\u0627\\u0633\",\"nav.cv\":\"\\u0631\\u0632\\u0648\\u0645\\u0647\",\"nav.home\":\"\\u062e\\u0627\\u0646\\u0647\",\"nav.primary\":\"\\u0646\\u0627\\u0648\\u0628\\u0631\\u06cc \\u0627\\u0635\\u0644\\u06cc\",\"nav.tooltip.about\":\"\\u062f\\u0631\\u0628\\u0627\\u0631\\u0647\",\"nav.tooltip.contact\":\"\\u062a\\u0645\\u0627\\u0633\",\"nav.tooltip.cv\":\"\\u062f\\u0627\\u0646\\u0644\\u0648\\u062f \\u0631\\u0632\\u0648\\u0645\\u0647\",\"nav.tooltip.home\":\"\\u062e\\u0627\\u0646\\u0647\",\"nav.tooltip.work\":\"\\u06a9\\u0627\\u0631\\u0647\\u0627\",\"nav.work\":\"\\u06a9\\u0627\\u0631\\u0647\\u0627\",\"preloader.aria\":\"\\u062f\\u0631 \\u062d\\u0627\\u0644 \\u0628\\u0627\\u0631\\u06af\\u0630\\u0627\\u0631\\u06cc \\u0646\\u0645\\u0648\\u0646\\u0647\\u200c\\u06a9\\u0627\\u0631\\u0647\\u0627\\u06cc \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646\",\"preloader.label\":\"\\u062f\\u0631 \\u062d\\u0627\\u0644 \\u0622\\u0645\\u0627\\u062f\\u0647\\u200c\\u0633\\u0627\\u0632\\u06cc \\u062a\\u062c\\u0631\\u0628\\u0647\",\"preloader.progress\":\"\\u067e\\u06cc\\u0634\\u0631\\u0641\\u062a \\u0628\\u0627\\u0631\\u06af\\u0630\\u0627\\u0631\\u06cc\",\"preloader.role\":\"\\u0645\\u0647\\u0646\\u062f\\u0633 \\u0646\\u0631\\u0645\\u200c\\u0627\\u0641\\u0632\\u0627\\u0631\",\"project.aria\":\"\\u067e\\u0631\\u0648\\u0698\\u0647\",\"project.back\":\"\\u2192 \\u0628\\u0627\\u0632\\u06af\\u0634\\u062a \\u0628\\u0647 \\u06a9\\u0627\\u0631\\u0647\\u0627\",\"project.github\":\"\\u06af\\u06cc\\u062a\\u200c\\u0647\\u0627\\u0628\",\"project.live\":\"\\u0646\\u0633\\u062e\\u0647 \\u0622\\u0646\\u0644\\u0627\\u06cc\\u0646\",\"project.missing.lead\":\"\\u0627\\u06cc\\u0646 \\u067e\\u0631\\u0648\\u0698\\u0647 \\u062f\\u0631 \\u062f\\u0633\\u062a\\u0631\\u0633 \\u0646\\u06cc\\u0633\\u062a. \\u0628\\u0647 \\u0641\\u0647\\u0631\\u0633\\u062a \\u06a9\\u0627\\u0631\\u0647\\u0627 \\u0628\\u0631\\u06af\\u0631\\u062f\\u06cc\\u062f.\",\"project.missing.title\":\"\\u067e\\u0631\\u0648\\u0698\\u0647 \\u067e\\u06cc\\u062f\\u0627 \\u0646\\u0634\\u062f\",\"project.role\":\"\\u0646\\u0642\\u0634:\",\"title.about\":\"\\u062f\\u0631\\u0628\\u0627\\u0631\\u0647 \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"title.base\":\"\\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"title.contact\":\"\\u062a\\u0645\\u0627\\u0633 \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"title.project\":\"{name} \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"title.work\":\"\\u06a9\\u0627\\u0631\\u0647\\u0627 \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"work.aria\":\"\\u06a9\\u0627\\u0631\\u0647\\u0627\",\"work.count\":\"{n} \\u067e\\u0631\\u0648\\u0698\\u0647\",\"work.explore\":\"\\u0645\\u0634\\u0627\\u0647\\u062f\\u0647 \\u067e\\u0631\\u0648\\u0698\\u0647\",\"work.eyebrow\":\"\\u06a9\\u0627\\u0631\\u0647\\u0627\\u06cc \\u0645\\u0646\\u062a\\u062e\\u0628\",\"work.lead\":\"\\u06af\\u0632\\u06cc\\u062f\\u0647\\u200c\\u0627\\u06cc \\u0627\\u0632 \\u0648\\u0628\\u200c\\u0633\\u0627\\u06cc\\u062a\\u200c\\u0647\\u0627\\u060c \\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646\\u200c\\u0647\\u0627\\u060c API\\u0647\\u0627 \\u0648 \\u0627\\u0628\\u0632\\u0627\\u0631\\u0647\\u0627\\u06cc \\u0627\\u062a\\u0648\\u0645\\u0627\\u0633\\u06cc\\u0648\\u0646.\",\"work.listbox\":\"\\u0627\\u0646\\u062a\\u062e\\u0627\\u0628 \\u067e\\u0631\\u0648\\u0698\\u0647\\u061b \\u0628\\u0627 \\u06a9\\u0644\\u06cc\\u062f\\u0647\\u0627\\u06cc \\u0628\\u0627\\u0644\\u0627 \\u0648 \\u067e\\u0627\\u06cc\\u06cc\\u0646 \\u062c\\u0627\\u0628\\u0647\\u200c\\u062c\\u0627 \\u0634\\u0648\\u06cc\\u062f\",\"work.next\":\"\\u067e\\u0631\\u0648\\u0698\\u0647 \\u0628\\u0639\\u062f\\u06cc\",\"work.open\":\"\\u0628\\u0627\\u0632 \\u06a9\\u0631\\u062f\\u0646 {name}\",\"work.prev\":\"\\u067e\\u0631\\u0648\\u0698\\u0647 \\u0642\\u0628\\u0644\\u06cc\",\"work.spotlight.eyebrow\":\"\\u06a9\\u0627\\u0631 \\u0645\\u0646\\u062a\\u062e\\u0628\",\"work.title\":\"\\u067e\\u0631\\u0648\\u0698\\u0647\\u200c\\u0647\\u0627\\u06cc \\u0645\\u0646\\u062a\\u062e\\u0628.\"}},\"projects\":[{\"slug\":\"personal-portfolio-website\",\"title\":\"Personal Portfolio Website\",\"category\":\"Websites\",\"date\":\"2025\",\"liveUrl\":\"https:\\/\\/github.com\\/Amir-dev00\\/Portfolio\",\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":true,\"sort_order\":0,\"image\":\"\\/media\\/published\\/img\\/portfolio-w1.webp\",\"technologies\":[\"HTML5\",\"CSS3\",\"Bootstrap 5\",\"JavaScript\",\"AOS\",\"Swiper\"],\"en\":{\"shortDescription\":\"Modern responsive portfolio built with Bootstrap\",\"fullDescription\":\"A personal portfolio website designed to showcase projects, skills, and professional experience. Built with a clean, dark-themed UI and fully responsive layout for desktop, tablet, and mobile devices.\",\"role\":\"Front-End Developer & Designer\",\"category\":\"Websites\"},\"fa\":{\"shortDescription\":\"\\u0646\\u0645\\u0648\\u0646\\u0647\\u200c\\u06a9\\u0627\\u0631 \\u0631\\u06cc\\u0633\\u067e\\u0627\\u0646\\u0633\\u06cc\\u0648 \\u0645\\u062f\\u0631\\u0646 \\u0628\\u0627 Bootstrap\",\"fullDescription\":\"\\u06cc\\u06a9 \\u0648\\u0628\\u200c\\u0633\\u0627\\u06cc\\u062a \\u0634\\u062e\\u0635\\u06cc \\u0628\\u0631\\u0627\\u06cc \\u0646\\u0645\\u0627\\u06cc\\u0634 \\u067e\\u0631\\u0648\\u0698\\u0647\\u200c\\u0647\\u0627\\u060c \\u0645\\u0647\\u0627\\u0631\\u062a\\u200c\\u0647\\u0627 \\u0648 \\u062a\\u062c\\u0631\\u0628\\u0647 \\u062d\\u0631\\u0641\\u0647\\u200c\\u0627\\u06cc. \\u0628\\u0627 \\u0631\\u0627\\u0628\\u0637 \\u062a\\u0627\\u0631\\u06cc\\u06a9 \\u062a\\u0645\\u06cc\\u0632 \\u0648 \\u0686\\u06cc\\u062f\\u0645\\u0627\\u0646 \\u06a9\\u0627\\u0645\\u0644\\u0627\\u064b \\u0631\\u06cc\\u0633\\u067e\\u0627\\u0646\\u0633\\u06cc\\u0648 \\u0628\\u0631\\u0627\\u06cc \\u062f\\u0633\\u06a9\\u062a\\u0627\\u067e\\u060c \\u062a\\u0628\\u0644\\u062a \\u0648 \\u0645\\u0648\\u0628\\u0627\\u06cc\\u0644.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0641\\u0631\\u0627\\u0646\\u062a\\u200c\\u0627\\u0646\\u062f \\u0648 \\u0637\\u0631\\u0627\\u062d\",\"category\":\"\\u0648\\u0628\\u200c\\u0633\\u0627\\u06cc\\u062a\\u200c\\u0647\\u0627\"}},{\"slug\":\"shopping-mall-desktop\",\"title\":\"Shopping Mall Desktop\",\"category\":\"Applications\",\"date\":\"2025\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":true,\"sort_order\":1,\"image\":\"\\/media\\/published\\/img\\/portfolio-1.webp\",\"technologies\":[\"Java 21\",\"JavaFX 21\",\"Maven\",\"PostgreSQL\",\"JDBC\"],\"en\":{\"shortDescription\":\"JavaFX desktop shopping application with PostgreSQL\",\"fullDescription\":\"A desktop-based shopping mall application developed using Java and JavaFX. It covers authentication, product browsing, cart management, and order processing with PostgreSQL integration and role-based access.\",\"role\":\"Full-Stack Developer\",\"category\":\"Applications\"},\"fa\":{\"shortDescription\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646 \\u062e\\u0631\\u06cc\\u062f \\u062f\\u0633\\u06a9\\u062a\\u0627\\u067e \\u0628\\u0627 JavaFX \\u0648 PostgreSQL\",\"fullDescription\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646 \\u062f\\u0633\\u06a9\\u062a\\u0627\\u067e \\u0645\\u0631\\u06a9\\u0632 \\u062e\\u0631\\u06cc\\u062f \\u0628\\u0627 Java \\u0648 JavaFX\\u061b \\u0634\\u0627\\u0645\\u0644 \\u0627\\u062d\\u0631\\u0627\\u0632 \\u0647\\u0648\\u06cc\\u062a\\u060c \\u0645\\u0631\\u0648\\u0631 \\u0645\\u062d\\u0635\\u0648\\u0644\\u060c \\u0633\\u0628\\u062f \\u062e\\u0631\\u06cc\\u062f \\u0648 \\u067e\\u0631\\u062f\\u0627\\u0632\\u0634 \\u0633\\u0641\\u0627\\u0631\\u0634 \\u0628\\u0627 PostgreSQL \\u0648 \\u062f\\u0633\\u062a\\u0631\\u0633\\u06cc \\u0645\\u0628\\u062a\\u0646\\u06cc \\u0628\\u0631 \\u0646\\u0642\\u0634.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0641\\u0648\\u0644\\u200c\\u0627\\u0633\\u062a\\u06a9\",\"category\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646\\u200c\\u0647\\u0627\"}},{\"slug\":\"rest-api-microservice\",\"title\":\"REST API Microservice\",\"category\":\"APIs & Backend\",\"date\":\"2024\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":true,\"sort_order\":2,\"image\":\"\\/media\\/published\\/img\\/portfolio-7.webp\",\"technologies\":[\"Node.js\",\"Express\",\"MongoDB\",\"JWT\",\"REST\"],\"en\":{\"shortDescription\":\"Scalable backend API with authentication\",\"fullDescription\":\"A backend microservice exposing RESTful endpoints for resource management, user authentication, and data validation. Designed with modular architecture for easy maintenance and deployment.\",\"role\":\"Back-End Developer\",\"category\":\"APIs & Backend\"},\"fa\":{\"shortDescription\":\"API \\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f \\u0645\\u0642\\u06cc\\u0627\\u0633\\u200c\\u067e\\u0630\\u06cc\\u0631 \\u0628\\u0627 \\u0627\\u062d\\u0631\\u0627\\u0632 \\u0647\\u0648\\u06cc\\u062a\",\"fullDescription\":\"\\u0645\\u06cc\\u06a9\\u0631\\u0648\\u0633\\u0631\\u0648\\u06cc\\u0633 \\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f \\u0628\\u0627 endpoint\\u0647\\u0627\\u06cc REST \\u0628\\u0631\\u0627\\u06cc \\u0645\\u062f\\u06cc\\u0631\\u06cc\\u062a \\u0645\\u0646\\u0627\\u0628\\u0639\\u060c \\u0627\\u062d\\u0631\\u0627\\u0632 \\u0647\\u0648\\u06cc\\u062a \\u06a9\\u0627\\u0631\\u0628\\u0631 \\u0648 \\u0627\\u0639\\u062a\\u0628\\u0627\\u0631\\u0633\\u0646\\u062c\\u06cc \\u062f\\u0627\\u062f\\u0647\\u061b \\u0628\\u0627 \\u0645\\u0639\\u0645\\u0627\\u0631\\u06cc \\u0645\\u0627\\u0698\\u0648\\u0644\\u0627\\u0631 \\u0628\\u0631\\u0627\\u06cc \\u0646\\u06af\\u0647\\u062f\\u0627\\u0631\\u06cc \\u0648 \\u0627\\u0633\\u062a\\u0642\\u0631\\u0627\\u0631 \\u0622\\u0633\\u0627\\u0646\\u200c\\u062a\\u0631.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f\",\"category\":\"API \\u0648 \\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f\"}},{\"slug\":\"telegram-automation-bot\",\"title\":\"Telegram Automation Bot\",\"category\":\"Automation \\/ Bots\",\"date\":\"2024\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":true,\"sort_order\":3,\"image\":\"\\/media\\/published\\/img\\/portfolio-4.webp\",\"technologies\":[\"Python\",\"python-telegram-bot\",\"SQLite\",\"APScheduler\"],\"en\":{\"shortDescription\":\"Automated messaging and task bot for Telegram\",\"fullDescription\":\"A Telegram bot that automates repetitive tasks such as notifications, scheduled messages, and user interaction workflows. Built to improve productivity and streamline communication.\",\"role\":\"Bot Developer\",\"category\":\"Automation \\/ Bots\"},\"fa\":{\"shortDescription\":\"\\u0631\\u0628\\u0627\\u062a \\u062a\\u0644\\u06af\\u0631\\u0627\\u0645 \\u0628\\u0631\\u0627\\u06cc \\u067e\\u06cc\\u0627\\u0645 \\u0648 \\u06a9\\u0627\\u0631\\u0647\\u0627\\u06cc \\u062e\\u0648\\u062f\\u06a9\\u0627\\u0631\",\"fullDescription\":\"\\u0631\\u0628\\u0627\\u062a \\u062a\\u0644\\u06af\\u0631\\u0627\\u0645\\u06cc \\u06a9\\u0647 \\u06a9\\u0627\\u0631\\u0647\\u0627\\u06cc \\u062a\\u06a9\\u0631\\u0627\\u0631\\u06cc \\u0645\\u062b\\u0644 \\u0627\\u0639\\u0644\\u0627\\u0646\\u200c\\u0647\\u0627\\u060c \\u067e\\u06cc\\u0627\\u0645\\u200c\\u0647\\u0627\\u06cc \\u0632\\u0645\\u0627\\u0646\\u200c\\u0628\\u0646\\u062f\\u06cc\\u200c\\u0634\\u062f\\u0647 \\u0648 \\u062c\\u0631\\u06cc\\u0627\\u0646 \\u062a\\u0639\\u0627\\u0645\\u0644 \\u06a9\\u0627\\u0631\\u0628\\u0631 \\u0631\\u0627 \\u062e\\u0648\\u062f\\u06a9\\u0627\\u0631 \\u0645\\u06cc\\u200c\\u06a9\\u0646\\u062f \\u062a\\u0627 \\u0628\\u0647\\u0631\\u0647\\u200c\\u0648\\u0631\\u06cc \\u0648 \\u0627\\u0631\\u062a\\u0628\\u0627\\u0637 \\u0633\\u0627\\u062f\\u0647\\u200c\\u062a\\u0631 \\u0634\\u0648\\u062f.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0631\\u0628\\u0627\\u062a\",\"category\":\"\\u0627\\u062a\\u0648\\u0645\\u0627\\u0633\\u06cc\\u0648\\u0646 \\/ \\u0631\\u0628\\u0627\\u062a\"}},{\"slug\":\"expense-tracker-app\",\"title\":\"Expense Tracker App\",\"category\":\"Applications\",\"date\":\"2024\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":false,\"sort_order\":4,\"image\":\"\\/media\\/published\\/img\\/portfolio-2.webp\",\"technologies\":[\"Java\",\"JavaFX\",\"SQLite\",\"Maven\"],\"en\":{\"shortDescription\":\"Desktop app for personal finance tracking\",\"fullDescription\":\"A desktop application for tracking daily expenses, categorizing spending, and generating simple reports to help users understand financial habits over time.\",\"role\":\"Application Developer\",\"category\":\"Applications\"},\"fa\":{\"shortDescription\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646 \\u062f\\u0633\\u06a9\\u062a\\u0627\\u067e \\u0628\\u0631\\u0627\\u06cc \\u067e\\u06cc\\u06af\\u06cc\\u0631\\u06cc \\u0647\\u0632\\u06cc\\u0646\\u0647\\u200c\\u0647\\u0627\\u06cc \\u0634\\u062e\\u0635\\u06cc\",\"fullDescription\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646 \\u062f\\u0633\\u06a9\\u062a\\u0627\\u067e \\u0628\\u0631\\u0627\\u06cc \\u062b\\u0628\\u062a \\u0647\\u0632\\u06cc\\u0646\\u0647\\u200c\\u0647\\u0627\\u06cc \\u0631\\u0648\\u0632\\u0627\\u0646\\u0647\\u060c \\u062f\\u0633\\u062a\\u0647\\u200c\\u0628\\u0646\\u062f\\u06cc \\u0645\\u062e\\u0627\\u0631\\u062c \\u0648 \\u06af\\u0632\\u0627\\u0631\\u0634\\u200c\\u0647\\u0627\\u06cc \\u0633\\u0627\\u062f\\u0647 \\u062a\\u0627 \\u0639\\u0627\\u062f\\u062a\\u200c\\u0647\\u0627\\u06cc \\u0645\\u0627\\u0644\\u06cc \\u0628\\u0647\\u062a\\u0631 \\u062f\\u06cc\\u062f\\u0647 \\u0634\\u0648\\u0646\\u062f.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646\",\"category\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646\\u200c\\u0647\\u0627\"}},{\"slug\":\"e-commerce-website\",\"title\":\"E-Commerce Website\",\"category\":\"Websites\",\"date\":\"2024\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":false,\"sort_order\":5,\"image\":\"\\/media\\/published\\/img\\/portfolio-11.webp\",\"technologies\":[\"HTML\",\"CSS\",\"JavaScript\",\"Bootstrap\",\"PHP\"],\"en\":{\"shortDescription\":\"Online store with product catalog and cart\",\"fullDescription\":\"A full-featured e-commerce website with product listings, shopping cart functionality, and a streamlined checkout experience focused on usability and modern web patterns.\",\"role\":\"Full-Stack Developer\",\"category\":\"Websites\"},\"fa\":{\"shortDescription\":\"\\u0641\\u0631\\u0648\\u0634\\u06af\\u0627\\u0647 \\u0622\\u0646\\u0644\\u0627\\u06cc\\u0646 \\u0628\\u0627 \\u06a9\\u0627\\u062a\\u0627\\u0644\\u0648\\u06af \\u0648 \\u0633\\u0628\\u062f \\u062e\\u0631\\u06cc\\u062f\",\"fullDescription\":\"\\u0648\\u0628\\u200c\\u0633\\u0627\\u06cc\\u062a \\u0641\\u0631\\u0648\\u0634\\u06af\\u0627\\u0647\\u06cc \\u0628\\u0627 \\u0641\\u0647\\u0631\\u0633\\u062a \\u0645\\u062d\\u0635\\u0648\\u0644\\u0627\\u062a\\u060c \\u0633\\u0628\\u062f \\u062e\\u0631\\u06cc\\u062f \\u0648 \\u062a\\u062c\\u0631\\u0628\\u0647 \\u067e\\u0631\\u062f\\u0627\\u062e\\u062a \\u0633\\u0627\\u062f\\u0647\\u061b \\u0628\\u0627 \\u062a\\u0645\\u0631\\u06a9\\u0632 \\u0628\\u0631 \\u06a9\\u0627\\u0631\\u0628\\u0631\\u062f\\u067e\\u0630\\u06cc\\u0631\\u06cc \\u0648 \\u0627\\u0644\\u06af\\u0648\\u0647\\u0627\\u06cc \\u0645\\u062f\\u0631\\u0646 \\u0648\\u0628.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0641\\u0648\\u0644\\u200c\\u0627\\u0633\\u062a\\u06a9\",\"category\":\"\\u0648\\u0628\\u200c\\u0633\\u0627\\u06cc\\u062a\\u200c\\u0647\\u0627\"}},{\"slug\":\"jwt-auth-backend\",\"title\":\"JWT Auth Backend\",\"category\":\"APIs & Backend\",\"date\":\"2024\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":false,\"sort_order\":6,\"image\":\"\\/media\\/published\\/img\\/portfolio-8.webp\",\"technologies\":[\"Node.js\",\"Express\",\"PostgreSQL\",\"JWT\",\"bcrypt\"],\"en\":{\"shortDescription\":\"Secure authentication service with role management\",\"fullDescription\":\"A dedicated authentication backend providing user registration, login, token refresh, and role-based authorization as a reusable service for web applications.\",\"role\":\"Back-End Developer\",\"category\":\"APIs & Backend\"},\"fa\":{\"shortDescription\":\"\\u0633\\u0631\\u0648\\u06cc\\u0633 \\u0627\\u062d\\u0631\\u0627\\u0632 \\u0647\\u0648\\u06cc\\u062a \\u0627\\u0645\\u0646 \\u0628\\u0627 \\u0645\\u062f\\u06cc\\u0631\\u06cc\\u062a \\u0646\\u0642\\u0634\",\"fullDescription\":\"\\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f \\u0627\\u062e\\u062a\\u0635\\u0627\\u0635\\u06cc \\u0627\\u062d\\u0631\\u0627\\u0632 \\u0647\\u0648\\u06cc\\u062a \\u0628\\u0631\\u0627\\u06cc \\u062b\\u0628\\u062a\\u200c\\u0646\\u0627\\u0645\\u060c \\u0648\\u0631\\u0648\\u062f\\u060c \\u062a\\u0627\\u0632\\u0647\\u200c\\u0633\\u0627\\u0632\\u06cc \\u062a\\u0648\\u06a9\\u0646 \\u0648 \\u062f\\u0633\\u062a\\u0631\\u0633\\u06cc \\u0645\\u0628\\u062a\\u0646\\u06cc \\u0628\\u0631 \\u0646\\u0642\\u0634\\u061b \\u0628\\u0647\\u200c\\u0639\\u0646\\u0648\\u0627\\u0646 \\u0633\\u0631\\u0648\\u06cc\\u0633 \\u0642\\u0627\\u0628\\u0644 \\u0627\\u0633\\u062a\\u0641\\u0627\\u062f\\u0647 \\u0645\\u062c\\u062f\\u062f \\u0628\\u0631\\u0627\\u06cc \\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646\\u200c\\u0647\\u0627\\u06cc \\u0648\\u0628.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f\",\"category\":\"API \\u0648 \\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f\"}},{\"slug\":\"web-scraping-bot\",\"title\":\"Web Scraping Bot\",\"category\":\"Automation \\/ Bots\",\"date\":\"2024\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":false,\"sort_order\":7,\"image\":\"\\/media\\/published\\/img\\/portfolio-5.webp\",\"technologies\":[\"Python\",\"BeautifulSoup\",\"Requests\",\"Pandas\"],\"en\":{\"shortDescription\":\"Automated data collection and reporting bot\",\"fullDescription\":\"An automation bot that scrapes targeted web data, processes it, and delivers formatted reports for monitoring prices, content changes, or research collection.\",\"role\":\"Automation Developer\",\"category\":\"Automation \\/ Bots\"},\"fa\":{\"shortDescription\":\"\\u0631\\u0628\\u0627\\u062a \\u062c\\u0645\\u0639\\u200c\\u0622\\u0648\\u0631\\u06cc \\u062f\\u0627\\u062f\\u0647 \\u0648 \\u06af\\u0632\\u0627\\u0631\\u0634\\u200c\\u06af\\u06cc\\u0631\\u06cc \\u062e\\u0648\\u062f\\u06a9\\u0627\\u0631\",\"fullDescription\":\"\\u0631\\u0628\\u0627\\u062a \\u0627\\u062a\\u0648\\u0645\\u0627\\u0633\\u06cc\\u0648\\u0646\\u06cc \\u06a9\\u0647 \\u062f\\u0627\\u062f\\u0647 \\u0647\\u062f\\u0641 \\u0631\\u0627 \\u0627\\u0632 \\u0648\\u0628 \\u0627\\u0633\\u062a\\u062e\\u0631\\u0627\\u062c \\u0645\\u06cc\\u200c\\u06a9\\u0646\\u062f\\u060c \\u067e\\u0631\\u062f\\u0627\\u0632\\u0634 \\u0645\\u06cc\\u200c\\u0646\\u0645\\u0627\\u06cc\\u062f \\u0648 \\u06af\\u0632\\u0627\\u0631\\u0634\\u200c\\u0647\\u0627\\u06cc \\u0633\\u0627\\u062e\\u062a\\u200c\\u06cc\\u0627\\u0641\\u062a\\u0647 \\u0628\\u0631\\u0627\\u06cc \\u067e\\u0627\\u06cc\\u0634 \\u0642\\u06cc\\u0645\\u062a\\u060c \\u062a\\u063a\\u06cc\\u06cc\\u0631 \\u0645\\u062d\\u062a\\u0648\\u0627 \\u06cc\\u0627 \\u067e\\u0698\\u0648\\u0647\\u0634 \\u0627\\u0631\\u0627\\u0626\\u0647 \\u0645\\u06cc\\u200c\\u062f\\u0647\\u062f.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0627\\u062a\\u0648\\u0645\\u0627\\u0633\\u06cc\\u0648\\u0646\",\"category\":\"\\u0627\\u062a\\u0648\\u0645\\u0627\\u0633\\u06cc\\u0648\\u0646 \\/ \\u0631\\u0628\\u0627\\u062a\"}},{\"slug\":\"task-manager-app\",\"title\":\"Task Manager App\",\"category\":\"Applications\",\"date\":\"2023\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":false,\"sort_order\":8,\"image\":\"\\/media\\/published\\/img\\/portfolio-3.webp\",\"technologies\":[\"Java\",\"JavaFX\",\"SQLite\",\"MVC\"],\"en\":{\"shortDescription\":\"Productivity app for task and project management\",\"fullDescription\":\"A task management desktop application for organizing to-do lists, setting priorities, and tracking project progress with clarity and minimal friction.\",\"role\":\"Application Developer\",\"category\":\"Applications\"},\"fa\":{\"shortDescription\":\"\\u0627\\u067e \\u0628\\u0647\\u0631\\u0647\\u200c\\u0648\\u0631\\u06cc \\u0628\\u0631\\u0627\\u06cc \\u0645\\u062f\\u06cc\\u0631\\u06cc\\u062a \\u06a9\\u0627\\u0631 \\u0648 \\u067e\\u0631\\u0648\\u0698\\u0647\",\"fullDescription\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646 \\u062f\\u0633\\u06a9\\u062a\\u0627\\u067e \\u0645\\u062f\\u06cc\\u0631\\u06cc\\u062a \\u06a9\\u0627\\u0631 \\u0628\\u0631\\u0627\\u06cc \\u0641\\u0647\\u0631\\u0633\\u062a \\u06a9\\u0627\\u0631\\u0647\\u0627\\u060c \\u0627\\u0648\\u0644\\u0648\\u06cc\\u062a\\u200c\\u0628\\u0646\\u062f\\u06cc \\u0648 \\u067e\\u06cc\\u06af\\u06cc\\u0631\\u06cc \\u067e\\u06cc\\u0634\\u0631\\u0641\\u062a \\u067e\\u0631\\u0648\\u0698\\u0647 \\u0628\\u0627 \\u0648\\u0636\\u0648\\u062d \\u0648 \\u062d\\u062f\\u0627\\u0642\\u0644 \\u0627\\u0635\\u0637\\u06a9\\u0627\\u06a9.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646\",\"category\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646\\u200c\\u0647\\u0627\"}},{\"slug\":\"landing-page-design\",\"title\":\"Landing Page Design\",\"category\":\"Websites\",\"date\":\"2023\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":false,\"sort_order\":9,\"image\":\"\\/media\\/published\\/img\\/portfolio-12.webp\",\"technologies\":[\"HTML\",\"CSS\",\"Bootstrap\",\"JavaScript\",\"Figma\"],\"en\":{\"shortDescription\":\"High-conversion marketing landing page\",\"fullDescription\":\"A modern landing page design focused on clear messaging, strong visual hierarchy, and conversion-oriented layout for startups and product launches.\",\"role\":\"UI Designer & Front-End Developer\",\"category\":\"Websites\"},\"fa\":{\"shortDescription\":\"\\u0644\\u0646\\u062f\\u06cc\\u0646\\u06af \\u0645\\u0627\\u0631\\u06a9\\u062a\\u06cc\\u0646\\u06af \\u0628\\u0627 \\u062a\\u0645\\u0631\\u06a9\\u0632 \\u0628\\u0631 \\u062a\\u0628\\u062f\\u06cc\\u0644\",\"fullDescription\":\"\\u0637\\u0631\\u0627\\u062d\\u06cc \\u0644\\u0646\\u062f\\u06cc\\u0646\\u06af \\u0645\\u062f\\u0631\\u0646 \\u0628\\u0627 \\u067e\\u06cc\\u0627\\u0645 \\u0631\\u0648\\u0634\\u0646\\u060c \\u0633\\u0644\\u0633\\u0644\\u0647\\u200c\\u0645\\u0631\\u0627\\u062a\\u0628 \\u0628\\u0635\\u0631\\u06cc \\u0642\\u0648\\u06cc \\u0648 \\u0686\\u06cc\\u062f\\u0645\\u0627\\u0646 \\u062a\\u0628\\u062f\\u06cc\\u0644\\u200c\\u0645\\u062d\\u0648\\u0631 \\u0628\\u0631\\u0627\\u06cc \\u0627\\u0633\\u062a\\u0627\\u0631\\u062a\\u0627\\u067e\\u200c\\u0647\\u0627 \\u0648 \\u0645\\u0639\\u0631\\u0641\\u06cc \\u0645\\u062d\\u0635\\u0648\\u0644.\",\"role\":\"\\u0637\\u0631\\u0627\\u062d UI \\u0648 \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0641\\u0631\\u0627\\u0646\\u062a\\u200c\\u0627\\u0646\\u062f\",\"category\":\"\\u0648\\u0628\\u200c\\u0633\\u0627\\u06cc\\u062a\\u200c\\u0647\\u0627\"}},{\"slug\":\"restful-api-service\",\"title\":\"RESTful API Service\",\"category\":\"APIs & Backend\",\"date\":\"2023\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":false,\"sort_order\":10,\"image\":\"\\/media\\/published\\/img\\/portfolio-9.webp\",\"technologies\":[\"Python\",\"FastAPI\",\"PostgreSQL\",\"Pydantic\",\"Docker\"],\"en\":{\"shortDescription\":\"Modular API for third-party integrations\",\"fullDescription\":\"A modular REST API designed for integration with external services, including versioning, input validation, and structured response formats.\",\"role\":\"API Developer\",\"category\":\"APIs & Backend\"},\"fa\":{\"shortDescription\":\"API \\u0645\\u0627\\u0698\\u0648\\u0644\\u0627\\u0631 \\u0628\\u0631\\u0627\\u06cc \\u06cc\\u06a9\\u067e\\u0627\\u0631\\u0686\\u0647\\u200c\\u0633\\u0627\\u0632\\u06cc\\u200c\\u0647\\u0627\\u06cc \\u062e\\u0627\\u0631\\u062c\\u06cc\",\"fullDescription\":\"API REST \\u0645\\u0627\\u0698\\u0648\\u0644\\u0627\\u0631 \\u0628\\u0631\\u0627\\u06cc \\u0627\\u062a\\u0635\\u0627\\u0644 \\u0628\\u0647 \\u0633\\u0631\\u0648\\u06cc\\u0633\\u200c\\u0647\\u0627\\u06cc \\u0628\\u06cc\\u0631\\u0648\\u0646\\u06cc\\u061b \\u0634\\u0627\\u0645\\u0644 \\u0646\\u0633\\u062e\\u0647\\u200c\\u0628\\u0646\\u062f\\u06cc\\u060c \\u0627\\u0639\\u062a\\u0628\\u0627\\u0631\\u0633\\u0646\\u062c\\u06cc \\u0648\\u0631\\u0648\\u062f\\u06cc \\u0648 \\u0642\\u0627\\u0644\\u0628 \\u067e\\u0627\\u0633\\u062e \\u0633\\u0627\\u062e\\u062a\\u200c\\u06cc\\u0627\\u0641\\u062a\\u0647.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 API\",\"category\":\"API \\u0648 \\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f\"}},{\"slug\":\"discord-automation-bot\",\"title\":\"Discord Automation Bot\",\"category\":\"Automation \\/ Bots\",\"date\":\"2023\",\"liveUrl\":null,\"githubUrl\":\"https:\\/\\/github.com\\/Amir-dev00\",\"is_featured\":false,\"sort_order\":11,\"image\":\"\\/media\\/published\\/img\\/portfolio-6.webp\",\"technologies\":[\"JavaScript\",\"Discord.js\",\"Node.js\",\"MongoDB\"],\"en\":{\"shortDescription\":\"Community management and moderation bot\",\"fullDescription\":\"A Discord bot that automates community management tasks including welcome messages, moderation commands, and scheduled announcements.\",\"role\":\"Bot Developer\",\"category\":\"Automation \\/ Bots\"},\"fa\":{\"shortDescription\":\"\\u0631\\u0628\\u0627\\u062a \\u0645\\u062f\\u06cc\\u0631\\u06cc\\u062a \\u0648 \\u0646\\u0638\\u0627\\u0631\\u062a \\u062c\\u0627\\u0645\\u0639\\u0647 \\u062f\\u0631 Discord\",\"fullDescription\":\"\\u0631\\u0628\\u0627\\u062a Discord \\u0628\\u0631\\u0627\\u06cc \\u062e\\u0648\\u062f\\u06a9\\u0627\\u0631\\u0633\\u0627\\u0632\\u06cc \\u0645\\u062f\\u06cc\\u0631\\u06cc\\u062a \\u062c\\u0627\\u0645\\u0639\\u0647\\u061b \\u0627\\u0632 \\u067e\\u06cc\\u0627\\u0645 \\u062e\\u0648\\u0634\\u200c\\u0622\\u0645\\u062f \\u062a\\u0627 \\u062f\\u0633\\u062a\\u0648\\u0631\\u0627\\u062a \\u0646\\u0638\\u0627\\u0631\\u062a \\u0648 \\u0627\\u0639\\u0644\\u0627\\u0646\\u200c\\u0647\\u0627\\u06cc \\u0632\\u0645\\u0627\\u0646\\u200c\\u0628\\u0646\\u062f\\u06cc\\u200c\\u0634\\u062f\\u0647.\",\"role\":\"\\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0631\\u0628\\u0627\\u062a\",\"category\":\"\\u0627\\u062a\\u0648\\u0645\\u0627\\u0633\\u06cc\\u0648\\u0646 \\/ \\u0631\\u0628\\u0627\\u062a\"}}],\"seo\":{\"en\":{\"page\":{\"home\":{\"title\":\"Amirhossein Zamanzade | Developer\",\"description\":\"Portfolio of Amirhossein Zamanzade \\u2014 Full-Stack Developer, Programmer, and Designer.\",\"og_image\":\"assets\\/img\\/amir\\/az-logo.webp\",\"robots\":\"index,follow\"},\"work\":{\"title\":\"Work \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"A selection of websites, applications, APIs, and automation tools.\",\"og_image\":\"assets\\/img\\/amir\\/az-logo.webp\",\"robots\":\"index,follow\"},\"about\":{\"title\":\"About \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"I\\u2019m Amirhossein Zamanzade, a Computer Science student and Full-Stack Developer focused on fast, scalable, and user-centric products. I care about clean architecture, modern tooling, and interfaces that feel refined.\",\"og_image\":\"assets\\/img\\/amir\\/az-logo.webp\",\"robots\":\"index,follow\"},\"contact\":{\"title\":\"Contact \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Have a project or a role in mind? Let\\u2019s talk.\",\"og_image\":\"assets\\/img\\/amir\\/az-logo.webp\",\"robots\":\"index,follow\"}},\"project\":{\"personal-portfolio-website\":{\"title\":\"Personal Portfolio Website \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Modern responsive portfolio built with Bootstrap\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-w1.webp\",\"robots\":\"index,follow\"},\"shopping-mall-desktop\":{\"title\":\"Shopping Mall Desktop \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"JavaFX desktop shopping application with PostgreSQL\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-1.webp\",\"robots\":\"index,follow\"},\"rest-api-microservice\":{\"title\":\"REST API Microservice \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Scalable backend API with authentication\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-7.webp\",\"robots\":\"index,follow\"},\"telegram-automation-bot\":{\"title\":\"Telegram Automation Bot \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Automated messaging and task bot for Telegram\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-4.webp\",\"robots\":\"index,follow\"},\"expense-tracker-app\":{\"title\":\"Expense Tracker App \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Desktop app for personal finance tracking\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-2.webp\",\"robots\":\"index,follow\"},\"e-commerce-website\":{\"title\":\"E-Commerce Website \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Online store with product catalog and cart\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-11.webp\",\"robots\":\"index,follow\"},\"jwt-auth-backend\":{\"title\":\"JWT Auth Backend \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Secure authentication service with role management\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-8.webp\",\"robots\":\"index,follow\"},\"web-scraping-bot\":{\"title\":\"Web Scraping Bot \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Automated data collection and reporting bot\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-5.webp\",\"robots\":\"index,follow\"},\"task-manager-app\":{\"title\":\"Task Manager App \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Productivity app for task and project management\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-3.webp\",\"robots\":\"index,follow\"},\"landing-page-design\":{\"title\":\"Landing Page Design \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"High-conversion marketing landing page\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-12.webp\",\"robots\":\"index,follow\"},\"restful-api-service\":{\"title\":\"RESTful API Service \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Modular API for third-party integrations\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-9.webp\",\"robots\":\"index,follow\"},\"discord-automation-bot\":{\"title\":\"Discord Automation Bot \\u2014 Amirhossein Zamanzade | Developer\",\"description\":\"Community management and moderation bot\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-6.webp\",\"robots\":\"index,follow\"}}},\"fa\":{\"page\":{\"home\":{\"title\":\"\\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0646\\u0645\\u0648\\u0646\\u0647\\u200c\\u06a9\\u0627\\u0631\\u0647\\u0627\\u06cc \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 \\u2014 \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0641\\u0648\\u0644\\u200c\\u0627\\u0633\\u062a\\u06a9\\u060c \\u0628\\u0631\\u0646\\u0627\\u0645\\u0647\\u200c\\u0646\\u0648\\u06cc\\u0633 \\u0648 \\u0637\\u0631\\u0627\\u062d.\",\"og_image\":\"assets\\/img\\/amir\\/az-logo.webp\",\"robots\":\"index,follow\"},\"work\":{\"title\":\"\\u06a9\\u0627\\u0631\\u0647\\u0627 \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u06af\\u0632\\u06cc\\u062f\\u0647\\u200c\\u0627\\u06cc \\u0627\\u0632 \\u0648\\u0628\\u200c\\u0633\\u0627\\u06cc\\u062a\\u200c\\u0647\\u0627\\u060c \\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646\\u200c\\u0647\\u0627\\u060c API\\u0647\\u0627 \\u0648 \\u0627\\u0628\\u0632\\u0627\\u0631\\u0647\\u0627\\u06cc \\u0627\\u062a\\u0648\\u0645\\u0627\\u0633\\u06cc\\u0648\\u0646.\",\"og_image\":\"assets\\/img\\/amir\\/az-logo.webp\",\"robots\":\"index,follow\"},\"about\":{\"title\":\"\\u062f\\u0631\\u0628\\u0627\\u0631\\u0647 \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0645\\u0646 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647\\u200c\\u0627\\u0645\\u061b \\u062f\\u0627\\u0646\\u0634\\u062c\\u0648\\u06cc \\u0639\\u0644\\u0648\\u0645 \\u06a9\\u0627\\u0645\\u067e\\u06cc\\u0648\\u062a\\u0631 \\u0648 \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647 \\u0641\\u0648\\u0644\\u200c\\u0627\\u0633\\u062a\\u06a9. \\u0631\\u0648\\u06cc \\u0645\\u062d\\u0635\\u0648\\u0644\\u0627\\u062a\\u06cc \\u0633\\u0631\\u06cc\\u0639\\u060c \\u0645\\u0642\\u06cc\\u0627\\u0633\\u200c\\u067e\\u0630\\u06cc\\u0631 \\u0648 \\u06a9\\u0627\\u0631\\u0628\\u0631\\u0645\\u062d\\u0648\\u0631 \\u062a\\u0645\\u0631\\u06a9\\u0632 \\u0645\\u06cc\\u200c\\u06a9\\u0646\\u0645 \\u0648 \\u0628\\u0647 \\u0645\\u0639\\u0645\\u0627\\u0631\\u06cc \\u062a\\u0645\\u06cc\\u0632\\u060c \\u0627\\u0628\\u0632\\u0627\\u0631\\u0647\\u0627\\u06cc \\u0645\\u062f\\u0631\\u0646 \\u0648 \\u0631\\u0627\\u0628\\u0637\\u200c\\u0647\\u0627\\u06cc\\u06cc \\u0628\\u0627 \\u062d\\u0633 \\u067e\\u0631\\u062f\\u0627\\u062e\\u062a\\u200c\\u0634\\u062f\\u0647 \\u0627\\u0647\\u0645\\u06cc\\u062a \\u0645\\u06cc\\u200c\\u062f\\u0647\\u0645.\",\"og_image\":\"assets\\/img\\/amir\\/az-logo.webp\",\"robots\":\"index,follow\"},\"contact\":{\"title\":\"\\u062a\\u0645\\u0627\\u0633 \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u067e\\u0631\\u0648\\u0698\\u0647 \\u06cc\\u0627 \\u0645\\u0648\\u0642\\u0639\\u06cc\\u062a\\u06cc \\u062f\\u0631 \\u0630\\u0647\\u0646 \\u062f\\u0627\\u0631\\u06cc\\u062f\\u061f \\u0635\\u062d\\u0628\\u062a \\u06a9\\u0646\\u06cc\\u0645.\",\"og_image\":\"assets\\/img\\/amir\\/az-logo.webp\",\"robots\":\"index,follow\"}},\"project\":{\"personal-portfolio-website\":{\"title\":\"Personal Portfolio Website \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0646\\u0645\\u0648\\u0646\\u0647\\u200c\\u06a9\\u0627\\u0631 \\u0631\\u06cc\\u0633\\u067e\\u0627\\u0646\\u0633\\u06cc\\u0648 \\u0645\\u062f\\u0631\\u0646 \\u0628\\u0627 Bootstrap\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-w1.webp\",\"robots\":\"index,follow\"},\"shopping-mall-desktop\":{\"title\":\"Shopping Mall Desktop \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646 \\u062e\\u0631\\u06cc\\u062f \\u062f\\u0633\\u06a9\\u062a\\u0627\\u067e \\u0628\\u0627 JavaFX \\u0648 PostgreSQL\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-1.webp\",\"robots\":\"index,follow\"},\"rest-api-microservice\":{\"title\":\"REST API Microservice \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"API \\u0628\\u06a9\\u200c\\u0627\\u0646\\u062f \\u0645\\u0642\\u06cc\\u0627\\u0633\\u200c\\u067e\\u0630\\u06cc\\u0631 \\u0628\\u0627 \\u0627\\u062d\\u0631\\u0627\\u0632 \\u0647\\u0648\\u06cc\\u062a\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-7.webp\",\"robots\":\"index,follow\"},\"telegram-automation-bot\":{\"title\":\"Telegram Automation Bot \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0631\\u0628\\u0627\\u062a \\u062a\\u0644\\u06af\\u0631\\u0627\\u0645 \\u0628\\u0631\\u0627\\u06cc \\u067e\\u06cc\\u0627\\u0645 \\u0648 \\u06a9\\u0627\\u0631\\u0647\\u0627\\u06cc \\u062e\\u0648\\u062f\\u06a9\\u0627\\u0631\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-4.webp\",\"robots\":\"index,follow\"},\"expense-tracker-app\":{\"title\":\"Expense Tracker App \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0627\\u067e\\u0644\\u06cc\\u06a9\\u06cc\\u0634\\u0646 \\u062f\\u0633\\u06a9\\u062a\\u0627\\u067e \\u0628\\u0631\\u0627\\u06cc \\u067e\\u06cc\\u06af\\u06cc\\u0631\\u06cc \\u0647\\u0632\\u06cc\\u0646\\u0647\\u200c\\u0647\\u0627\\u06cc \\u0634\\u062e\\u0635\\u06cc\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-2.webp\",\"robots\":\"index,follow\"},\"e-commerce-website\":{\"title\":\"E-Commerce Website \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0641\\u0631\\u0648\\u0634\\u06af\\u0627\\u0647 \\u0622\\u0646\\u0644\\u0627\\u06cc\\u0646 \\u0628\\u0627 \\u06a9\\u0627\\u062a\\u0627\\u0644\\u0648\\u06af \\u0648 \\u0633\\u0628\\u062f \\u062e\\u0631\\u06cc\\u062f\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-11.webp\",\"robots\":\"index,follow\"},\"jwt-auth-backend\":{\"title\":\"JWT Auth Backend \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0633\\u0631\\u0648\\u06cc\\u0633 \\u0627\\u062d\\u0631\\u0627\\u0632 \\u0647\\u0648\\u06cc\\u062a \\u0627\\u0645\\u0646 \\u0628\\u0627 \\u0645\\u062f\\u06cc\\u0631\\u06cc\\u062a \\u0646\\u0642\\u0634\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-8.webp\",\"robots\":\"index,follow\"},\"web-scraping-bot\":{\"title\":\"Web Scraping Bot \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0631\\u0628\\u0627\\u062a \\u062c\\u0645\\u0639\\u200c\\u0622\\u0648\\u0631\\u06cc \\u062f\\u0627\\u062f\\u0647 \\u0648 \\u06af\\u0632\\u0627\\u0631\\u0634\\u200c\\u06af\\u06cc\\u0631\\u06cc \\u062e\\u0648\\u062f\\u06a9\\u0627\\u0631\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-5.webp\",\"robots\":\"index,follow\"},\"task-manager-app\":{\"title\":\"Task Manager App \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0627\\u067e \\u0628\\u0647\\u0631\\u0647\\u200c\\u0648\\u0631\\u06cc \\u0628\\u0631\\u0627\\u06cc \\u0645\\u062f\\u06cc\\u0631\\u06cc\\u062a \\u06a9\\u0627\\u0631 \\u0648 \\u067e\\u0631\\u0648\\u0698\\u0647\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-3.webp\",\"robots\":\"index,follow\"},\"landing-page-design\":{\"title\":\"Landing Page Design \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0644\\u0646\\u062f\\u06cc\\u0646\\u06af \\u0645\\u0627\\u0631\\u06a9\\u062a\\u06cc\\u0646\\u06af \\u0628\\u0627 \\u062a\\u0645\\u0631\\u06a9\\u0632 \\u0628\\u0631 \\u062a\\u0628\\u062f\\u06cc\\u0644\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-12.webp\",\"robots\":\"index,follow\"},\"restful-api-service\":{\"title\":\"RESTful API Service \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"API \\u0645\\u0627\\u0698\\u0648\\u0644\\u0627\\u0631 \\u0628\\u0631\\u0627\\u06cc \\u06cc\\u06a9\\u067e\\u0627\\u0631\\u0686\\u0647\\u200c\\u0633\\u0627\\u0632\\u06cc\\u200c\\u0647\\u0627\\u06cc \\u062e\\u0627\\u0631\\u062c\\u06cc\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-9.webp\",\"robots\":\"index,follow\"},\"discord-automation-bot\":{\"title\":\"Discord Automation Bot \\u2014 \\u0627\\u0645\\u06cc\\u0631\\u062d\\u0633\\u06cc\\u0646 \\u0632\\u0645\\u0627\\u0646\\u200c\\u0632\\u0627\\u062f\\u0647 | \\u062a\\u0648\\u0633\\u0639\\u0647\\u200c\\u062f\\u0647\\u0646\\u062f\\u0647\",\"description\":\"\\u0631\\u0628\\u0627\\u062a \\u0645\\u062f\\u06cc\\u0631\\u06cc\\u062a \\u0648 \\u0646\\u0638\\u0627\\u0631\\u062a \\u062c\\u0627\\u0645\\u0639\\u0647 \\u062f\\u0631 Discord\",\"og_image\":\"assets\\/img\\/amir\\/portfolio-6.webp\",\"robots\":\"index,follow\"}}}},\"settings\":{\"social\":{\"email\":\"itsamirzamani@gmail.com\",\"linkedin\":\"https:\\/\\/linkedin.com\\/in\\/amirhossein-zamanzade\",\"github\":\"https:\\/\\/github.com\\/Amir-dev00\",\"telegram\":\"https:\\/\\/t.me\\/Amir_dev00\",\"telegram_handle\":\"@Amir_dev00\"},\"profile\":{\"name\":\"Amirhossein Zamanzade\",\"photo\":\"assets\\/img\\/amir\\/profile.jpg\",\"logo\":\"assets\\/img\\/amir\\/az-logo.webp\"},\"featured_slugs\":[\"personal-portfolio-website\",\"shopping-mall-desktop\",\"rest-api-microservice\",\"telegram-automation-bot\"]},\"resume\":null,\"social\":{\"email\":\"itsamirzamani@gmail.com\",\"linkedin\":\"https:\\/\\/linkedin.com\\/in\\/amirhossein-zamanzade\",\"github\":\"https:\\/\\/github.com\\/Amir-dev00\",\"telegram\":\"https:\\/\\/t.me\\/Amir_dev00\",\"telegram_handle\":\"@Amir_dev00\"},\"profile\":{\"name\":\"Amirhossein Zamanzade\",\"photo\":\"assets\\/img\\/amir\\/profile.jpg\",\"logo\":\"assets\\/img\\/amir\\/az-logo.webp\"},\"featured_slugs\":[\"personal-portfolio-website\",\"shopping-mall-desktop\",\"rest-api-microservice\",\"telegram-automation-bot\"]}',NULL,'2026-11-09 10:46:57','2026-11-09 10:46:57','2026-11-09 10:46:57');
+/*!40000 ALTER TABLE `publications` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `resume_versions`
+--
+
+DROP TABLE IF EXISTS `resume_versions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `resume_versions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `label` varchar(255) DEFAULT NULL,
+  `source` varchar(32) NOT NULL DEFAULT 'upload',
+  `pdf_media_id` bigint(20) unsigned DEFAULT NULL,
+  `fields_en` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`fields_en`)),
+  `fields_fa` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`fields_fa`)),
+  `is_current` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `resume_versions_pdf_media_id_foreign` (`pdf_media_id`),
+  KEY `resume_versions_is_current_index` (`is_current`),
+  CONSTRAINT `resume_versions_pdf_media_id_foreign` FOREIGN KEY (`pdf_media_id`) REFERENCES `media_assets` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `resume_versions`
+--
+
+LOCK TABLES `resume_versions` WRITE;
+/*!40000 ALTER TABLE `resume_versions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `resume_versions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `seo_entries`
+--
+
+DROP TABLE IF EXISTS `seo_entries`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `seo_entries` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `locale` varchar(5) NOT NULL,
+  `scope` varchar(32) NOT NULL,
+  `scope_key` varchar(128) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `og_image` varchar(255) DEFAULT NULL,
+  `robots` varchar(64) NOT NULL DEFAULT 'index,follow',
+  `is_dirty` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `seo_entries_locale_scope_scope_key_unique` (`locale`,`scope`,`scope_key`)
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `seo_entries`
+--
+
+LOCK TABLES `seo_entries` WRITE;
+/*!40000 ALTER TABLE `seo_entries` DISABLE KEYS */;
+INSERT INTO `seo_entries` VALUES (1,'en','page','home','Amirhossein Zamanzade | Developer','Portfolio of Amirhossein Zamanzade — Full-Stack Developer, Programmer, and Designer.','assets/img/amir/az-logo.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(2,'fa','page','home','امیرحسین زمان‌زاده | توسعه‌دهنده','نمونه‌کارهای امیرحسین زمان‌زاده — توسعه‌دهنده فول‌استک، برنامه‌نویس و طراح.','assets/img/amir/az-logo.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(3,'en','page','work','Work — Amirhossein Zamanzade | Developer','A selection of websites, applications, APIs, and automation tools.','assets/img/amir/az-logo.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(4,'fa','page','work','کارها — امیرحسین زمان‌زاده | توسعه‌دهنده','گزیده‌ای از وب‌سایت‌ها، اپلیکیشن‌ها، APIها و ابزارهای اتوماسیون.','assets/img/amir/az-logo.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(5,'en','page','about','About — Amirhossein Zamanzade | Developer','I’m Amirhossein Zamanzade, a Computer Science student and Full-Stack Developer focused on fast, scalable, and user-centric products. I care about clean architecture, modern tooling, and interfaces that feel refined.','assets/img/amir/az-logo.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(6,'fa','page','about','درباره — امیرحسین زمان‌زاده | توسعه‌دهنده','من امیرحسین زمان‌زاده‌ام؛ دانشجوی علوم کامپیوتر و توسعه‌دهنده فول‌استک. روی محصولاتی سریع، مقیاس‌پذیر و کاربرمحور تمرکز می‌کنم و به معماری تمیز، ابزارهای مدرن و رابط‌هایی با حس پرداخت‌شده اهمیت می‌دهم.','assets/img/amir/az-logo.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(7,'en','page','contact','Contact — Amirhossein Zamanzade | Developer','Have a project or a role in mind? Let’s talk.','assets/img/amir/az-logo.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(8,'fa','page','contact','تماس — امیرحسین زمان‌زاده | توسعه‌دهنده','پروژه یا موقعیتی در ذهن دارید؟ صحبت کنیم.','assets/img/amir/az-logo.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(9,'en','project','personal-portfolio-website','Personal Portfolio Website — Amirhossein Zamanzade | Developer','Modern responsive portfolio built with Bootstrap','assets/img/amir/portfolio-w1.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(10,'fa','project','personal-portfolio-website','Personal Portfolio Website — امیرحسین زمان‌زاده | توسعه‌دهنده','نمونه‌کار ریسپانسیو مدرن با Bootstrap','assets/img/amir/portfolio-w1.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(11,'en','project','shopping-mall-desktop','Shopping Mall Desktop — Amirhossein Zamanzade | Developer','JavaFX desktop shopping application with PostgreSQL','assets/img/amir/portfolio-1.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(12,'fa','project','shopping-mall-desktop','Shopping Mall Desktop — امیرحسین زمان‌زاده | توسعه‌دهنده','اپلیکیشن خرید دسکتاپ با JavaFX و PostgreSQL','assets/img/amir/portfolio-1.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(13,'en','project','rest-api-microservice','REST API Microservice — Amirhossein Zamanzade | Developer','Scalable backend API with authentication','assets/img/amir/portfolio-7.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(14,'fa','project','rest-api-microservice','REST API Microservice — امیرحسین زمان‌زاده | توسعه‌دهنده','API بک‌اند مقیاس‌پذیر با احراز هویت','assets/img/amir/portfolio-7.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(15,'en','project','telegram-automation-bot','Telegram Automation Bot — Amirhossein Zamanzade | Developer','Automated messaging and task bot for Telegram','assets/img/amir/portfolio-4.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(16,'fa','project','telegram-automation-bot','Telegram Automation Bot — امیرحسین زمان‌زاده | توسعه‌دهنده','ربات تلگرام برای پیام و کارهای خودکار','assets/img/amir/portfolio-4.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(17,'en','project','expense-tracker-app','Expense Tracker App — Amirhossein Zamanzade | Developer','Desktop app for personal finance tracking','assets/img/amir/portfolio-2.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(18,'fa','project','expense-tracker-app','Expense Tracker App — امیرحسین زمان‌زاده | توسعه‌دهنده','اپلیکیشن دسکتاپ برای پیگیری هزینه‌های شخصی','assets/img/amir/portfolio-2.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(19,'en','project','e-commerce-website','E-Commerce Website — Amirhossein Zamanzade | Developer','Online store with product catalog and cart','assets/img/amir/portfolio-11.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(20,'fa','project','e-commerce-website','E-Commerce Website — امیرحسین زمان‌زاده | توسعه‌دهنده','فروشگاه آنلاین با کاتالوگ و سبد خرید','assets/img/amir/portfolio-11.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(21,'en','project','jwt-auth-backend','JWT Auth Backend — Amirhossein Zamanzade | Developer','Secure authentication service with role management','assets/img/amir/portfolio-8.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(22,'fa','project','jwt-auth-backend','JWT Auth Backend — امیرحسین زمان‌زاده | توسعه‌دهنده','سرویس احراز هویت امن با مدیریت نقش','assets/img/amir/portfolio-8.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(23,'en','project','web-scraping-bot','Web Scraping Bot — Amirhossein Zamanzade | Developer','Automated data collection and reporting bot','assets/img/amir/portfolio-5.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(24,'fa','project','web-scraping-bot','Web Scraping Bot — امیرحسین زمان‌زاده | توسعه‌دهنده','ربات جمع‌آوری داده و گزارش‌گیری خودکار','assets/img/amir/portfolio-5.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(25,'en','project','task-manager-app','Task Manager App — Amirhossein Zamanzade | Developer','Productivity app for task and project management','assets/img/amir/portfolio-3.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(26,'fa','project','task-manager-app','Task Manager App — امیرحسین زمان‌زاده | توسعه‌دهنده','اپ بهره‌وری برای مدیریت کار و پروژه','assets/img/amir/portfolio-3.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(27,'en','project','landing-page-design','Landing Page Design — Amirhossein Zamanzade | Developer','High-conversion marketing landing page','assets/img/amir/portfolio-12.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(28,'fa','project','landing-page-design','Landing Page Design — امیرحسین زمان‌زاده | توسعه‌دهنده','لندینگ مارکتینگ با تمرکز بر تبدیل','assets/img/amir/portfolio-12.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(29,'en','project','restful-api-service','RESTful API Service — Amirhossein Zamanzade | Developer','Modular API for third-party integrations','assets/img/amir/portfolio-9.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(30,'fa','project','restful-api-service','RESTful API Service — امیرحسین زمان‌زاده | توسعه‌دهنده','API ماژولار برای یکپارچه‌سازی‌های خارجی','assets/img/amir/portfolio-9.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(31,'en','project','discord-automation-bot','Discord Automation Bot — Amirhossein Zamanzade | Developer','Community management and moderation bot','assets/img/amir/portfolio-6.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58'),(32,'fa','project','discord-automation-bot','Discord Automation Bot — امیرحسین زمان‌زاده | توسعه‌دهنده','ربات مدیریت و نظارت جامعه در Discord','assets/img/amir/portfolio-6.webp','index,follow',0,'2026-11-09 10:46:57','2026-11-09 10:46:58');
+/*!40000 ALTER TABLE `seo_entries` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `sessions`
+--
+
+DROP TABLE IF EXISTS `sessions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sessions` (
+  `id` varchar(255) NOT NULL,
+  `user_id` bigint(20) unsigned DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `payload` longtext NOT NULL,
+  `last_activity` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sessions_user_id_index` (`user_id`),
+  KEY `sessions_last_activity_index` (`last_activity`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `sessions`
+--
+
+LOCK TABLES `sessions` WRITE;
+/*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `site_settings`
+--
+
+DROP TABLE IF EXISTS `site_settings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `site_settings` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `key` varchar(128) NOT NULL,
+  `value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`value`)),
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `site_settings_key_unique` (`key`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `site_settings`
+--
+
+LOCK TABLES `site_settings` WRITE;
+/*!40000 ALTER TABLE `site_settings` DISABLE KEYS */;
+INSERT INTO `site_settings` VALUES (1,'social','{\"email\":\"itsamirzamani@gmail.com\",\"linkedin\":\"https:\\/\\/linkedin.com\\/in\\/amirhossein-zamanzade\",\"github\":\"https:\\/\\/github.com\\/Amir-dev00\",\"telegram\":\"https:\\/\\/t.me\\/Amir_dev00\",\"telegram_handle\":\"@Amir_dev00\"}','2026-11-09 10:46:57','2026-11-09 10:46:57'),(2,'profile','{\"name\":\"Amirhossein Zamanzade\",\"photo\":\"assets\\/img\\/amir\\/profile.jpg\",\"logo\":\"assets\\/img\\/amir\\/az-logo.webp\"}','2026-11-09 10:46:57','2026-11-09 10:46:57'),(3,'featured_slugs','[\"personal-portfolio-website\",\"shopping-mall-desktop\",\"rest-api-microservice\",\"telegram-automation-bot\"]','2026-11-09 10:46:57','2026-11-09 10:46:57');
+/*!40000 ALTER TABLE `site_settings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `site_state`
+--
+
+DROP TABLE IF EXISTS `site_state`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `site_state` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `current_publication_id` bigint(20) unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `site_state_current_publication_id_foreign` (`current_publication_id`),
+  CONSTRAINT `site_state_current_publication_id_foreign` FOREIGN KEY (`current_publication_id`) REFERENCES `publications` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `site_state`
+--
+
+LOCK TABLES `site_state` WRITE;
+/*!40000 ALTER TABLE `site_state` DISABLE KEYS */;
+INSERT INTO `site_state` VALUES (1,1,'2026-11-09 10:46:57','2026-11-09 10:46:58');
+/*!40000 ALTER TABLE `site_state` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `password` varchar(255) NOT NULL,
+  `is_owner` tinyint(1) NOT NULL DEFAULT 1,
+  `remember_token` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-11-09 17:52:18
+
+SET FOREIGN_KEY_CHECKS=1;

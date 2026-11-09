@@ -18,6 +18,9 @@
   -webkit-backdrop-filter: blur(12px) saturate(1.2);
   backdrop-filter: blur(12px) saturate(1.2);
   pointer-events: auto;
+  /* Keep English left / فارسی right in both page languages. */
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 .az-lang-switch__btn {
@@ -62,8 +65,7 @@ html.az-lang-fa body {
 html.az-lang-fa .az-panel__title,
 html.az-lang-fa .az-work-spotlight__copy h2,
 html.az-lang-fa .az-profile__name,
-html.az-lang-fa .az-preloader__name,
-html.az-lang-fa .preloader__heading.az-preloader__name {
+html.az-lang-fa #view-home .slider__heading {
   font-family: "Vazirmatn", Cinzel, Georgia, serif;
   letter-spacing: 0;
 }
@@ -87,18 +89,15 @@ html.az-lang-fa .az-project__back {
 html.az-lang-fa .az-panel__eyebrow,
 html.az-lang-fa .az-contact-eyebrow,
 html.az-lang-fa .az-work-spotlight__eyebrow,
-html.az-lang-fa .glass-nav__name,
-html.az-lang-fa .az-preloader__load-label,
-html.az-lang-fa .az-preloader__role,
-html.az-lang-fa .preloader__subline.az-preloader__role {
+html.az-lang-fa .glass-nav__name {
   letter-spacing: 0.04em;
   text-transform: none;
 }
 
-html.az-lang-fa .az-preloader__load-label,
-html.az-lang-fa .preloader__subline.az-preloader__role,
-html.az-lang-fa .preloader__heading.az-preloader__name {
-  padding-inline-start: 0;
+/* Preloader is English-only regardless of saved locale. */
+#js-preloader {
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 /* Keep emails / handles LTR inside RTL copy. */
@@ -145,8 +144,9 @@ html[dir="rtl"] .az-panel_work {
   text-align: start;
 }
 
-/* Homepage titles stay English (split-text). Keep Persian UI glyphs connected. */
-html.az-lang-fa .js-split-text .split-text__char {
+/* Keep Persian homepage titles joined when Rhye animates word units as chars. */
+html.az-lang-fa #view-home .slider__heading .split-text__word,
+html.az-lang-fa #view-home .slider__heading .split-text__char {
   font-feature-settings: "liga" 1, "calt" 1;
 }
 

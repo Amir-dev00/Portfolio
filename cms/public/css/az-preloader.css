@@ -1,0 +1,239 @@
+/* AZ / 02 — Circular metallic monogram preloader. Styled only inside #js-preloader.
+   The Rhye template still controls the counter's value and the loader's dismissal. */
+
+/* Hide Rhye's cursor SVG ring while AZ owns the loading visuals (cursor stays in DOM for Rhye). */
+html.az-loading #js-cursor .cursor__follower {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+#js-preloader.az-preloader--ring {
+  --az-gold: #dfb777;
+  --az-text: #f2ede5;
+  --az-muted: rgba(237,225,209,.55);
+  --az-progress: 0;
+  position: fixed;
+  inset: 0;
+  isolation: isolate;
+  z-index: 99999;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  min-height: 100svh;
+  background: #08090c !important;
+  color: var(--az-text);
+  overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+  font-family: 'Raleway', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+/* Keep the loader visible even if Rhye sets display:none before the first paint. */
+html.az-preloader-open #js-preloader.az-preloader--ring {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 99999 !important;
+}
+#js-preloader.az-preloader--ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 32% 42% at 50% 45%, rgba(172, 105, 42, .125), transparent 85%),
+    radial-gradient(ellipse 55% 45% at 50% -15%, rgba(255, 244, 215, .07), transparent 70%),
+    linear-gradient(160deg, #0e1015 0%, #08090c 54%, #0c0d10 100%);
+}
+#js-preloader.az-preloader--ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: .15;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.17' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#js-preloader.az-preloader--ring *, #js-preloader.az-preloader--ring *::before,
+#js-preloader.az-preloader--ring *::after { box-sizing: border-box; }
+#js-preloader.az-preloader--ring .preloader__circle { opacity: 0 !important; pointer-events: none !important; }
+#js-preloader.az-preloader--ring .preloader__content.az-preloader__layout {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  z-index: 2;
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: nowrap;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  max-height: none !important;
+  margin: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  padding: max(clamp(22px, 4vw, 55px), env(safe-area-inset-top)) clamp(22px, 4vw, 55px) max(clamp(22px, 4vw, 55px), env(safe-area-inset-bottom));
+}
+#js-preloader.az-preloader--ring .az-preloader__center.preloader__header {
+  position: relative; width: 100%; min-height: 0; margin: 0 !important; padding: 18px 0;
+  display: flex; flex: 1 1 auto; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+}
+#js-preloader.az-preloader--ring .az-preloader__disc {
+  --az-size: clamp(218px, 29vw, 334px);
+  position: relative; display: grid; place-items: center;
+  width: var(--az-size); height: var(--az-size); flex: 0 0 auto;
+  margin: 0 auto clamp(18px, 2.4vw, 28px);
+  opacity: 1;
+  visibility: visible;
+  filter: drop-shadow(0 12px 34px rgba(182, 104, 36, .07));
+  animation: az-ring-arrive 1100ms cubic-bezier(.16,1,.3,1) both;
+}
+#js-preloader.az-preloader--ring .az-preloader__disc::before {
+  content: '';
+  position: absolute; inset: -19%; border-radius: 50%; z-index: -1; pointer-events: none;
+  background: radial-gradient(circle, rgba(213, 140, 72, .13) 0%, rgba(145, 89, 35, .04) 40%, transparent 68%);
+  transition: opacity .6s ease;
+}
+#js-preloader.az-preloader--ring .az-preloader__image-shell {
+  position: absolute; inset: 8.25%; overflow: hidden; border-radius: 50%; background: #030304;
+  box-shadow: inset 0 0 35px rgba(0,0,0,.4), 0 1px 36px rgba(201, 127, 64, .14);
+  border: 1px solid rgba(255, 220, 175, .14);
+}
+#js-preloader.az-preloader--ring .az-preloader__image-shell::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 1; border-radius: 50%; pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.085), transparent 25%, transparent 70%, rgba(236,166,93,.05)),
+    radial-gradient(circle at 50% 0%, rgba(243, 183, 116, .045), transparent 52%);
+  mix-blend-mode: screen;
+}
+#js-preloader.az-preloader--ring .az-preloader__image {
+  display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+  transform: scale(1.17); transform-origin: center;
+  filter: saturate(1.02) contrast(1.08);
+}
+#js-preloader.az-preloader--ring .az-preloader__ring {
+  position: absolute; inset: 0; display: block; width: 100%; height: 100%;
+  overflow: visible; z-index: 3; transform: rotate(-90deg);
+}
+#js-preloader.az-preloader--ring .az-preloader__ring-track,
+#js-preloader.az-preloader--ring .az-preloader__ring-fill {
+  fill: none; stroke-width: 3.25; stroke-linecap: round;
+}
+#js-preloader.az-preloader--ring .az-preloader__ring-track { stroke: rgba(235, 209, 178, .14); }
+#js-preloader.az-preloader--ring .az-preloader__ring-fill {
+  stroke: url(#az-ring-gold); stroke-width: 4; stroke-dasharray: 100 100; stroke-dashoffset: 100;
+  transition: stroke-dashoffset .19s linear; will-change: stroke-dashoffset;
+  filter: drop-shadow(0 0 3px rgba(245, 186, 111, .66));
+}
+#js-preloader.az-preloader--ring .az-preloader__ring-head {
+  position: absolute; z-index: 4; inset: 0; display: block; pointer-events: none;
+  transform: rotate(calc(var(--az-progress, 0) * 3.6deg));
+  opacity: 0;
+  transition:
+    transform .19s linear,
+    opacity 260ms ease;
+}
+#js-preloader.az-preloader--ring .az-preloader__ring-head.is-active {
+  opacity: 1;
+}
+#js-preloader.az-preloader--ring .az-preloader__ring-head.is-complete,
+#js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-head {
+  opacity: 0;
+}
+#js-preloader.az-preloader--ring .az-preloader__ring-head::after {
+  content: ''; position: absolute; top: 4.5%; left: calc(50% - 3px);
+  width: 6px; height: 6px; background: #fff0c8; border-radius: 50%;
+  box-shadow: 0 0 8px 2px rgba(243,183,109,.65), 0 0 22px rgba(228,160,91,.3);
+}
+#js-preloader.az-preloader--ring .az-preloader__load-label {
+  display: block; color: rgba(226, 199, 170, .60); font-size: 10px; line-height: 1.5;
+  letter-spacing: .42em; padding-left: .42em; font-weight: 600;
+  animation: az-ring-fade-up 900ms 550ms both;
+}
+#js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage {
+  position: relative; display: flex; align-items: baseline; justify-content: center;
+  gap: 0.28em; margin: 8px 0 0; padding: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #f5eee1; font-size: clamp(42px, 5.6vw, 64px); font-weight: 400; line-height: 1.18;
+  letter-spacing: -.04em; white-space: nowrap;
+  font-variant-numeric: lining-nums tabular-nums;
+  opacity: 1;
+  animation: az-ring-fade-up 700ms 220ms both;
+}
+#js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-current {
+  width: auto; min-width: 3ch; text-align: right;
+  color: #f7f1e6; font: inherit; font-variant-numeric: tabular-nums;
+}
+#js-preloader.az-preloader--ring .az-preloader__counter-sep,
+#js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-total {
+  width: auto; color: rgba(168, 168, 168, 0.72);
+  font: inherit; font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+#js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-total {
+  min-width: 3ch; text-align: left;
+}
+#js-preloader.az-preloader--ring .az-preloader__identity {
+  margin-top: clamp(18px, 2.4vw, 27px); padding-top: clamp(18px, 2.4vw, 27px);
+  position: relative; animation: az-ring-fade-up 850ms 850ms both;
+}
+#js-preloader.az-preloader--ring .az-preloader__identity::before {
+  content: ''; position: absolute; top: 0; left: calc(50% - 27px); width: 54px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(226, 190, 136, .6), transparent);
+}
+#js-preloader.az-preloader--ring .preloader__heading.az-preloader__name {
+  font-family: 'Raleway', Arial, sans-serif; font-size: clamp(13px, 2vw, 20px);
+  letter-spacing: .28em; padding-left: .28em; line-height: 1.55; color: #efe9de;
+  font-weight: 600; white-space: normal;
+}
+#js-preloader.az-preloader--ring .preloader__subline.az-preloader__role {
+  margin-top: 10px !important; color: rgba(218, 204, 184, .48);
+  font-family: 'Raleway', Arial, sans-serif; font-size: 10px; font-weight: 500;
+  letter-spacing: .43em; padding-left: .43em; line-height: 1.6;
+}
+#js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__disc::before { opacity: 1; }
+#js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-fill { filter: drop-shadow(0 0 6px rgba(247, 188, 118, .85)); }
+@keyframes az-ring-arrive {
+  /* No filter here — animating filter overrides the metallic drop-shadow and looks matte. */
+  from { transform: translateY(10px) scale(.96); opacity: 1; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes az-ring-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 600px) {
+  #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: clamp(222px, 70vw, 290px); margin-bottom: 21px; }
+  #js-preloader.az-preloader--ring .preloader__heading.az-preloader__name { font-size: 14px; letter-spacing: .14em; padding-left: .14em; }
+  #js-preloader.az-preloader--ring .preloader__subline.az-preloader__role { font-size: 9px; letter-spacing: .28em; padding-left: .28em; }
+}
+@media (max-height: 670px) {
+  #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: clamp(164px, 35vh, 244px); margin-bottom: 9px; }
+  #js-preloader.az-preloader--ring .az-preloader__center.preloader__header { padding: 7px 0; }
+  #js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage { font-size: 42px; margin-top: 1px; }
+  #js-preloader.az-preloader--ring .az-preloader__identity { margin-top: 10px; padding-top: 14px; }
+  #js-preloader.az-preloader--ring .az-preloader__load-label { font-size: 8px; }
+}
+@media (max-height: 460px) {
+  #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: min(44vh,180px); }
+  #js-preloader.az-preloader--ring .az-preloader__identity { margin-top: 5px; padding-top: 9px; }
+  #js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage { font-size: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #js-preloader.az-preloader--ring *,
+  #js-preloader.az-preloader--ring *::before,
+  #js-preloader.az-preloader--ring *::after { animation: none !important; transition: none !important; }
+}

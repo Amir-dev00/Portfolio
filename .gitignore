@@ -1,6 +1,9 @@
 # Local archives / backups
 Old-Portfolio/
 Portfolio.zip
+portfolio-cpanel.zip
+portfolio-final.raw.sql
+dist/
 
 # Editor / agent tooling
 .agents/

@@ -1,0 +1,868 @@
+/* In-app views — hash SPA. Dock stays fixed; only main content swaps. */
+
+html.az-app-ready {
+  scroll-behavior: auto;
+  /* Keep the classic scrollbar gutter reserved so About ↔ Work
+     (short ↔ tall) does not shrink the layout viewport and shove the fixed dock. */
+  scrollbar-gutter: stable;
+}
+
+/* Native document scroll for Work / About / Contact / project detail.
+   Rhye's .smooth-scroll locks the page to 100vh + overflow:hidden and its
+   Scrollbar instance preventDefaults wheel even when limit.y === 0. */
+html[data-az-route]:not([data-az-route="home"]),
+html.az-native-scroll {
+  height: auto;
+  overflow-x: hidden;
+  /* Always occupy the classic scrollbar lane so short About and tall Work
+     share the same layout viewport; avoids fixed-dock recentering. */
+  overflow-y: scroll;
+  overscroll-behavior-y: auto;
+  scrollbar-gutter: stable;
+}
+
+html[data-az-route]:not([data-az-route="home"]) body,
+html.az-native-scroll body {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  touch-action: pan-y;
+}
+
+html[data-az-route]:not([data-az-route="home"]) #page-wrapper,
+html[data-az-route]:not([data-az-route="home"]) #page-wrapper.smooth-scroll,
+html[data-az-route]:not([data-az-route="home"]) #page-wrapper.js-smooth-scroll,
+html.az-native-scroll #page-wrapper,
+html.az-native-scroll #page-wrapper.smooth-scroll,
+html.az-native-scroll #page-wrapper.js-smooth-scroll {
+  width: 100% !important;
+  max-width: 100%;
+  height: auto !important;
+  min-height: 100%;
+  overflow: visible !important;
+}
+
+html[data-az-route]:not([data-az-route="home"]) .page-wrapper__content,
+html.az-native-scroll .page-wrapper__content {
+  overflow: visible !important;
+  /* Rhye starts .page-wrapper__content at opacity:0 until OS animations;
+     non-home hash routes skip that path, so force the SPA content visible. */
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html[data-az-route]:not([data-az-route="home"]) .scroll-content,
+html.az-native-scroll .scroll-content {
+  transform: none !important;
+}
+
+html[data-az-route]:not([data-az-route="home"]) #js-scroll,
+html[data-az-route]:not([data-az-route="home"]) .scrollbar,
+html[data-az-route]:not([data-az-route="home"]) .scrollbar-track,
+html.az-native-scroll #js-scroll,
+html.az-native-scroll .scrollbar,
+html.az-native-scroll .scrollbar-track {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Home keeps Rhye's fullscreen smooth-scroll shell. */
+html[data-az-route="home"]:not(.az-native-scroll) {
+  height: 100%;
+  overflow: hidden;
+}
+
+html[data-az-route="home"]:not(.az-native-scroll) body {
+  height: 100%;
+  overflow: hidden;
+}
+
+.az-app {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+}
+
+.az-view {
+  display: none;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(14px);
+  pointer-events: none;
+}
+
+.az-view.is-active {
+  display: block;
+  pointer-events: auto;
+}
+
+.az-view.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 320ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.az-view.is-leaving {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html[data-az-route="home"] #view-home.az-view.is-active {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+html[data-az-route]:not([data-az-route="home"]) .az-profile {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.az-panel {
+  position: relative;
+  z-index: 2;
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+  padding:
+    max(28px, env(safe-area-inset-top)) 0
+    calc(110px + env(safe-area-inset-bottom));
+  color: #f4f1ea;
+}
+
+.az-panel__eyebrow {
+  margin: 0 0 10px;
+  font-family: Raleway, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(226, 208, 182, 0.62);
+}
+
+.az-panel__title {
+  margin: 0 0 12px;
+  font-family: Cinzel, Georgia, serif;
+  font-size: clamp(28px, 5vw, 46px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: #f7f3ea;
+}
+
+.az-panel__lead {
+  margin: 0 0 28px;
+  max-width: 42rem;
+  font-family: Raleway, "Vazirmatn", sans-serif;
+  font-size: clamp(14px, 2vw, 17px);
+  line-height: 1.65;
+  color: rgba(244, 241, 234, 0.72);
+}
+
+/* —— Work browser (spotlight + selector), modeled on itsamir.com/#work —— */
+
+.az-panel_work {
+  width: min(980px, calc(100% - 40px));
+}
+
+.az-panel_work .az-panel__lead {
+  margin-bottom: 22px;
+}
+
+.az-work-browser {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.az-work-spotlight {
+  display: grid;
+  grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+  align-items: stretch;
+  min-height: 240px;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+    rgba(16, 16, 18, 0.78);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+  transition: opacity 180ms ease;
+}
+
+.az-work-spotlight.is-fading {
+  opacity: 0;
+}
+
+.az-work-spotlight__cover {
+  display: block;
+  min-height: 220px;
+  overflow: hidden;
+  background: #0b0b0d;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.az-work-spotlight__cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 420ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.az-work-spotlight__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px 24px 20px;
+}
+
+.az-work-spotlight__eyebrow {
+  margin: 0;
+  font-family: Raleway, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(226, 208, 182, 0.58);
+}
+
+.az-work-spotlight__copy h2 {
+  margin: 0;
+  font-family: Cinzel, Georgia, serif;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 500;
+  line-height: 1.2;
+  color: #f7f3ea;
+}
+
+.az-work-spotlight__copy > p {
+  margin: 0;
+  font-family: Raleway, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(244, 241, 234, 0.68);
+}
+
+.az-work-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.az-work-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  font-family: Raleway, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(244, 241, 234, 0.78);
+}
+
+.az-work-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  width: fit-content;
+  font-family: Raleway, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #f4f1ea;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(244, 241, 234, 0.28);
+  padding-bottom: 2px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.az-work-explore:focus-visible,
+.az-work-spotlight__cover:focus-visible,
+.az-work-row:focus-visible,
+.az-work-browse:focus-visible {
+  outline: 2px solid #f4f1ea;
+  outline-offset: 3px;
+}
+
+.az-work-wheel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+}
+
+.az-work-count {
+  font-family: Raleway, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(244, 241, 234, 0.52);
+}
+
+.az-work-wheel-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.az-work-browse {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f4f1ea;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.az-work-wheel {
+  --az-work-row: 48px;
+  --az-work-visible: 5;
+  position: relative;
+  height: calc(var(--az-work-row) * var(--az-work-visible));
+  overflow: hidden;
+  outline: none;
+  touch-action: pan-y;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+}
+
+.az-work-wheel__track {
+  will-change: transform;
+  transition: transform 280ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.az-work-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: var(--az-work-row);
+  margin: 0;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: rgba(244, 241, 234, 0.78);
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    opacity 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease,
+    color 220ms ease;
+}
+
+.az-work-row__name {
+  overflow: hidden;
+  font-family: Raleway, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.az-work-row small {
+  font-family: Raleway, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: rgba(244, 241, 234, 0.42);
+}
+
+.az-work-row__chev {
+  font-size: 13px;
+  color: rgba(244, 241, 234, 0.35);
+}
+
+.az-work-row.is-selected {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f7f3ea;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.az-work-row.is-selected small,
+.az-work-row.is-selected .az-work-row__chev {
+  color: rgba(226, 208, 182, 0.72);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .az-work-browse:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  .az-work-explore:hover {
+    border-bottom-color: rgba(244, 241, 234, 0.7);
+  }
+
+  .az-work-spotlight__cover:hover img {
+    transform: scale(1.03);
+  }
+
+  .az-work-row:hover:not(.is-selected) {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+.az-about {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
+  gap: clamp(22px, 4vw, 40px);
+  align-items: start;
+}
+
+.az-about__portrait {
+  width: min(220px, 100%);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 236, 210, 0.34);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.28) inset,
+    0 16px 34px rgba(0, 0, 0, 0.34);
+}
+
+.az-about__portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+.az-about__meta {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: Raleway, sans-serif;
+  font-size: 13px;
+  color: rgba(244, 241, 234, 0.7);
+}
+
+.az-about__meta strong {
+  color: rgba(244, 241, 234, 0.92);
+  font-weight: 600;
+}
+
+.az-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.az-skills li {
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  font-family: Raleway, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.78);
+}
+
+/* —— Contact (itsamir-style single column) —— */
+
+.az-panel_contact {
+  width: min(560px, calc(100% - 40px));
+  margin-inline: auto;
+  text-align: start;
+  padding-bottom: calc(128px + env(safe-area-inset-bottom));
+}
+
+.az-contact-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-family: Raleway, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(226, 208, 182, 0.62);
+}
+
+.az-contact-eyebrow::before {
+  content: "";
+  width: 16px;
+  height: 1px;
+  background: rgba(226, 208, 182, 0.55);
+  flex: 0 0 auto;
+}
+
+.az-panel_contact .az-panel__title {
+  margin-bottom: 12px;
+}
+
+.az-contact-intro {
+  margin-bottom: 22px;
+  max-width: none;
+}
+
+.az-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 28px;
+}
+
+.az-contact-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: #f4f1ea;
+  font-family: Raleway, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.az-contact-pill_primary {
+  border-color: transparent;
+  background: rgba(244, 241, 234, 0.92);
+  color: #111;
+}
+
+.az-contact-pill__arrow {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.az-contact-pill:focus-visible,
+.az-contact-link:focus-visible {
+  outline: 2px solid #f4f1ea;
+  outline-offset: 3px;
+}
+
+.az-contact-links {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.az-contact-link {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 22px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms ease, opacity 160ms ease;
+}
+
+.az-contact-link__icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: rgba(244, 241, 234, 0.72);
+}
+
+.az-contact-link__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.az-contact-link__copy strong {
+  font-family: Raleway, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #f7f3ea;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.az-contact-link__copy small {
+  font-family: Raleway, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(244, 241, 234, 0.48);
+}
+
+.az-contact-link__arrow {
+  font-size: 15px;
+  color: rgba(244, 241, 234, 0.38);
+}
+
+.az-contact-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 0;
+  font-family: Raleway, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(244, 241, 234, 0.55);
+}
+
+.az-contact-note__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ecf8e;
+  box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.16);
+  flex: 0 0 auto;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .az-contact-pill_primary:hover {
+    background: #fff;
+  }
+
+  .az-contact-pill:not(.az-contact-pill_primary):hover {
+    border-color: rgba(255, 255, 255, 0.34);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .az-contact-link:hover {
+    opacity: 0.92;
+  }
+
+  .az-contact-link:hover .az-contact-link__arrow {
+    color: rgba(244, 241, 234, 0.72);
+  }
+}
+
+.az-project {
+  display: grid;
+  gap: 22px;
+}
+
+.az-project__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin: 0 0 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(226, 208, 182, 0.78);
+  font-family: Raleway, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.az-project__hero {
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  aspect-ratio: 16 / 9;
+  background: #0b0b0d;
+}
+
+.az-project__hero img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.az-project__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.az-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4f1ea;
+  font-family: Raleway, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.az-btn_primary {
+  background: rgba(244, 241, 234, 0.92);
+  color: #111;
+  border-color: transparent;
+}
+
+.az-btn:focus-visible {
+  outline: 2px solid #f4f1ea;
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .az-work-spotlight,
+  .az-about {
+    grid-template-columns: 1fr;
+  }
+
+  .az-panel {
+    width: min(1120px, calc(100% - 28px));
+    padding-bottom: calc(118px + env(safe-area-inset-bottom));
+  }
+
+  .az-panel_work {
+    width: min(980px, calc(100% - 28px));
+  }
+
+  .az-panel_contact {
+    width: min(560px, calc(100% - 32px));
+    padding-bottom: calc(128px + env(safe-area-inset-bottom));
+  }
+
+  .az-contact-actions {
+    gap: 8px;
+  }
+
+  .az-contact-link {
+    gap: 12px;
+    padding: 18px 0;
+  }
+
+  .az-contact-link__copy strong {
+    font-size: 14px;
+  }
+
+  .az-work-spotlight__cover {
+    min-height: 190px;
+    aspect-ratio: 16 / 10;
+  }
+
+  .az-work-spotlight__copy {
+    padding: 18px 16px 16px;
+  }
+
+  .az-work-row {
+    gap: 8px;
+    padding: 0 10px;
+  }
+
+  .az-work-row__name {
+    font-size: 14px;
+  }
+
+  .az-work-row small {
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .az-about__portrait {
+    width: min(160px, 56vw);
+  }
+}
+
+@media (max-width: 390px) {
+  .az-panel__title {
+    font-size: 26px;
+  }
+
+  .az-work-wheel {
+    --az-work-visible: 5;
+  }
+
+  .az-work-spotlight__copy {
+    padding: 16px 14px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .az-view,
+  .az-view.is-visible,
+  .az-view.is-leaving,
+  .az-work-spotlight,
+  .az-work-spotlight__cover img,
+  .az-work-wheel__track,
+  .az-work-row,
+  .az-contact-pill,
+  .az-contact-link {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .az-view,
+  .az-view.is-visible,
+  .az-view.is-leaving,
+  .az-work-spotlight__cover img {
+    transform: none !important;
+  }
+
+  .az-view.is-active {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,5 @@
+# Block script execution in published media.
+<FilesMatch "\.(?i:php|phtml|phar|cgi|pl|py|jsp|asp|aspx)$">
+  Require all denied
+</FilesMatch>
+Options -Indexes

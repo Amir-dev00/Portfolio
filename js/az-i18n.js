@@ -14,10 +14,6 @@
       "title.about": "About — Amirhossein Zamanzade | Developer",
       "title.contact": "Contact — Amirhossein Zamanzade | Developer",
       "title.project": "{name} — Amirhossein Zamanzade | Developer",
-      "preloader.aria": "Loading Amirhossein's portfolio",
-      "preloader.label": "LOADING EXPERIENCE",
-      "preloader.progress": "Loading progress",
-      "preloader.role": "SOFTWARE ENGINEER",
       "nav.primary": "Primary",
       "nav.work": "Work",
       "nav.about": "About",
@@ -40,6 +36,10 @@
       "home.arrows": "Project slides",
       "home.prev": "Previous project",
       "home.next": "Next project",
+      "home.slide.personal-portfolio-website": "Personal Portfolio Website",
+      "home.slide.shopping-mall-desktop": "Shopping Mall Desktop",
+      "home.slide.rest-api-microservice": "REST API Microservice",
+      "home.slide.telegram-automation-bot": "Telegram Automation Bot",
       "work.aria": "Work",
       "work.eyebrow": "Selected work",
       "work.title": "Selected projects.",
@@ -99,10 +99,6 @@
       "title.about": "درباره — امیرحسین زمان‌زاده | توسعه‌دهنده",
       "title.contact": "تماس — امیرحسین زمان‌زاده | توسعه‌دهنده",
       "title.project": "{name} — امیرحسین زمان‌زاده | توسعه‌دهنده",
-      "preloader.aria": "در حال بارگذاری نمونه‌کارهای امیرحسین",
-      "preloader.label": "در حال آماده‌سازی تجربه",
-      "preloader.progress": "پیشرفت بارگذاری",
-      "preloader.role": "مهندس نرم‌افزار",
       "nav.primary": "ناوبری اصلی",
       "nav.work": "کارها",
       "nav.about": "درباره",
@@ -125,6 +121,10 @@
       "home.arrows": "اسلاید پروژه‌ها",
       "home.prev": "پروژه قبلی",
       "home.next": "پروژه بعدی",
+      "home.slide.personal-portfolio-website": "وب‌سایت نمونه‌کار شخصی",
+      "home.slide.shopping-mall-desktop": "اپلیکیشن دسکتاپ مرکز خرید",
+      "home.slide.rest-api-microservice": "میکروسرویس REST API",
+      "home.slide.telegram-automation-bot": "ربات اتوماسیون تلگرام",
       "work.aria": "کارها",
       "work.eyebrow": "کارهای منتخب",
       "work.title": "پروژه‌های منتخب.",
@@ -328,8 +328,123 @@
     html.classList.toggle("az-lang-en", current === "en");
   }
 
+  function homeSlideType() {
+    // Persian must stay word/line-based so letters remain joined.
+    return current === "fa" ? "lines, words" : "lines, words, chars";
+  }
+
+  function bridgeFaWordsAsChars(el) {
+    if (!el || current !== "fa") return;
+    el.querySelectorAll(".split-text__word").forEach(function (word) {
+      word.classList.add("split-text__char");
+    });
+  }
+
+  function revealSplitHeading(el) {
+    if (!window.gsap || !el) return;
+    var nodes = el.querySelectorAll(".split-text__line, .split-text__word, .split-text__char");
+    if (!nodes.length) return;
+    // Fade swiper already hides inactive slides; keep split units visible so a
+    // mid-transition language switch cannot leave the active title stuck hidden.
+    try {
+      window.gsap.set(nodes, {
+        autoAlpha: 1,
+        x: 0,
+        y: 0,
+        xPercent: 0,
+        yPercent: 0,
+      });
+    } catch (err) {}
+  }
+
+  function resplitHomeHeading(el, title) {
+    if (window.gsap) {
+      try {
+        window.gsap.killTweensOf(
+          el.querySelectorAll(".split-text__line, .split-text__word, .split-text__char")
+        );
+      } catch (err) {}
+    }
+
+    if (el._azSplitText && typeof el._azSplitText.revert === "function") {
+      try {
+        el._azSplitText.revert();
+      } catch (err) {}
+      el._azSplitText = null;
+    }
+
+    el.textContent = title;
+    el.setAttribute("data-split-text-type", homeSlideType());
+    el.setAttribute("data-split-text-set", current === "fa" ? "words" : "chars");
+
+    var SplitText = window.SplitText;
+    if (!SplitText) {
+      el.classList.add("js-split-text");
+      return;
+    }
+
+    var split = new SplitText(el, {
+      type: homeSlideType(),
+      linesClass: "split-text__line overflow",
+      wordsClass: "split-text__word",
+      charsClass: "split-text__char",
+      reduceWhiteSpace: false,
+    });
+    el._azSplitText = split;
+    el.classList.add("split-text");
+    el.classList.remove("js-split-text");
+    bridgeFaWordsAsChars(el);
+    revealSplitHeading(el);
+  }
+
+  function applyHomeHeadings() {
+    var root = document.getElementById("view-home");
+    if (!root) return;
+
+    root.querySelectorAll(".slider__heading[data-project-slug]").forEach(function (el) {
+      var slug = el.getAttribute("data-project-slug");
+      if (!slug) return;
+      var title = t("home.slide." + slug);
+      var type = homeSlideType();
+      el.setAttribute("data-split-text-type", type);
+      el.setAttribute("data-split-text-set", current === "fa" ? "words" : "chars");
+
+      var awaitingRhye =
+        el.classList.contains("js-split-text") &&
+        !el.querySelector(".split-text__word, .split-text__char, .split-text__line");
+
+      if (awaitingRhye) {
+        el.textContent = title;
+        return;
+      }
+
+      resplitHomeHeading(el, title);
+    });
+  }
+
+  function scheduleHomeHeadingBridge() {
+    var tries = 0;
+    var timer = window.setInterval(function () {
+      tries += 1;
+      var headings = document.querySelectorAll(
+        "#view-home .slider__heading[data-project-slug]"
+      );
+      var splitReady = true;
+      headings.forEach(function (el) {
+        var hasSplit = !!el.querySelector(
+          ".split-text__word, .split-text__char, .split-text__line"
+        );
+        if (el.classList.contains("js-split-text") && !hasSplit) splitReady = false;
+        if (hasSplit) bridgeFaWordsAsChars(el);
+      });
+      if (splitReady || tries > 60) window.clearInterval(timer);
+    }, 50);
+  }
+
   function applyNode(el) {
     if (!el || el.nodeType !== 1) return;
+    // Preloader stays English-only; never apply translation hooks inside it.
+    if (el.closest && el.closest("#js-preloader")) return;
     var key = el.getAttribute("data-i18n");
     if (key) {
       var vars = {};
@@ -356,6 +471,7 @@
     var scope = root || document;
     applyDocumentShell();
     scope.querySelectorAll("[data-i18n], [data-i18n-attr]").forEach(applyNode);
+    applyHomeHeadings();
     var meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", t("meta.description"));
     document.querySelectorAll(".az-lang-switch__btn").forEach(function (btn) {
@@ -414,6 +530,7 @@
   function boot() {
     bindSwitcher(document);
     applyAll(document);
+    scheduleHomeHeadingBridge();
   }
 
   if (document.readyState === "loading") {
