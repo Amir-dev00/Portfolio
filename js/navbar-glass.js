@@ -54,7 +54,16 @@
         item.hasAttribute("download") ||
         item.target === "_blank";
       if (isExternal) return;
+      // Hash SPA routes are owned by az-app.js (keeps dock highlight + aria-current in sync).
+      if (href.charAt(0) === "#") return;
       setActive(item);
+    });
+
+    // Avoid sticky tap :focus rectangles; keep :focus-visible for keyboard.
+    item.addEventListener("pointerup", function (event) {
+      if (event.pointerType && event.pointerType !== "keyboard") {
+        item.blur();
+      }
     });
   });
 

@@ -1,0 +1,377 @@
+/* Hash SPA router — Home / Work / About / Contact. Dock stays mounted. */
+(function () {
+  "use strict";
+
+  var REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var TITLE_BASE = "Amirhossein Zamanzade | Developer";
+  var app = document.getElementById("az-app");
+  var nav = document.getElementById("glass-nav");
+  if (!app) return;
+
+  var views = {
+    home: document.getElementById("view-home"),
+    work: document.getElementById("view-work"),
+    about: document.getElementById("view-about"),
+    contact: document.getElementById("view-contact"),
+    project: document.getElementById("view-project"),
+  };
+
+  var workGrid = document.getElementById("az-work-grid");
+  var projectRoot = document.getElementById("az-project-root");
+  var indicator = nav && nav.querySelector(".glass-nav__indicator");
+  var currentKey = null;
+  var animating = false;
+  var pendingRoute = null;
+  var transitionTimer = 0;
+
+  function normalizeHash(raw) {
+    var hash = String(raw || "").replace(/^#/, "").replace(/^\/+/, "");
+    if (!hash || hash === "selected-work" || hash === "/") return { name: "home" };
+    if (hash === "home") return { name: "home" };
+    if (hash === "work") return { name: "work" };
+    if (hash === "about") return { name: "about" };
+    if (hash === "contact") return { name: "contact" };
+    if (hash.indexOf("work/") === 0) {
+      return { name: "project", slug: decodeURIComponent(hash.slice(5)) };
+    }
+    return { name: "home" };
+  }
+
+  function routeKey(route) {
+    return route.name === "project" ? "project:" + route.slug : route.name;
+  }
+
+  function viewFor(route) {
+    return views[route.name] || views.home;
+  }
+
+  function setDocumentTitle(route) {
+    if (route.name === "work") document.title = "Work — " + TITLE_BASE;
+    else if (route.name === "about") document.title = "About — " + TITLE_BASE;
+    else if (route.name === "contact") document.title = "Contact — " + TITLE_BASE;
+    else if (route.name === "project") {
+      var project = window.AZ_getProjectBySlug && window.AZ_getProjectBySlug(route.slug);
+      document.title = (project ? project.title + " — " : "") + TITLE_BASE;
+    } else document.title = TITLE_BASE;
+  }
+
+  function getHomeSwiper() {
+    var el = document.querySelector(".js-slider-fullscreen-projects__images");
+    return el && el.swiper ? el.swiper : null;
+  }
+
+  function setHomeSliderLive(live) {
+    var swiper = getHomeSwiper();
+    if (!swiper) return;
+    try {
+      if (live) {
+        if (typeof swiper.update === "function") swiper.update();
+        if (swiper.autoplay && typeof swiper.autoplay.start === "function") swiper.autoplay.start();
+        if ("allowTouchMove" in swiper) swiper.allowTouchMove = true;
+        if (swiper.mousewheel && typeof swiper.mousewheel.enable === "function") {
+          swiper.mousewheel.enable();
+        }
+        window.dispatchEvent(new Event("resize"));
+      } else {
+        if (swiper.autoplay && typeof swiper.autoplay.stop === "function") swiper.autoplay.stop();
+        if ("allowTouchMove" in swiper) swiper.allowTouchMove = false;
+        if (swiper.mousewheel && typeof swiper.mousewheel.disable === "function") {
+          swiper.mousewheel.disable();
+        }
+      }
+    } catch (err) {
+      /* Rhye swiper internals may differ across builds. */
+    }
+  }
+
+  function moveIndicator(navKey) {
+    if (!nav || !indicator) return;
+    var target =
+      nav.querySelector('[data-nav="' + navKey + '"]') ||
+      (navKey === "work" ? nav.querySelector('[data-nav="portfolio"]') : null);
+    if (!target || navKey === "cv") {
+      indicator.classList.remove("is-on", "is-home");
+      return;
+    }
+
+    var bar = nav.querySelector(".glass-nav__bar");
+    if (!bar) return;
+
+    var isHome = navKey === "home";
+    var icon =
+      (isHome && target.querySelector(".glass-nav__home-glass")) ||
+      target.querySelector(".glass-nav__icon, .glass-nav__action-icon, .glass-nav__home-icon") ||
+      target;
+
+    var barBox = bar.getBoundingClientRect();
+    var iconBox = icon.getBoundingClientRect();
+    var iconCx = iconBox.left + iconBox.width / 2 - barBox.left;
+    var iconCy = iconBox.top + iconBox.height / 2 - barBox.top;
+
+    // Glass oval hugs the icon only — equal side padding, label stays under it.
+    var ovalW;
+    var ovalH;
+    if (isHome) {
+      ovalW = Math.round(iconBox.width);
+      ovalH = Math.round(iconBox.height);
+    } else {
+      var padX = Math.max(11, Math.round(iconBox.width * 0.75));
+      var padY = 2;
+      ovalH = Math.round(iconBox.height + padY * 2);
+      ovalW = Math.round(Math.max(iconBox.width + padX * 2, ovalH + 14));
+    }
+
+    var x = iconCx - ovalW / 2;
+    // Bias upward so the oval sits on the icon and clears the label beneath.
+    var y = iconCy - ovalH / 2 - (isHome ? 0 : 2);
+
+    indicator.classList.toggle("is-home", isHome);
+    indicator.style.width = ovalW + "px";
+    indicator.style.height = ovalH + "px";
+    indicator.style.transform = "translate3d(" + x.toFixed(2) + "px," + y.toFixed(2) + "px,0)";
+    indicator.classList.add("is-on");
+  }
+
+  function setDockActive(route) {
+    if (!nav) return;
+    var navKey = route.name === "project" ? "work" : route.name;
+    var map = { home: "home", work: "work", about: "about", contact: "contact" };
+    var activeKey = map[navKey] || "home";
+    nav.querySelectorAll("[data-nav]").forEach(function (item) {
+      var key = item.getAttribute("data-nav");
+      var normalized = key === "portfolio" ? "work" : key;
+      var active = normalized === activeKey && key !== "cv";
+      item.classList.toggle("is-active", active);
+      if (active) item.setAttribute("aria-current", "page");
+      else item.removeAttribute("aria-current");
+    });
+    moveIndicator(activeKey);
+    window.requestAnimationFrame(function () {
+      moveIndicator(activeKey);
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function renderWorkGrid() {
+    if (!workGrid || workGrid.dataset.ready === "1") return;
+    var projects = window.AZ_PROJECTS || [];
+    workGrid.innerHTML = projects
+      .map(function (project) {
+        return (
+          '<li>' +
+          '<a class="az-work-card" href="#work/' +
+          encodeURIComponent(project.slug) +
+          '">' +
+          '<div class="az-work-card__media">' +
+          '<img src="' +
+          escapeHtml(project.image) +
+          '" alt="" loading="lazy" decoding="async" width="640" height="400"/>' +
+          "</div>" +
+          '<div class="az-work-card__body">' +
+          '<span class="az-work-card__category">' +
+          escapeHtml(project.category) +
+          "</span>" +
+          '<h3 class="az-work-card__title">' +
+          escapeHtml(project.title) +
+          "</h3>" +
+          '<p class="az-work-card__text">' +
+          escapeHtml(project.shortDescription) +
+          "</p>" +
+          "</div>" +
+          "</a>" +
+          "</li>"
+        );
+      })
+      .join("");
+    workGrid.dataset.ready = "1";
+  }
+
+  function renderProject(slug) {
+    if (!projectRoot) return false;
+    var project = window.AZ_getProjectBySlug && window.AZ_getProjectBySlug(slug);
+    if (!project) {
+      projectRoot.innerHTML =
+        '<div class="az-panel">' +
+        '<a class="az-project__back" href="#work">← Back to Work</a>' +
+        '<h1 class="az-panel__title">Project not found</h1>' +
+        '<p class="az-panel__lead">That project is unavailable. Return to the work grid to continue.</p>' +
+        "</div>";
+      return false;
+    }
+    var actions =
+      '<div class="az-project__actions">' +
+      (project.githubUrl
+        ? '<a class="az-btn az-btn_primary" href="' +
+          escapeHtml(project.githubUrl) +
+          '" target="_blank" rel="noopener">GitHub</a>'
+        : "") +
+      (project.liveUrl
+        ? '<a class="az-btn" href="' +
+          escapeHtml(project.liveUrl) +
+          '" target="_blank" rel="noopener">Live</a>'
+        : "") +
+      "</div>";
+    var tech = (project.technologies || [])
+      .map(function (item) {
+        return "<li>" + escapeHtml(item) + "</li>";
+      })
+      .join("");
+    projectRoot.innerHTML =
+      '<article class="az-panel az-project">' +
+      '<a class="az-project__back" href="#work">← Back to Work</a>' +
+      '<p class="az-panel__eyebrow">' +
+      escapeHtml(project.category) +
+      " · " +
+      escapeHtml(project.date) +
+      "</p>" +
+      '<h1 class="az-panel__title">' +
+      escapeHtml(project.title) +
+      "</h1>" +
+      '<p class="az-panel__lead">' +
+      escapeHtml(project.fullDescription) +
+      "</p>" +
+      '<div class="az-project__hero"><img src="' +
+      escapeHtml(project.image) +
+      '" alt="' +
+      escapeHtml(project.title) +
+      '" decoding="async"/></div>' +
+      '<ul class="az-about__meta">' +
+      "<li><strong>Role:</strong> " +
+      escapeHtml(project.role) +
+      "</li>" +
+      "</ul>" +
+      '<ul class="az-skills">' +
+      tech +
+      "</ul>" +
+      actions +
+      "</article>";
+    return true;
+  }
+
+  function afterShow(route) {
+    document.documentElement.dataset.azRoute = route.name === "project" ? "work" : route.name;
+    document.documentElement.classList.toggle("az-route-home", route.name === "home");
+    setHomeSliderLive(route.name === "home");
+    if (route.name === "home") {
+      window.scrollTo(0, 0);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function showView(route, instant) {
+    var next = viewFor(route);
+    var key = routeKey(route);
+    if (!next) return;
+    if (key === currentKey && !animating) {
+      setDockActive(route);
+      return;
+    }
+
+    // Rapid taps: jump to the latest route instead of queuing stale frames.
+    if (animating) {
+      pendingRoute = route;
+      if (transitionTimer) {
+        window.clearTimeout(transitionTimer);
+        transitionTimer = 0;
+      }
+      animating = false;
+      instant = true;
+    }
+
+    if (route.name === "work") renderWorkGrid();
+    if (route.name === "project") renderProject(route.slug);
+
+    var prev = document.querySelector(".az-view.is-active");
+    setDocumentTitle(route);
+    setDockActive(route);
+
+    function activate() {
+      Object.keys(views).forEach(function (name) {
+        var view = views[name];
+        if (!view) return;
+        var on = view === next;
+        view.classList.toggle("is-active", on);
+        view.classList.toggle("is-visible", on);
+        view.classList.remove("is-leaving");
+        view.hidden = !on;
+        view.setAttribute("aria-hidden", on ? "false" : "true");
+      });
+      currentKey = key;
+      afterShow(route);
+      animating = false;
+      transitionTimer = 0;
+      var queued = pendingRoute;
+      pendingRoute = null;
+      if (queued && routeKey(queued) !== key) {
+        showView(queued, true);
+      }
+    }
+
+    if (instant || REDUCE || !prev || prev === next) {
+      if (prev && prev !== next) {
+        prev.classList.remove("is-leaving", "is-visible", "is-active");
+        prev.hidden = true;
+        prev.setAttribute("aria-hidden", "true");
+      }
+      activate();
+      return;
+    }
+
+    animating = true;
+    prev.classList.add("is-leaving");
+    prev.classList.remove("is-visible");
+    transitionTimer = window.setTimeout(function () {
+      activate();
+      if (!REDUCE) {
+        next.classList.remove("is-visible");
+        void next.offsetWidth;
+        next.classList.add("is-visible");
+      }
+    }, 170);
+  }
+
+  function applyFromLocation(instant) {
+    showView(normalizeHash(window.location.hash), instant);
+  }
+
+  function onNavClick(event) {
+    var link = event.target.closest("a[data-nav], a[href^='#']");
+    if (!link || link.hasAttribute("download")) return;
+    var href = link.getAttribute("href") || "";
+    if (href.indexOf("mailto:") === 0 || href.indexOf("http") === 0) return;
+    if (href.charAt(0) !== "#") return;
+    event.preventDefault();
+    var route = normalizeHash(href);
+    var nextHash = "#" + (route.name === "project" ? "work/" + route.slug : route.name === "home" ? "home" : route.name);
+    if (window.location.hash === nextHash) {
+      showView(route, false);
+      return;
+    }
+    window.location.hash = nextHash;
+  }
+
+  document.addEventListener("click", onNavClick);
+  window.addEventListener("hashchange", function () {
+    applyFromLocation(false);
+  });
+  window.addEventListener("resize", function () {
+    var route = normalizeHash(window.location.hash);
+    setDockActive(route);
+  });
+
+  // Ensure an initial hash exists for shareable Home without forcing reload loops.
+  if (!window.location.hash || window.location.hash === "#") {
+    history.replaceState(null, "", "#home");
+  }
+
+  document.documentElement.classList.add("az-app-ready");
+  applyFromLocation(true);
+})();

@@ -131,6 +131,47 @@ html.cursor-disabled button {
   user-select: none;
 }
 
+.glass-nav__indicator {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, #f4f1ea 14%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -6px 12px rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  will-change: transform, width, height;
+  transition:
+    transform 320ms var(--ease-out),
+    width 320ms var(--ease-out),
+    height 320ms var(--ease-out),
+    border-radius 280ms var(--ease-out),
+    opacity 180ms var(--ease-out),
+    background-color 220ms var(--ease-out),
+    box-shadow 220ms var(--ease-out);
+}
+
+.glass-nav__indicator.is-on {
+  opacity: 1;
+}
+
+/* Home already has its own glass circle; keep the indicator there for glide continuity only. */
+.glass-nav__indicator.is-on.is-home {
+  opacity: 0 !important;
+  border-radius: 50%;
+}
+
 .glass-nav__tab {
   display: flex;
   flex-direction: column;
@@ -140,11 +181,11 @@ html.cursor-disabled button {
   width: 100%;
   min-height: 38px;
   padding: 2px 1px;
-  border-radius: 12px;
+  border-radius: 0;
+  background: transparent;
   transform: translateY(var(--mag-y, 0)) translateX(var(--mag-x, 0));
   transition:
     color 160ms var(--ease-out),
-    background-color 160ms var(--ease-out),
     transform 180ms var(--ease-spring);
 }
 
@@ -154,6 +195,12 @@ html.cursor-disabled button {
 
 .glass-nav__tab:active {
   transform: scale(0.96);
+}
+
+.glass-nav__tab:focus,
+.glass-nav__action:focus,
+.glass-nav__home:focus {
+  outline: none;
 }
 
 .glass-nav__icon {
@@ -228,6 +275,17 @@ html.cursor-disabled button {
   height: 17px;
 }
 
+.glass-nav__home.is-active .glass-nav__home-glass {
+  background: rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, #f4f1ea 16%, transparent);
+  border-color: rgba(255, 255, 255, 0.46);
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.36),
+    0 0 18px rgba(244, 241, 234, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -8px 18px rgba(255, 255, 255, 0.06);
+}
+
 .glass-nav__home:active .glass-nav__home-glass {
   transform: scale(0.92);
 }
@@ -283,9 +341,12 @@ html.cursor-disabled button {
   transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out);
 }
 
-.glass-nav :focus-visible {
+.glass-nav__tab:focus-visible,
+.glass-nav__action:focus-visible,
+.glass-nav__home:focus-visible {
   outline: 2px solid #f4f1ea;
   outline-offset: 3px;
+  border-radius: 12px;
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -300,6 +361,7 @@ html.cursor-disabled button {
     color: #fff;
   }
 
+  .glass-nav__tab[data-nav="work"]:hover .glass-nav__icon,
   .glass-nav__tab[data-nav="portfolio"]:hover .glass-nav__icon {
     transform: translateY(-1px);
   }
@@ -418,10 +480,21 @@ html.cursor-disabled button {
   .glass-nav__home-glass,
   .glass-nav__action,
   .glass-nav__action-icon,
-  .glass-nav__action[data-tooltip]::after {
+  .glass-nav__action[data-tooltip]::after,
+  .glass-nav__indicator {
     animation: none;
-    transition-duration: 160ms;
+    transition-duration: 1ms;
     filter: none;
+  }
+
+  .glass-nav.is-ready .glass-nav__bar,
+  .glass-nav__tab,
+  .glass-nav__icon,
+  .glass-nav__home,
+  .glass-nav__home-glass,
+  .glass-nav__action,
+  .glass-nav__action-icon,
+  .glass-nav__action[data-tooltip]::after {
     transform: none;
   }
 

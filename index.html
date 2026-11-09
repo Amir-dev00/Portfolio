@@ -23,6 +23,8 @@
     <link rel="stylesheet" type="text/css" href="css/navbar-glass.css"/>
     <link rel="stylesheet" type="text/css" href="css/az-preloader.css"/>
     <link rel="stylesheet" type="text/css" href="css/az-profile.css"/>
+    <link rel="stylesheet" type="text/css" href="css/az-app.css"/>
+    <link rel="stylesheet" type="text/css" href="css/az-progress.css"/>
     <link rel="preload" href="assets/img/amir/az-logo.webp" as="image" type="image/webp"/>
     <link rel="preload" href="assets/img/amir/profile.jpg" as="image" type="image/jpeg"/>
     <style>
@@ -291,8 +293,9 @@
       <nav class="glass-nav" id="glass-nav" aria-label="Primary">
         <div class="glass-nav__bar" role="list">
           <span class="glass-nav__sheen" aria-hidden="true"></span>
+          <span class="glass-nav__indicator" aria-hidden="true"></span>
 
-          <a class="glass-nav__tab" role="listitem" href="#selected-work" data-nav="portfolio">
+          <a class="glass-nav__tab" role="listitem" href="#work" data-nav="work">
             <span class="glass-nav__icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"/><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M22 13a18.15 18.15 0 0 1-20 0"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
             </span>
@@ -306,7 +309,7 @@
             <span class="glass-nav__name">About</span>
           </a>
 
-          <a class="glass-nav__home is-active" role="listitem" href="/" aria-label="Home" aria-current="page" data-nav="home">
+          <a class="glass-nav__home is-active" role="listitem" href="#home" aria-label="Home" aria-current="page" data-nav="home">
             <span class="glass-nav__home-glass" aria-hidden="true"></span>
             <span class="glass-nav__home-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
@@ -320,7 +323,7 @@
             <span class="glass-nav__name">CV</span>
           </a>
 
-          <a class="glass-nav__action glass-nav__contact" role="listitem" href="mailto:itsamirzamani@gmail.com" aria-label="Contact Me" data-tooltip="Contact Me" data-nav="contact">
+          <a class="glass-nav__action glass-nav__contact" role="listitem" href="#contact" aria-label="Contact" data-tooltip="Contact" data-nav="contact">
             <span class="glass-nav__action-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
             </span>
@@ -330,10 +333,9 @@
       </nav>
       <!-- PAGE MAIN -->
       <div class="js-smooth-scroll bg-dark-1" id="page-wrapper" data-barba="container">
-        <main class="page-wrapper__content">
-          <!-- section MASTHEAD -->
-          <section id="about" class="section section-masthead d-none" data-background-color="var(--color-dark-1)"></section>
-          <!-- - section MASTHEAD -->
+        <main class="page-wrapper__content az-app" id="az-app">
+          <!-- HOME VIEW -->
+          <section class="az-view is-active is-visible" id="view-home" data-view="home" aria-label="Home">
           <!-- section PROJECTS SLIDER FULLSCREEN -->
           <section id="selected-work" class="section section-fullheight section-projects section-projects-slider bg-dark-1 overflow" data-arts-theme-text="light" data-arts-os-animation>
             <div class="section-fullheight__inner section-fullheight__inner_mobile text-center">
@@ -418,8 +420,8 @@
                   </div>
                 </div>
                 <!-- - slider FOOTER -->
-                <!-- slider COUNTER -->
-                <div class="slider__wrapper-counter slider-fullscreen-projects__counter">
+                <!-- slider COUNTER (kept for Rhye sync; visually replaced by az-progress) -->
+                <div class="slider__wrapper-counter slider-fullscreen-projects__counter" aria-hidden="true">
                   <div class="slider__counter slider__counter_current">
                     <div class="js-slider-fullscreen-projects__counter-current swiper-container">
                       <div class="swiper-wrapper"></div>
@@ -429,6 +431,7 @@
                   <div class="slider__counter slider__counter_total js-slider-fullscreen-projects__counter-total"></div>
                 </div>
                 <!-- - slider COUNTER -->
+                <div class="az-progress" id="az-progress" role="tablist" aria-label="Project slides" hidden></div>
                 <!-- slider ARROWS -->
                 <div class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev">
                   <div class="arrow arrow-left js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
@@ -460,6 +463,97 @@
             </div>
           </section>
           <!-- - section PROJECTS SLIDER FULLSCREEN -->
+          </section>
+          <!-- - HOME VIEW -->
+
+          <!-- WORK VIEW -->
+          <section class="az-view" id="view-work" data-view="work" aria-label="Work" hidden aria-hidden="true">
+            <div class="az-panel">
+              <p class="az-panel__eyebrow">Selected work</p>
+              <h1 class="az-panel__title">Projects.</h1>
+              <p class="az-panel__lead">A selection of websites, applications, APIs, and automation tools.</p>
+              <ul class="az-work-grid" id="az-work-grid"></ul>
+            </div>
+          </section>
+
+          <!-- PROJECT DETAIL VIEW -->
+          <section class="az-view" id="view-project" data-view="project" aria-label="Project" hidden aria-hidden="true">
+            <div id="az-project-root"></div>
+          </section>
+
+          <!-- ABOUT VIEW -->
+          <section class="az-view" id="view-about" data-view="about" aria-label="About" hidden aria-hidden="true">
+            <div class="az-panel">
+              <p class="az-panel__eyebrow">About</p>
+              <h1 class="az-panel__title">Software engineer.</h1>
+              <div class="az-about">
+                <div>
+                  <div class="az-about__portrait">
+                    <img src="assets/img/amir/profile.jpg" width="640" height="640" alt="Portrait of Amirhossein Zamanzade" decoding="async"/>
+                  </div>
+                  <ul class="az-about__meta">
+                    <li><strong>Location:</strong> Tehran, Iran</li>
+                    <li><strong>Education:</strong> B.Sc. Computer Science, Amirkabir University of Technology</li>
+                    <li><strong>Status:</strong> Available for freelance</li>
+                  </ul>
+                </div>
+                <div>
+                  <p class="az-panel__lead" style="margin-bottom:16px">
+                    I’m Amirhossein Zamanzade, a Computer Science student and Full-Stack Developer focused on fast, scalable, and user-centric products. I care about clean architecture, modern tooling, and interfaces that feel refined.
+                  </p>
+                  <p class="az-panel__lead" style="margin-bottom:0">
+                    This portfolio reflects my learning journey across web, desktop, APIs, and automation — and a place to connect for collaboration.
+                  </p>
+                  <ul class="az-skills" aria-label="Skills">
+                    <li>HTML</li><li>CSS</li><li>JavaScript</li><li>React</li><li>Python</li><li>Java</li>
+                    <li>Node.js</li><li>PHP</li><li>Laravel</li><li>.NET</li><li>MySQL</li><li>PostgreSQL</li>
+                    <li>MongoDB</li><li>Bootstrap</li><li>Tailwind</li><li>JavaFX</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CONTACT VIEW -->
+          <section class="az-view" id="view-contact" data-view="contact" aria-label="Contact" hidden aria-hidden="true">
+            <div class="az-panel">
+              <p class="az-panel__eyebrow">Contact</p>
+              <h1 class="az-panel__title">Let’s talk.</h1>
+              <p class="az-panel__lead">For collaborations, roles, or technical inquiries — reach out through any channel below.</p>
+              <div class="az-contact-grid">
+                <a class="az-contact-card" href="mailto:itsamirzamani@gmail.com">
+                  <span class="az-contact-card__label">Email</span>
+                  <span class="az-contact-card__value">itsamirzamani@gmail.com</span>
+                  <span class="az-contact-card__hint">Direct message</span>
+                </a>
+                <a class="az-contact-card" href="https://github.com/Amir-dev00" target="_blank" rel="noopener">
+                  <span class="az-contact-card__label">GitHub</span>
+                  <span class="az-contact-card__value">Amir-dev00</span>
+                  <span class="az-contact-card__hint">Code &amp; repositories</span>
+                </a>
+                <a class="az-contact-card" href="https://linkedin.com/in/amirhossein-zamanzade" target="_blank" rel="noopener">
+                  <span class="az-contact-card__label">LinkedIn</span>
+                  <span class="az-contact-card__value">Amirhossein Zamanzade</span>
+                  <span class="az-contact-card__hint">Professional profile</span>
+                </a>
+                <a class="az-contact-card" href="https://t.me/Amir_dev00" target="_blank" rel="noopener">
+                  <span class="az-contact-card__label">Telegram</span>
+                  <span class="az-contact-card__value">@Amir_dev00</span>
+                  <span class="az-contact-card__hint">Quick chat</span>
+                </a>
+                <a class="az-contact-card" href="assets/cv/Amirhossein-Zamanzade-CV.pdf" download="Amirhossein-Zamanzade-CV.pdf">
+                  <span class="az-contact-card__label">CV</span>
+                  <span class="az-contact-card__value">Download PDF</span>
+                  <span class="az-contact-card__hint">Resume file</span>
+                </a>
+                <a class="az-contact-card" href="tel:+989966892614">
+                  <span class="az-contact-card__label">Phone</span>
+                  <span class="az-contact-card__value">+98 996 689 2614</span>
+                  <span class="az-contact-card__hint">Tehran, Iran</span>
+                </a>
+              </div>
+            </div>
+          </section>
         </main>
         <!-- PAGE FOOTER -->
         <!-- - PAGE FOOTER -->
@@ -645,6 +739,9 @@
     <!-- COMPONENTS -->
     <script src="js/components.js"></script>
     <script src="js/az-profile.js"></script>
+    <script src="js/az-projects.js"></script>
+    <script src="js/az-app.js"></script>
+    <script src="js/az-progress.js"></script>
     <!-- - COMPONENTS -->
     <script src="https://maps.googleapis.com/maps/api/js?callback=Function.prototype&amp;key=AIzaSyBwR_TrF6h7-pMxkKv_q2t8BXX3w6QuFOc" async></script>
 </body>
