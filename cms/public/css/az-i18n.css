@@ -55,6 +55,15 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
+/* Kill sticky mouse/touch focus rings; keep a ring for keyboard :focus-visible only. */
+.az-lang-switch__btn:focus {
+  outline: none;
+}
+
+.az-lang-switch__btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
 .az-lang-switch__btn:focus-visible {
   outline: 2px solid #f4f1ea;
   outline-offset: 2px;
@@ -85,6 +94,8 @@ html.az-lang-fa .az-contact-pill,
 html.az-lang-fa .az-profile__role,
 html.az-lang-fa .glass-nav__name,
 html.az-lang-fa .az-about__meta,
+html.az-lang-fa .az-about-skills__title,
+html.az-lang-fa .az-about-skills__heading,
 html.az-lang-fa .az-project__back {
   font-family: var(--font-ui);
 }
@@ -92,9 +103,16 @@ html.az-lang-fa .az-project__back {
 html.az-lang-fa .az-panel__eyebrow,
 html.az-lang-fa .az-contact-eyebrow,
 html.az-lang-fa .az-work-spotlight__eyebrow,
+html.az-lang-fa .az-about-skills__title,
 html.az-lang-fa .glass-nav__name {
   letter-spacing: 0.04em;
   text-transform: none;
+}
+
+/* Keep tech chip labels LTR inside Persian About cards. */
+html[dir="rtl"] .az-about-skills__list {
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 /* Preloader is English-only regardless of saved locale. */
@@ -142,6 +160,7 @@ html[dir="rtl"] .az-contact-link {
 }
 
 html[dir="rtl"] .az-panel,
+html[dir="rtl"] .az-panel_about,
 html[dir="rtl"] .az-panel_contact,
 html[dir="rtl"] .az-panel_work {
   text-align: start;

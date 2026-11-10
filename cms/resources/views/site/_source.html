@@ -468,20 +468,32 @@
                 <div class="az-home-arrows" role="group" aria-label="Project slides" data-i18n-attr="aria-label:home.arrows">
                   <div class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev" aria-label="Previous project" data-i18n-attr="aria-label:home.prev">
                     <div class="arrow arrow-left js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
-                      <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                      <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
                         <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
                       </svg>
-                      <div class="arrow__pointer arrow-left__pointer"></div>
-                      <div class="arrow__triangle"></div>
+                      <div class="arrow__pointer arrow-left__pointer" aria-hidden="true"></div>
+                      <div class="arrow__triangle" aria-hidden="true"></div>
+                      <span class="az-home-arrows__tab" aria-hidden="true">
+                        <span class="az-home-arrows__glint"></span>
+                        <svg class="az-home-arrows__chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" focusable="false">
+                          <path d="M10.25 3.5 5.75 8l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </span>
                     </div>
                   </div>
                   <div class="slider__arrow slider__arrow_right slider__arrow_absolute js-slider__arrow-next" aria-label="Next project" data-i18n-attr="aria-label:home.next">
                     <div class="arrow arrow-right js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
-                      <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                      <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
                         <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
                       </svg>
-                      <div class="arrow__pointer arrow-right__pointer"></div>
-                      <div class="arrow__triangle"></div>
+                      <div class="arrow__pointer arrow-right__pointer" aria-hidden="true"></div>
+                      <div class="arrow__triangle" aria-hidden="true"></div>
+                      <span class="az-home-arrows__tab" aria-hidden="true">
+                        <span class="az-home-arrows__glint"></span>
+                        <svg class="az-home-arrows__chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" focusable="false">
+                          <path d="M5.75 3.5 10.25 8l-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -517,11 +529,9 @@
 
           <!-- ABOUT VIEW -->
           <section class="az-view" id="view-about" data-view="about" aria-label="About" hidden aria-hidden="true" data-i18n-attr="aria-label:about.aria">
-            <div class="az-panel">
-              <p class="az-panel__eyebrow" data-i18n="about.eyebrow">About</p>
-              <h1 class="az-panel__title" data-i18n="about.title">Software engineer.</h1>
+            <div class="az-panel az-panel_about">
               <div class="az-about">
-                <div>
+                <aside class="az-about__aside">
                   <div class="az-about__portrait">
                     <img src="assets/img/amir/profile.jpg" width="640" height="640" alt="Portrait of Amirhossein Zamanzade" decoding="async" data-i18n-attr="alt:about.portrait.alt"/>
                   </div>
@@ -530,21 +540,65 @@
                     <li><strong data-i18n="about.meta.education.label">Education:</strong> <span data-i18n="about.meta.education.value">B.Sc. Computer Science, Amirkabir University of Technology</span></li>
                     <li><strong data-i18n="about.meta.status.label">Status:</strong> <span data-i18n="about.meta.status.value">Available for freelance</span></li>
                   </ul>
-                </div>
-                <div>
-                  <p class="az-panel__lead" style="margin-bottom:16px" data-i18n="about.p1">
+                </aside>
+
+                <div class="az-about__copy">
+                  <p class="az-panel__eyebrow" data-i18n="about.eyebrow">About</p>
+                  <h1 class="az-panel__title" data-i18n="about.title">Software engineer.</h1>
+                  <p class="az-panel__lead az-about__lead" data-i18n="about.p1">
                     I’m Amirhossein Zamanzade, a Computer Science student and Full-Stack Developer focused on fast, scalable, and user-centric products. I care about clean architecture, modern tooling, and interfaces that feel refined.
                   </p>
-                  <p class="az-panel__lead" style="margin-bottom:0" data-i18n="about.p2">
+                  <p class="az-panel__lead az-about__lead az-about__lead_last" data-i18n="about.p2">
                     This portfolio reflects my learning journey across web, desktop, APIs, and automation — and a place to connect for collaboration.
                   </p>
-                  <ul class="az-skills" aria-label="Skills" data-i18n-attr="aria-label:about.skills">
-                    <li>HTML</li><li>CSS</li><li>JavaScript</li><li>React</li><li>Python</li><li>Java</li>
-                    <li>Node.js</li><li>PHP</li><li>Laravel</li><li>.NET</li><li>MySQL</li><li>PostgreSQL</li>
-                    <li>MongoDB</li><li>Bootstrap</li><li>Tailwind</li><li>JavaFX</li>
-                  </ul>
                 </div>
               </div>
+
+              <section class="az-about-skills" aria-labelledby="about-skills-heading">
+                <h2 class="az-about-skills__title" id="about-skills-heading" data-i18n="about.skills">Skills</h2>
+                <div class="az-about-skills__grid">
+                  <article class="az-about-skills__card">
+                    <h3 class="az-about-skills__heading" data-i18n="about.skills.frontend">Front-end</h3>
+                    <ul class="az-about-skills__list">
+                      <li>HTML</li>
+                      <li>CSS</li>
+                      <li>JavaScript</li>
+                      <li>React</li>
+                      <li>Bootstrap</li>
+                      <li>Tailwind</li>
+                      <li>Sass</li>
+                    </ul>
+                  </article>
+                  <article class="az-about-skills__card">
+                    <h3 class="az-about-skills__heading" data-i18n="about.skills.languages">Programming Languages</h3>
+                    <ul class="az-about-skills__list">
+                      <li>Python</li>
+                      <li>Java</li>
+                      <li>PHP</li>
+                      <li>C</li>
+                      <li>C#</li>
+                    </ul>
+                  </article>
+                  <article class="az-about-skills__card">
+                    <h3 class="az-about-skills__heading" data-i18n="about.skills.backend">Back-end &amp; Database</h3>
+                    <ul class="az-about-skills__list">
+                      <li>Node.js</li>
+                      <li>Laravel</li>
+                      <li>.NET</li>
+                      <li>MySQL</li>
+                      <li>PostgreSQL</li>
+                      <li>MongoDB</li>
+                    </ul>
+                  </article>
+                  <article class="az-about-skills__card">
+                    <h3 class="az-about-skills__heading" data-i18n="about.skills.other">Other Skills</h3>
+                    <ul class="az-about-skills__list">
+                      <li>JavaFX</li>
+                      <li>Scrum</li>
+                    </ul>
+                  </article>
+                </div>
+              </section>
             </div>
           </section>
 
@@ -802,6 +856,7 @@
     <!-- COMPONENTS -->
     <script src="js/components.js"></script>
     <script src="js/az-profile.js"></script>
+    <script src="js/az-home-arrows.js"></script>
     <script src="js/az-projects.js"></script>
     <script src="js/az-app.js"></script>
     <script src="js/az-jalali.js"></script>

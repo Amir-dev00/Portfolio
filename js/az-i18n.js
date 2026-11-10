@@ -74,6 +74,10 @@
       "about.p2":
         "This portfolio reflects my learning journey across web, desktop, APIs, and automation — and a place to connect for collaboration.",
       "about.skills": "Skills",
+      "about.skills.frontend": "Front-end",
+      "about.skills.languages": "Programming Languages",
+      "about.skills.backend": "Back-end & Database",
+      "about.skills.other": "Other Skills",
       "contact.aria": "Contact",
       "contact.eyebrow": "Let’s connect",
       "contact.title": "Let’s talk.",
@@ -196,6 +200,10 @@
       "about.p2":
         "این نمونه کار بازتاب مسیر یادگیری من در وب، دسکتاپ، API و اتوماسیون است — و جایی برای شروع همکاری.",
       "about.skills": "مهارت‌ها",
+      "about.skills.frontend": "فرانت‌اند",
+      "about.skills.languages": "زبان‌های برنامه‌نویسی",
+      "about.skills.backend": "بک‌اند و پایگاه داده",
+      "about.skills.other": "سایر مهارت‌ها",
       "contact.aria": "تماس",
       "contact.eyebrow": "بیایید در ارتباط باشیم",
       "contact.title": "صحبت کنیم.",
@@ -664,9 +672,19 @@
     scope.querySelectorAll("[data-lang]").forEach(function (btn) {
       if (btn.dataset.azLangBound === "1") return;
       btn.dataset.azLangBound = "1";
+      // Pointer activation should not leave a sticky focus ring; keyboard keeps focus.
+      btn.addEventListener("pointerdown", function (event) {
+        if (event.pointerType === "mouse" || event.pointerType === "touch" || event.pointerType === "pen") {
+          btn.dataset.azPointerActivate = "1";
+        }
+      });
       btn.addEventListener("click", function (event) {
         event.preventDefault();
         setLang(btn.getAttribute("data-lang"));
+        if (btn.dataset.azPointerActivate === "1") {
+          btn.blur();
+          delete btn.dataset.azPointerActivate;
+        }
       });
     });
   }

@@ -11,6 +11,7 @@
     <!-- COMPONENTS -->
     <script src="{{ $assetV('js/components.js') }}"></script>
     <script src="{{ $assetV('js/az-profile.js') }}"></script>
+    <script src="{{ $assetV('js/az-home-arrows.js') }}"></script>
     <script src="{{ $assetV('js/az-projects.js') }}"></script>
     <script>
       (function () {

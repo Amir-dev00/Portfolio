@@ -1,4 +1,4 @@
-/* Homepage slider arrows — Rhye controls, restyled for contrast + mobile side edges. */
+/* Homepage slider arrows — desktop Rhye circles; mobile smoked-glass edge tabs. */
 
 .slider-fullscreen-projects__counter {
   opacity: 0 !important;
@@ -7,6 +7,8 @@
 }
 
 .az-home-arrows {
+  --az-home-arrow-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --az-home-arrow-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
   position: absolute;
   inset: 0;
   z-index: 62;
@@ -24,7 +26,7 @@
   -webkit-user-select: none;
 }
 
-/* Stronger rim + frost so arrows read on light and dark WebGL slides. */
+/* Desktop Rhye circle frost (mobile overrides reshape these). */
 .az-home-arrows .arrow {
   border-radius: 50%;
   background: rgba(12, 12, 14, 0.28);
@@ -49,13 +51,18 @@
   border-color: transparent transparent transparent #f4f1ea;
 }
 
+/* Mobile glass tab chrome — hidden on desktop. */
+.az-home-arrows__tab {
+  display: none;
+}
+
 html[data-az-route]:not([data-az-route="home"]) .az-home-arrows {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
 
-/* —— Mobile: opposite edges, vertically centered on the slide —— */
+/* —— Mobile: slim smoked-glass edge tabs —— */
 @media (max-width: 767px) {
   .az-home-arrows {
     inset: 0;
@@ -77,85 +84,173 @@ html[data-az-route]:not([data-az-route="home"]) .az-home-arrows {
   .az-home-arrows .slider__arrow_left,
   .az-home-arrows .slider__arrow_right {
     position: absolute !important;
+    /* Mid-band: clear of profile (top) and dock (bottom). */
     top: 50% !important;
     bottom: auto !important;
     display: grid;
     place-items: center;
     width: 44px;
-    height: 44px;
+    height: 56px;
     min-width: 44px;
     min-height: 44px;
     margin: 0;
+    padding: 0;
     transform: translateY(-50%) !important;
   }
 
   .az-home-arrows .slider__arrow_left {
-    left: max(8px, env(safe-area-inset-left, 0px)) !important;
+    left: 0 !important;
     right: auto !important;
+    justify-items: start;
   }
 
   .az-home-arrows .slider__arrow_right {
-    right: max(8px, env(safe-area-inset-right, 0px)) !important;
+    right: 0 !important;
     left: auto !important;
+    justify-items: end;
+  }
+
+  /* Hide Rhye circle / pointer graphics on mobile. */
+  .az-home-arrows .arrow .svg-circle,
+  .az-home-arrows .arrow__pointer,
+  .az-home-arrows .arrow__triangle {
+    display: none !important;
   }
 
   .az-home-arrows .arrow {
-    width: 44px;
-    height: 44px;
-    background: rgba(8, 9, 12, 0.62);
-    background: color-mix(in srgb, #08090c 62%, transparent);
-    border: 1px solid rgba(247, 243, 234, 0.42);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 52px;
+    margin: 0;
+    border: 1px solid rgba(247, 243, 234, 0.28);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
+      rgba(10, 11, 14, 0.55);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
+      color-mix(in srgb, #0a0b0e 55%, transparent);
     box-shadow:
-      0 6px 18px rgba(0, 0, 0, 0.38),
-      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      0 10px 24px rgba(0, 0, 0, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.25);
+    backdrop-filter: blur(14px) saturate(1.25);
+    transition:
+      transform 120ms var(--az-home-arrow-ease),
+      background-color 140ms ease,
+      border-color 140ms ease,
+      box-shadow 140ms ease;
+    will-change: transform;
   }
 
-  .az-home-arrows .arrow .svg-circle {
-    width: 40px;
-    height: 40px;
+  .az-home-arrows .slider__arrow_left .arrow {
+    border-radius: 0 14px 14px 0;
+    border-left: 0;
+    /* Faint highlight along the inward (right) edge. */
+    box-shadow:
+      0 10px 24px rgba(0, 0, 0, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset -1px 0 0 rgba(255, 255, 255, 0.28);
   }
 
-  .az-home-arrows .arrow .circle {
-    stroke: rgba(247, 243, 234, 0.88);
-    stroke-width: 1.5px;
+  .az-home-arrows .slider__arrow_right .arrow {
+    border-radius: 14px 0 0 14px;
+    border-right: 0;
+    /* Faint highlight along the inward (left) edge. */
+    box-shadow:
+      0 10px 24px rgba(0, 0, 0, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      inset 1px 0 0 rgba(255, 255, 255, 0.28);
   }
 
-  .az-home-arrows .arrow__pointer {
-    width: 46% !important;
-    background-color: #f7f3ea;
+  .az-home-arrows__tab {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    color: #f7f3ea;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35));
   }
 
-  .az-home-arrows .arrow-left .arrow__pointer {
-    right: 22px;
+  .az-home-arrows__chevron {
+    display: block;
+    width: 14px;
+    height: 14px;
+    transition: transform 220ms var(--az-home-arrow-spring);
+    will-change: transform;
   }
 
-  .az-home-arrows .arrow-right .arrow__pointer {
-    left: 22px;
+  .az-home-arrows__glint {
+    position: absolute;
+    inset: -20% auto -20% -40%;
+    width: 42%;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0) 35%,
+      rgba(255, 255, 255, 0.38) 50%,
+      rgba(255, 255, 255, 0) 65%,
+      transparent 100%
+    );
+    opacity: 0;
+    transform: translateX(0);
+    pointer-events: none;
   }
 
-  .az-home-arrows .arrow__triangle {
-    border-color: transparent transparent transparent #f7f3ea;
-  }
-
+  /* Press: compress the glass slightly. */
   .az-home-arrows .arrow:active {
-    background: rgba(244, 241, 234, 0.18);
-    transform: scale(0.96);
+    transform: scaleX(0.9) scaleY(0.94);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)),
+      rgba(244, 241, 234, 0.16);
+    border-color: rgba(247, 243, 234, 0.4);
+  }
+
+  /* Activation: chevron travels 4px, then springs home on release. */
+  .az-home-arrows .arrow-left:active .az-home-arrows__chevron,
+  .az-home-arrows .slider__arrow_left.is-firing .az-home-arrows__chevron {
+    transform: translateX(-4px);
+  }
+
+  .az-home-arrows .arrow-right:active .az-home-arrows__chevron,
+  .az-home-arrows .slider__arrow_right.is-firing .az-home-arrows__chevron {
+    transform: translateX(4px);
+  }
+
+  .az-home-arrows .slider__arrow.is-glinting .az-home-arrows__glint {
+    animation: az-home-arrow-glint 380ms var(--az-home-arrow-ease) both;
   }
 
   /*
-   * Keep the project title clear of the 44px edge controls.
-   * At 320px this leaves ~208px for the heading between the arrows.
+   * Keep the project title clear of the edge tabs.
+   * At 320px this leaves ~232px between the 32px glass faces.
    */
   #view-home .slider-fullscreen-projects__content {
     margin-left: max(
-      56px,
-      calc(8px + env(safe-area-inset-left, 0px) + 44px + 4px)
+      40px,
+      calc(env(safe-area-inset-left, 0px) + 32px + 8px)
     );
     margin-right: max(
-      56px,
-      calc(8px + env(safe-area-inset-right, 0px) + 44px + 4px)
+      40px,
+      calc(env(safe-area-inset-right, 0px) + 32px + 8px)
     );
     max-width: none;
+  }
+}
+
+@keyframes az-home-arrow-glint {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(220%);
   }
 }
 
@@ -178,6 +273,10 @@ html[data-az-route]:not([data-az-route="home"]) .az-home-arrows {
     width: 56px;
     height: 56px;
   }
+
+  .az-home-arrows__tab {
+    display: none !important;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -192,11 +291,21 @@ html[data-az-route]:not([data-az-route="home"]) .az-home-arrows {
 
 @media (prefers-reduced-motion: reduce) {
   .az-home-arrows .slider__arrow,
-  .az-home-arrows .arrow {
+  .az-home-arrows .arrow,
+  .az-home-arrows__chevron,
+  .az-home-arrows__glint {
     transition: none !important;
+    animation: none !important;
   }
 
   .az-home-arrows .arrow:active {
+    transform: none;
+  }
+
+  .az-home-arrows .arrow-left:active .az-home-arrows__chevron,
+  .az-home-arrows .arrow-right:active .az-home-arrows__chevron,
+  .az-home-arrows .slider__arrow_left.is-firing .az-home-arrows__chevron,
+  .az-home-arrows .slider__arrow_right.is-firing .az-home-arrows__chevron {
     transform: none;
   }
 }

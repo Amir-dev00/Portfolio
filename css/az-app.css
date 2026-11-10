@@ -21,10 +21,20 @@ html.az-native-scroll {
   scrollbar-gutter: stable;
 }
 
+/* Non-home routes: paint the dark shell on html/body so short pages
+   (About) never flash the theme's default white body below #page-wrapper. */
+html[data-az-route]:not([data-az-route="home"]),
+html.az-native-scroll {
+  background-color: #111111;
+  min-height: 100%;
+}
+
 html[data-az-route]:not([data-az-route="home"]) body,
 html.az-native-scroll body {
   height: auto;
-  min-height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #111111;
   overflow-x: hidden;
   overflow-y: visible;
   touch-action: pan-y;
@@ -39,7 +49,9 @@ html.az-native-scroll #page-wrapper.js-smooth-scroll {
   width: 100% !important;
   max-width: 100%;
   height: auto !important;
-  min-height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #111111;
   overflow: visible !important;
 }
 
@@ -443,11 +455,32 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   }
 }
 
+/* —— About (scoped redesign; .az-skills remains for project detail) —— */
+
+#view-about.az-view.is-active {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #111111;
+}
+
+.az-panel_about {
+  width: min(1100px, calc(100% - 40px));
+  /* Extra bottom room so the last skill card clears the fixed glass dock. */
+  padding-bottom: calc(152px + env(safe-area-inset-bottom));
+}
+
 .az-about {
   display: grid;
-  grid-template-columns: minmax(140px, 220px) minmax(0, 1fr);
-  gap: clamp(22px, 4vw, 40px);
+  grid-template-columns: minmax(160px, 240px) minmax(0, 1fr);
+  gap: clamp(28px, 4.5vw, 56px);
   align-items: start;
+}
+
+.az-about__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .az-about__portrait {
@@ -472,13 +505,16 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
 .az-about__meta {
   display: grid;
-  gap: 8px;
-  margin: 18px 0 0;
+  gap: 10px;
+  width: 100%;
+  margin: 20px 0 0;
   padding: 0;
   list-style: none;
   font-family: var(--font-ui);
   font-size: 13px;
+  line-height: 1.45;
   color: rgba(244, 241, 234, 0.7);
+  text-align: start;
 }
 
 .az-about__meta strong {
@@ -486,6 +522,80 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   font-weight: 600;
 }
 
+.az-about__copy .az-panel__title {
+  margin-bottom: 18px;
+}
+
+.az-about__lead {
+  margin: 0 0 14px;
+  max-width: 38rem;
+}
+
+.az-about__lead_last {
+  margin-bottom: 0;
+}
+
+.az-about-skills {
+  margin-top: clamp(36px, 5vw, 52px);
+  padding-top: clamp(28px, 4vw, 36px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.az-about-skills__title {
+  margin: 0 0 18px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(226, 208, 182, 0.72);
+}
+
+.az-about-skills__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.az-about-skills__card {
+  padding: 18px 18px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.az-about-skills__heading {
+  margin: 0 0 14px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: #f7f3ea;
+}
+
+.az-about-skills__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.az-about-skills__list li {
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.78);
+}
+
+/* Project detail tech chips (not About skill groups). */
 .az-skills {
   display: flex;
   flex-wrap: wrap;
@@ -771,9 +881,32 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
     grid-template-columns: 1fr;
   }
 
+  .az-about {
+    gap: 22px;
+  }
+
+  .az-about__aside {
+    align-items: center;
+  }
+
+  .az-about__meta {
+    max-width: 28rem;
+    margin-inline: auto;
+  }
+
+  .az-about-skills__grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
   .az-panel {
     width: min(1120px, calc(100% - 28px));
     padding-bottom: calc(118px + env(safe-area-inset-bottom));
+  }
+
+  .az-panel_about {
+    width: min(1100px, calc(100% - 28px));
+    padding-bottom: calc(152px + env(safe-area-inset-bottom));
   }
 
   .az-panel_work {
