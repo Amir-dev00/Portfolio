@@ -385,7 +385,7 @@
       state.year = parts.year;
       state.month = parts.month;
       if (!cfg.enabled) {
-        throw Object(code: "disabled");
+        throw Object.assign(new Error("Booking is disabled"), { code: "disabled" });
       }
     });
   }

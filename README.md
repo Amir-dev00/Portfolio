@@ -10,7 +10,9 @@ Cinematic personal portfolio with bilingual EN/FA support.
 - cPanel install: [`INSTALL-CPANEL.md`](INSTALL-CPANEL.md)
 - Packaged outputs: `dist/portfolio-cpanel.zip`, `dist/portfolio-final.sql`
 
-Root `index.html` + `css/` + `js/` + `assets/` remain as the design/source frontend assets that are synced into `cms/public` for Laravel.
+Root `css/` + `js/` + `assets/` are the editable frontend source. `scripts/build-cpanel-package.ps1` syncs them into `cms/public` before packaging — keep both copies in sync.
+
+The live app entry is Laravel’s `cms/public/index.php` (locally via `php artisan serve`). On cPanel that becomes `public_html/index.php` (from `cms/public/index.cpanel.php`).
 
 ## Quick local run
 

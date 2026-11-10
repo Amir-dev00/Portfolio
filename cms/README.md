@@ -2,7 +2,7 @@
 
 This Laravel app is the **canonical** portfolio: public Blade site, bilingual EN/FA, admin CMS, and cPanel packaging.
 
-The root `index.html` is a static fallback mirror for design reference. Prefer running **this** `cms/` app.
+Run **this** `cms/` app. Web entry: `public/index.php` (local) / cPanel `public_html/index.php`.
 
 ## Requirements
 
