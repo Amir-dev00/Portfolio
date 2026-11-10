@@ -44,10 +44,9 @@ class ContentController extends Controller
             'profile' => SiteSetting::query()->where('key', 'profile')->value('value') ?? [],
             'featured' => SiteSetting::query()->where('key', 'featured_slugs')->value('value') ?? [],
             'booking' => array_merge(
-                ['enabled' => true, 'url' => null, 'provider' => 'auto', 'duration' => 30],
+                ['enabled' => true, 'duration' => 30, 'timezone' => 'Asia/Tehran'],
                 (array) (SiteSetting::query()->where('key', 'booking')->value('value') ?? [])
             ),
-            'bookingEnvUrl' => config('portfolio.booking_url'),
         ]);
     }
 
@@ -62,11 +61,7 @@ class ContentController extends Controller
             'featured_slugs' => ['nullable', 'string'],
             'booking' => ['nullable', 'array'],
             'booking.enabled' => ['nullable', 'boolean'],
-            'booking.url' => ['nullable', 'string', 'max:500', 'url:https'],
-            'booking.provider' => ['nullable', 'in:auto,calcom,calendly,link'],
             'booking.duration' => ['nullable', 'integer', 'min:5', 'max:480'],
-        ], [
-            'booking.url.url' => 'The booking URL must be a full https:// link (for example https://cal.com/your-name/30min).',
         ]);
 
         foreach ($data['entries'] ?? [] as $id => $values) {
@@ -96,13 +91,12 @@ class ContentController extends Controller
             SiteSetting::query()->updateOrCreate(['key' => 'profile'], ['value' => $data['profile']]);
         }
         if (isset($data['booking'])) {
-            $before = SiteSetting::query()->where('key', 'booking')->value('value');
-            $after = [
+            $before = (array) (SiteSetting::query()->where('key', 'booking')->value('value') ?? []);
+            $after = array_merge($before, [
                 'enabled' => (bool) ($data['booking']['enabled'] ?? false),
-                'url' => filled($data['booking']['url'] ?? null) ? trim($data['booking']['url']) : null,
-                'provider' => $data['booking']['provider'] ?? 'auto',
-                'duration' => isset($data['booking']['duration']) ? (int) $data['booking']['duration'] : null,
-            ];
+                'duration' => isset($data['booking']['duration']) ? (int) $data['booking']['duration'] : ($before['duration'] ?? 30),
+            ]);
+            unset($after['url'], $after['provider']);
             $setting = SiteSetting::query()->updateOrCreate(['key' => 'booking'], ['value' => $after]);
             if ($before !== $after) {
                 ContentRevision::query()->create([

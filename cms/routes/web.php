@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\BookingAdminController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExportController;
@@ -9,11 +10,22 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\PublishController;
 use App\Http\Controllers\Admin\ResumeController;
 use App\Http\Controllers\Admin\SeoController;
+use App\Http\Controllers\Api\BookingController as PublicBookingController;
 use App\Http\Controllers\PublicSiteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/sitemap.xml', [PublicSiteController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [PublicSiteController::class, 'robots'])->name('robots');
+
+/* Self-hosted Book a Call API (no Cal.com / Calendly). */
+Route::prefix('api/booking')->name('api.booking.')->group(function () {
+    Route::get('/config', [PublicBookingController::class, 'config'])->name('config');
+    Route::get('/month', [PublicBookingController::class, 'month'])->middleware('throttle:60,1')->name('month');
+    Route::get('/slots', [PublicBookingController::class, 'slots'])->middleware('throttle:60,1')->name('slots');
+    Route::get('/convert', [PublicBookingController::class, 'convert'])->middleware('throttle:60,1')->name('convert');
+    Route::post('/', [PublicBookingController::class, 'store'])->middleware('throttle:8,1')->name('store');
+    Route::get('/{reference}/ics', [PublicBookingController::class, 'ics'])->where('reference', '[A-Za-z0-9\-]+')->name('ics');
+});
 
 Route::get('/', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->home($r, 'en'))->name('home');
 Route::get('/work', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->work($r, 'en'))->name('work');
@@ -43,6 +55,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/content', [ContentController::class, 'edit'])->name('content.edit');
         Route::post('/content', [ContentController::class, 'update'])->name('content.update');
+
+        Route::get('/bookings', [BookingAdminController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/export.csv', [BookingAdminController::class, 'exportCsv'])->name('bookings.export');
+        Route::get('/bookings/settings', [BookingAdminController::class, 'settings'])->name('bookings.settings');
+        Route::post('/bookings/settings', [BookingAdminController::class, 'updateSettings'])->name('bookings.settings.update');
+        Route::post('/bookings/availability', [BookingAdminController::class, 'saveAvailability'])->name('bookings.availability');
+        Route::post('/bookings/blocks', [BookingAdminController::class, 'storeBlock'])->name('bookings.blocks.store');
+        Route::delete('/bookings/blocks/{block}', [BookingAdminController::class, 'destroyBlock'])->name('bookings.blocks.destroy');
+        Route::get('/bookings/{booking}', [BookingAdminController::class, 'show'])->name('bookings.show');
+        Route::post('/bookings/{booking}/cancel', [BookingAdminController::class, 'cancel'])->name('bookings.cancel');
+        Route::post('/bookings/{booking}/complete', [BookingAdminController::class, 'complete'])->name('bookings.complete');
 
         Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
         Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');

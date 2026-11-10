@@ -173,26 +173,18 @@ class PublicSiteController extends Controller
     }
 
     /**
-     * Published booking settings, with BOOKING_URL as a fallback link. Only https URLs are exposed.
+     * Native self-hosted booking settings (no external scheduling providers).
      */
     protected function bookingConfig(array $settings): array
     {
-        $https = static function ($value): ?string {
-            $value = trim((string) $value);
-
-            return $value !== '' && filter_var($value, FILTER_VALIDATE_URL) && str_starts_with(strtolower($value), 'https://')
-                ? $value
-                : null;
-        };
-
-        $provider = $settings['provider'] ?? 'auto';
-        $duration = (int) ($settings['duration'] ?? 0);
+        $duration = (int) ($settings['duration'] ?? 30);
 
         return [
             'enabled' => (bool) ($settings['enabled'] ?? true),
-            'url' => $https($settings['url'] ?? null) ?? $https(config('portfolio.booking_url')),
-            'provider' => in_array($provider, ['auto', 'calcom', 'calendly', 'link'], true) ? $provider : 'auto',
-            'duration' => $duration > 0 ? $duration : null,
+            'duration' => $duration > 0 ? $duration : 30,
+            'timezone' => $settings['timezone'] ?? 'Asia/Tehran',
+            'native' => true,
+            'api' => url('/api/booking'),
         ];
     }
 

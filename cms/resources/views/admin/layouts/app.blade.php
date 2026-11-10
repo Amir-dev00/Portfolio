@@ -44,6 +44,7 @@
     <nav>
       <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
       <a href="{{ route('admin.content.edit') }}" class="{{ request()->routeIs('admin.content.*') ? 'active' : '' }}">Site content</a>
+      <a href="{{ route('admin.bookings.index') }}" class="{{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">Bookings</a>
       <a href="{{ route('admin.projects.index') }}" class="{{ request()->routeIs('admin.projects.*') ? 'active' : '' }}">Projects</a>
       <a href="{{ route('admin.resume.edit') }}" class="{{ request()->routeIs('admin.resume.*') ? 'active' : '' }}">Resume</a>
       <a href="{{ route('admin.seo.edit') }}" class="{{ request()->routeIs('admin.seo.*') ? 'active' : '' }}">SEO</a>

@@ -157,7 +157,8 @@ Your content, projects, media and admin users live in the **database**, `portfol
 2. **Do not import `portfolio-final.sql`** into an existing database; it would replace your content.
    Database changes ship as separate files in the `upgrades/` folder next to the ZIP. They only add missing
    rows/tables and never change or delete existing content, and are safe to run twice.
-   For this release run **`upgrades/2026_11_10_booking.sql`** (adds the "Book a Call" texts and setting):
+   For the self-hosted calendar also run **`upgrades/2026_11_10_native_booking.sql`**
+   (after the earlier `upgrades/2026_11_10_booking.sql` texts if you never imported them):
    phpMyAdmin → your database → **SQL** → paste the file's contents → **Go**.
 3. Extract the new ZIP into a temporary folder (e.g. `/home/ACCOUNT/upgrade/`).
 4. Replace code, keeping your data:
@@ -193,26 +194,21 @@ Text fonts ship inside `public_html/assets/fonts/` — no Google Fonts install s
 
 **Icon fonts** (Material Icons CDN, Font Awesome / Rhye icon webfonts under `assets/fonts/`) are separate from text typography and are intentional.
 
-**Book a Call limitation:** the booking modal chrome uses Manrope/Estedad. Cal.com / Calendly content inside a cross-origin iframe cannot inherit local fonts; their UI keeps the provider’s typeface.
-
 After unzipping, open DevTools → Network → Font and confirm the WOFF2 files return **200** (not 404).
 
 ---
 
-## "Book a Call" setup
+## "Book a Call" setup (self-hosted)
 
-The Contact page's primary button opens a booking window with your real calendar. It needs your own scheduling account:
+Scheduling runs entirely on your Laravel + MySQL host — **no Cal.com, Calendly, or Google Calendar**.
 
-1. Create a free event on [Cal.com](https://cal.com) (recommended; embeds inline) or [Calendly](https://calendly.com),
-   connect your calendar, and set your availability there.
-2. Copy the public event link, e.g. `https://cal.com/your-name/30min` or `https://calendly.com/your-name/30min`.
-3. `/admin` → **Site content** → **Booking**: paste the link, keep provider on **Auto**, set the duration shown on the button, keep **Enabled** ticked, **Save**.
-   The button texts (EN/FA) are in the same page's *Booking* group.
-4. **Publish live**. Open `/contact` → **Book a Call**: your real free times appear; a booking is only shown as
-   confirmed after Cal.com/Calendly confirms it, and both of you get the calendar invite from them.
+1. Import `portfolio-app/database/upgrades/2026_11_10_native_booking.sql` in phpMyAdmin (creates `bookings`, `availability_rules`, `blocked_slots`).
+2. `/admin` → **Bookings** → set weekly hours, duration, buffers, blocked dates (defaults: Sat–Wed mornings/afternoons, Asia/Tehran).
+3. `/admin` → **Site content** → keep **Book a Call** enabled; edit EN/FA labels if you like → **Publish live**.
+4. Open `/contact` → **Book a Call**: pick a date/time, submit details. The appointment is stored in MySQL and listed under **Admin → Bookings**.
+5. Visitors can download a local `.ics` invite. Optional SMTP notifications use your host mail settings; bookings still succeed if mail is offline.
 
-Until a link is set, the window explains that online booking isn't open yet and offers your email instead.
-Other `https://` booking links (Google Calendar, Zoho, …) open in a new tab. Untick **Enabled** to bring back the original "Email me" button.
+Untick **Enabled** in Site content / Booking settings to show the original “Email me” primary button instead.
 
 ## Things only your host can confirm
 
