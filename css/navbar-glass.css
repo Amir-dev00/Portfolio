@@ -222,10 +222,10 @@ html.cursor-disabled button {
 }
 
 .glass-nav__name {
-  font-family: Raleway, sans-serif;
-  font-size: 7px;
+  font-family: var(--font-ui);
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
   line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
@@ -335,10 +335,10 @@ html.cursor-disabled button {
   background: rgba(12, 12, 12, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: #f4f1ea;
-  font-family: Raleway, sans-serif;
-  font-size: 10px;
+  font-family: var(--font-ui);
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
@@ -433,8 +433,8 @@ html.cursor-disabled button {
   }
 
   .glass-nav__name {
-    font-size: 9px;
-    letter-spacing: 0.04em;
+    font-size: 11px;
+    letter-spacing: 0.03em;
   }
 
   .glass-nav__home {
@@ -465,12 +465,12 @@ html.cursor-disabled button {
 
 @media (max-width: 360px) {
   .glass-nav {
-    width: min(260px, calc(100% - 40px));
+    width: min(300px, calc(100% - 24px));
   }
 
   .glass-nav__name {
-    font-size: 6.5px;
-    letter-spacing: 0.01em;
+    font-size: 11px;
+    letter-spacing: 0;
   }
 
   .glass-nav__home {

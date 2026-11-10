@@ -1,0 +1,221 @@
+/* AZ typography — self-hosted Manrope (EN) + Estedad (FA). No Google text-font CDN.
+ *
+ * Files (ship in public_html/assets/fonts/ on cPanel):
+ *   manrope/manrope-variable.woff2           — Latin VF (preload on every page)
+ *   manrope/manrope-latin-ext-variable.woff2 — Latin Extended subset (lazy via unicode-range)
+ *   estedad/estedad-variable.woff2           — Persian/Arabic VF (preload only when lang=fa)
+ *
+ * Book a Call: our modal chrome uses these variables. Cal.com / Calendly iframes are
+ * cross-origin — their internal UI fonts cannot be overridden from this site.
+ */
+
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/manrope/manrope-variable.woff2") format("woff2-variations"),
+       url("../assets/fonts/manrope/manrope-variable.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Manrope";
+  src: url("../assets/fonts/manrope/manrope-latin-ext-variable.woff2") format("woff2-variations"),
+       url("../assets/fonts/manrope/manrope-latin-ext-variable.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Estedad";
+  src: url("../assets/fonts/estedad/estedad-variable.woff2") format("woff2-variations"),
+       url("../assets/fonts/estedad/estedad-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-en: "Manrope", sans-serif;
+  --font-fa: "Estedad", sans-serif;
+  --font-primary: var(--font-en);
+  --font-secondary: var(--font-en);
+  --font-display: var(--font-en);
+  --font-body: var(--font-en);
+  --font-ui: var(--font-en);
+  --font-weight-body: 450;
+  --font-weight-ui: 560;
+  --font-weight-heading: 650;
+  --font-weight-display: 700;
+  --font-tracking-tight: -0.02em;
+  --font-tracking-ui: 0.02em;
+  --font-tracking-label: 0.08em;
+  --font-leading-body: 1.65;
+  --font-leading-heading: 1.18;
+}
+
+html[lang="en"],
+html.az-lang-en {
+  --font-primary: var(--font-en);
+  --font-secondary: var(--font-en);
+  --font-display: var(--font-en);
+  --font-body: var(--font-en);
+  --font-ui: var(--font-en);
+  --font-weight-body: 450;
+  --font-weight-ui: 560;
+  --font-weight-heading: 650;
+  --font-weight-display: 700;
+  --font-tracking-tight: -0.02em;
+  --font-tracking-ui: 0.02em;
+  --font-tracking-label: 0.08em;
+  --font-leading-body: 1.65;
+  --font-leading-heading: 1.18;
+}
+
+html[lang="fa"],
+html.az-lang-fa {
+  --font-primary: var(--font-fa);
+  --font-secondary: var(--font-fa);
+  --font-display: var(--font-fa);
+  --font-body: var(--font-fa);
+  --font-ui: var(--font-fa);
+  --font-weight-body: 400;
+  --font-weight-ui: 550;
+  --font-weight-heading: 650;
+  --font-weight-display: 700;
+  --font-tracking-tight: 0;
+  --font-tracking-ui: 0;
+  --font-tracking-label: 0;
+  --font-leading-body: 1.85;
+  --font-leading-heading: 1.35;
+}
+
+html,
+body {
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--font-leading-body);
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6,
+.xl,
+.h1, .h2, .h3, .h4, .h5, .h6,
+.slider__heading,
+.section-title,
+.az-panel__title,
+.az-work-spotlight__copy h2,
+.az-profile__name {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-heading);
+  letter-spacing: var(--font-tracking-tight);
+  line-height: var(--font-leading-heading);
+  text-wrap: balance;
+}
+
+.az-panel__lead,
+.az-panel__copy,
+.az-work-spotlight__copy > p,
+.az-about__copy,
+.az-contact-intro,
+.az-project__body,
+.paragraph {
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--font-leading-body);
+  text-wrap: pretty;
+  max-width: 70ch;
+}
+
+button,
+input,
+select,
+textarea,
+.btn,
+.az-contact-pill,
+.az-contact-link,
+.az-lang-switch,
+.glass-nav,
+.az-work-row,
+.az-booking,
+.az-booking__dialog,
+.az-booking__title,
+.az-booking__intro,
+.az-booking__chip,
+.az-booking__notice,
+.az-booking__foot {
+  font-family: var(--font-ui);
+}
+
+.az-panel__eyebrow,
+.az-contact-eyebrow,
+.az-work-spotlight__eyebrow,
+.az-profile__role,
+.glass-nav__name {
+  font-family: var(--font-ui);
+  font-weight: var(--font-weight-ui);
+  letter-spacing: var(--font-tracking-label);
+}
+
+/* Latin islands inside Persian pages (emails, handles, codes). */
+html[lang="fa"] .az-ltr,
+html.az-lang-fa .az-ltr,
+html[dir="rtl"] .az-ltr {
+  font-family: var(--font-en);
+  letter-spacing: var(--font-tracking-ui);
+}
+
+/* AZ Circular Preloader — always English / Manrope, regardless of site language. */
+#js-preloader,
+#js-preloader.az-preloader--ring,
+#js-preloader .az-preloader__percentage,
+#js-preloader .az-preloader__name,
+#js-preloader .az-preloader__role,
+#js-preloader .az-preloader__load-label,
+#js-preloader .preloader__heading,
+#js-preloader .preloader__subline,
+#js-preloader .preloader__counter {
+  font-family: var(--font-en) !important;
+  direction: ltr;
+  unicode-bidi: isolate;
+  letter-spacing: inherit;
+}
+
+#js-preloader .az-preloader__percentage,
+#js-preloader .preloader__counter {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+html.az-lang-fa .az-panel__title,
+html.az-lang-fa .az-work-spotlight__copy h2,
+html.az-lang-fa .az-profile__name,
+html.az-lang-fa #view-home .slider__heading,
+html.az-lang-fa .az-work-row__name,
+html.az-lang-fa .az-contact-pill,
+html.az-lang-fa .az-contact-link__copy,
+html.az-lang-fa .glass-nav__name {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+html.az-lang-fa .az-panel__lead,
+html.az-lang-fa .az-work-spotlight__copy > p,
+html.az-lang-fa .az-contact-intro,
+html.az-lang-fa .az-about__copy p {
+  line-height: 1.9;
+}
+
+.logo-wordmark {
+  font-family: var(--font-en);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}

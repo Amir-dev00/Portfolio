@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>@yield('title', 'Admin') — AZ Portfolio</title>
+  <link rel="stylesheet" href="{{ asset('css/typography.css') }}">
   <style>
     :root { --bg:#0f1115; --panel:#171a21; --line:#2a3140; --text:#eef2f7; --muted:#9aa6b2; --accent:#d7b57a; --danger:#c45c5c; --ok:#3d9a6a; }
     * { box-sizing: border-box; }
-    body { margin:0; font-family: Segoe UI, Tahoma, sans-serif; background:var(--bg); color:var(--text); }
+    body { margin:0; font-family: var(--font-en); background:var(--bg); color:var(--text); }
+    textarea[dir="rtl"], input[dir="rtl"] { font-family: var(--font-fa); }
     a { color:var(--accent); text-decoration:none; }
     .shell { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
     aside { border-right:1px solid var(--line); background:#12151c; padding:20px 14px; }

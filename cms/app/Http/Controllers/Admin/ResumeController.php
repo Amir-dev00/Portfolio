@@ -122,7 +122,7 @@ class ResumeController extends Controller
             'is_current' => true,
         ]);
 
-        return back()->with('status', 'Generated '.$locale.' PDF (draft). Persian uses DejaVu Sans for reliable Dompdf glyph coverage; embed Vazirmatn TTF later if needed.');
+        return back()->with('status', 'Generated '.$locale.' PDF (draft). Persian uses DejaVu Sans for reliable Dompdf glyph coverage; embed Estedad TTF later if needed.');
     }
 
     public function activate(ResumeVersion $resume): RedirectResponse

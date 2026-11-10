@@ -28,7 +28,7 @@ html.az-loading #js-cursor .cursor__follower {
   overflow: hidden;
   opacity: 1;
   visibility: visible;
-  font-family: 'Raleway', Arial, sans-serif;
+  font-family: var(--font-en);
   -webkit-font-smoothing: antialiased;
 }
 /* Keep the loader visible even if Rhye sets display:none before the first paint. */
@@ -159,14 +159,14 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   box-shadow: 0 0 8px 2px rgba(243,183,109,.65), 0 0 22px rgba(228,160,91,.3);
 }
 #js-preloader.az-preloader--ring .az-preloader__load-label {
-  display: block; color: rgba(226, 199, 170, .60); font-size: 10px; line-height: 1.5;
-  letter-spacing: .42em; padding-left: .42em; font-weight: 600;
+  display: block; color: rgba(226, 199, 170, .60); font-size: 11px; line-height: 1.5;
+  letter-spacing: .28em; padding-left: .28em; font-weight: 600;
   animation: az-ring-fade-up 900ms 550ms both;
 }
 #js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage {
   position: relative; display: flex; align-items: baseline; justify-content: center;
   gap: 0.28em; margin: 8px 0 0; padding: 0;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-en);
   color: #f5eee1; font-size: clamp(42px, 5.6vw, 64px); font-weight: 400; line-height: 1.18;
   letter-spacing: -.04em; white-space: nowrap;
   font-variant-numeric: lining-nums tabular-nums;
@@ -195,14 +195,14 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   background: linear-gradient(90deg, transparent, rgba(226, 190, 136, .6), transparent);
 }
 #js-preloader.az-preloader--ring .preloader__heading.az-preloader__name {
-  font-family: 'Raleway', Arial, sans-serif; font-size: clamp(13px, 2vw, 20px);
+  font-family: var(--font-en); font-size: clamp(13px, 2vw, 20px);
   letter-spacing: .28em; padding-left: .28em; line-height: 1.55; color: #efe9de;
   font-weight: 600; white-space: normal;
 }
 #js-preloader.az-preloader--ring .preloader__subline.az-preloader__role {
   margin-top: 10px !important; color: rgba(218, 204, 184, .48);
-  font-family: 'Raleway', Arial, sans-serif; font-size: 10px; font-weight: 500;
-  letter-spacing: .43em; padding-left: .43em; line-height: 1.6;
+  font-family: var(--font-en); font-size: 11px; font-weight: 500;
+  letter-spacing: .36em; padding-left: .36em; line-height: 1.6;
 }
 #js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__disc::before { opacity: 1; }
 #js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-fill { filter: drop-shadow(0 0 6px rgba(247, 188, 118, .85)); }
@@ -217,15 +217,15 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 }
 @media (max-width: 600px) {
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: clamp(222px, 70vw, 290px); margin-bottom: 21px; }
-  #js-preloader.az-preloader--ring .preloader__heading.az-preloader__name { font-size: 14px; letter-spacing: .14em; padding-left: .14em; }
-  #js-preloader.az-preloader--ring .preloader__subline.az-preloader__role { font-size: 9px; letter-spacing: .28em; padding-left: .28em; }
+  #js-preloader.az-preloader--ring .preloader__heading.az-preloader__name { font-size: 14px; letter-spacing: .12em; padding-left: .12em; }
+  #js-preloader.az-preloader--ring .preloader__subline.az-preloader__role { font-size: 11px; letter-spacing: .22em; padding-left: .22em; }
 }
 @media (max-height: 670px) {
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: clamp(164px, 35vh, 244px); margin-bottom: 9px; }
   #js-preloader.az-preloader--ring .az-preloader__center.preloader__header { padding: 7px 0; }
   #js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage { font-size: 42px; margin-top: 1px; }
   #js-preloader.az-preloader--ring .az-preloader__identity { margin-top: 10px; padding-top: 14px; }
-  #js-preloader.az-preloader--ring .az-preloader__load-label { font-size: 8px; }
+  #js-preloader.az-preloader--ring .az-preloader__load-label { font-size: 11px; letter-spacing: .2em; padding-left: .2em; }
 }
 @media (max-height: 460px) {
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: min(44vh,180px); }

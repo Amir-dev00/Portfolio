@@ -28,12 +28,18 @@
       document.documentElement.classList.add("az-preloader-open", "az-loading");
       window.__AZ_SERVER_LANG__ = @json($locale);
 </script>
-    <!-- Google Fonts -->
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&amp;family=Raleway:ital,wght@0,500;0,600;0,700;1,500&amp;family=Vazirmatn:wght@400;500;600;700&amp;family=Material+Icons&amp;display=swap"/>
+    <!-- Icon font only (Material Icons). Text fonts are self-hosted Manrope + Estedad. -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Material+Icons&amp;display=swap"/>
+    {{-- Always preload Manrope (preloader + EN). Estedad only when the first paint is FA. --}}
+    <link rel="preload" href="{{ asset('assets/fonts/manrope/manrope-variable.woff2') }}" as="font" type="font/woff2" crossorigin/>
+    @if (($locale ?? 'en') === 'fa')
+      <link rel="preload" href="{{ asset('assets/fonts/estedad/estedad-variable.woff2') }}" as="font" type="font/woff2" crossorigin/>
+    @endif
     <!-- Template Vendor's Stylesheet -->
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/vendor.css') }}"/>
     <!-- Template Main Stylesheet -->
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/main.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/typography.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/navbar-glass.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-preloader.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-profile.css') }}"/>
@@ -57,7 +63,7 @@
         transform:none!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
         display:flex!important;flex-direction:column!important;opacity:1!important;visibility:visible!important;
       }
-      .logo-wordmark{display:inline-block;font-family:var(--font-secondary),Cinzel,serif;font-size:15px;font-weight:700;letter-spacing:.14em;line-height:20px;white-space:nowrap}
+      .logo-wordmark{display:inline-block;font-family:var(--font-en),"Manrope",sans-serif;font-size:15px;font-weight:700;letter-spacing:.1em;line-height:20px;white-space:nowrap}
       .logo__img-primary.logo-wordmark{color:#111}
       .logo__img-secondary.logo-wordmark{color:#fff}
     </style>

@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>Admin login — AZ Portfolio</title>
+  <link rel="stylesheet" href="{{ asset('css/typography.css') }}">
   <style>
-    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f1115;color:#eef2f7;font-family:Segoe UI,Tahoma,sans-serif}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f1115;color:#eef2f7;font-family:var(--font-en)}
     form{width:min(380px,92vw);background:#171a21;border:1px solid #2a3140;border-radius:14px;padding:22px}
     label{display:block;font-size:12px;color:#9aa6b2;margin:10px 0 4px}
     input{width:100%;padding:10px;border-radius:8px;border:1px solid #2a3140;background:#0e1218;color:#fff}

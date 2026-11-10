@@ -31,8 +31,7 @@
   border-radius: 999px;
   background: transparent;
   color: rgba(244, 241, 234, 0.58);
-  font-family: Raleway, "Vazirmatn", sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -41,8 +40,12 @@
   transition: background-color 160ms ease, color 160ms ease;
 }
 
+.az-lang-switch__btn[data-lang="en"] {
+  font-family: var(--font-en);
+}
+
 .az-lang-switch__btn[data-lang="fa"] {
-  font-family: "Vazirmatn", Raleway, sans-serif;
+  font-family: var(--font-fa);
   letter-spacing: 0;
 }
 
@@ -59,14 +62,14 @@
 
 html.az-lang-fa,
 html.az-lang-fa body {
-  font-family: "Vazirmatn", Raleway, sans-serif;
+  font-family: var(--font-ui);
 }
 
 html.az-lang-fa .az-panel__title,
 html.az-lang-fa .az-work-spotlight__copy h2,
 html.az-lang-fa .az-profile__name,
 html.az-lang-fa #view-home .slider__heading {
-  font-family: "Vazirmatn", Cinzel, Georgia, serif;
+  font-family: var(--font-display);
   letter-spacing: 0;
 }
 
@@ -83,7 +86,7 @@ html.az-lang-fa .az-profile__role,
 html.az-lang-fa .glass-nav__name,
 html.az-lang-fa .az-about__meta,
 html.az-lang-fa .az-project__back {
-  font-family: "Vazirmatn", Raleway, sans-serif;
+  font-family: var(--font-ui);
 }
 
 html.az-lang-fa .az-panel__eyebrow,
@@ -163,7 +166,7 @@ html.az-lang-fa .az-profile__role {
 
   .az-lang-switch__btn {
     padding: 6px 9px;
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 

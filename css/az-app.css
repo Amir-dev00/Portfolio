@@ -137,28 +137,28 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
 .az-panel__eyebrow {
   margin: 0 0 10px;
-  font-family: Raleway, sans-serif;
-  font-size: 11px;
+  font-family: var(--font-ui);
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(226, 208, 182, 0.62);
 }
 
 .az-panel__title {
   margin: 0 0 12px;
-  font-family: Cinzel, Georgia, serif;
+  font-family: var(--font-display);
   font-size: clamp(28px, 5vw, 46px);
-  font-weight: 500;
+  font-weight: 650;
   line-height: 1.15;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: #f7f3ea;
 }
 
 .az-panel__lead {
   margin: 0 0 28px;
   max-width: 42rem;
-  font-family: Raleway, "Vazirmatn", sans-serif;
+  font-family: var(--font-ui);
   font-size: clamp(14px, 2vw, 17px);
   line-height: 1.65;
   color: rgba(244, 241, 234, 0.72);
@@ -226,7 +226,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
 .az-work-spotlight__eyebrow {
   margin: 0;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.2em;
@@ -236,7 +236,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
 .az-work-spotlight__copy h2 {
   margin: 0;
-  font-family: Cinzel, Georgia, serif;
+  font-family: var(--font-display);
   font-size: clamp(22px, 3vw, 30px);
   font-weight: 500;
   line-height: 1.2;
@@ -245,7 +245,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
 .az-work-spotlight__copy > p {
   margin: 0;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
   line-height: 1.55;
   color: rgba(244, 241, 234, 0.68);
@@ -265,7 +265,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.05);
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -278,7 +278,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   gap: 6px;
   margin-top: 8px;
   width: fit-content;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -306,7 +306,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 }
 
 .az-work-count {
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -390,7 +390,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
 .az-work-row__name {
   overflow: hidden;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -399,7 +399,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 }
 
 .az-work-row small {
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -476,7 +476,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   margin: 18px 0 0;
   padding: 0;
   list-style: none;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   color: rgba(244, 241, 234, 0.7);
 }
@@ -500,7 +500,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -522,7 +522,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   align-items: center;
   gap: 10px;
   margin: 0 0 14px;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.28em;
@@ -566,7 +566,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   border: 1px solid rgba(255, 255, 255, 0.18);
   background: transparent;
   color: #f4f1ea;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -629,7 +629,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 }
 
 .az-contact-link__copy strong {
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -640,7 +640,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 }
 
 .az-contact-link__copy small {
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 500;
   color: rgba(244, 241, 234, 0.48);
@@ -656,7 +656,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   align-items: center;
   gap: 8px;
   margin: 22px 0 0;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 500;
   color: rgba(244, 241, 234, 0.55);
@@ -705,10 +705,10 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   border: 0;
   background: transparent;
   color: rgba(226, 208, 182, 0.78);
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
@@ -746,7 +746,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.06);
   color: #f4f1ea;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;

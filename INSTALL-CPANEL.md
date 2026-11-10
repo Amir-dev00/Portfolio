@@ -178,6 +178,27 @@ To roll back a bad upgrade, restore the home-directory backup files; the databas
 - Changes stay in **draft** until **Publish live**; publishing switches the site to the new snapshot in one step.
 - **Rollback** on the dashboard restores any previous snapshot.
 
+## Self-hosted fonts (Manrope + Estedad)
+
+Text fonts ship inside `public_html/assets/fonts/` — no Google Fonts install step on the server:
+
+| Path | Role |
+| --- | --- |
+| `assets/fonts/manrope/manrope-variable.woff2` | English + AZ preloader (always) |
+| `assets/fonts/manrope/manrope-latin-ext-variable.woff2` | Latin Extended subset (unicode-range) |
+| `assets/fonts/estedad/estedad-variable.woff2` | Persian |
+| `assets/fonts/.htaccess` | `font/woff2` MIME + 1-year cache |
+
+`css/typography.css` declares both faces with `font-display: swap`. Manrope is preloaded on every page; Estedad is preloaded only when the first paint language is Persian.
+
+**Icon fonts** (Material Icons CDN, Font Awesome / Rhye icon webfonts under `assets/fonts/`) are separate from text typography and are intentional.
+
+**Book a Call limitation:** the booking modal chrome uses Manrope/Estedad. Cal.com / Calendly content inside a cross-origin iframe cannot inherit local fonts; their UI keeps the provider’s typeface.
+
+After unzipping, open DevTools → Network → Font and confirm the WOFF2 files return **200** (not 404).
+
+---
+
 ## "Book a Call" setup
 
 The Contact page's primary button opens a booking window with your real calendar. It needs your own scheduling account:

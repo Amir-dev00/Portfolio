@@ -570,12 +570,35 @@
     });
   }
 
+  function ensureFaFont() {
+    try {
+      if (document.querySelector('link[data-az-font="estedad"]')) return;
+      var manrope = document.querySelector('link[href*="manrope-variable.woff2"]');
+      var href = "assets/fonts/estedad/estedad-variable.woff2";
+      if (manrope) {
+        href = String(manrope.getAttribute("href") || "").replace(
+          /manrope\/manrope-variable\.woff2.*$/,
+          "estedad/estedad-variable.woff2"
+        ) || href;
+      }
+      var link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "font";
+      link.type = "font/woff2";
+      link.crossOrigin = "anonymous";
+      link.href = href;
+      link.setAttribute("data-az-font", "estedad");
+      document.head.appendChild(link);
+    } catch (err) {}
+  }
+
   function setLang(next, opts) {
     var lang = normalize(next);
     if (lang === current && !(opts && opts.force)) return current;
     var keepScroll = !(opts && opts.resetScroll);
     var y = window.scrollY || 0;
     current = lang;
+    if (current === "fa") ensureFaFont();
     writeStored(current);
     applyAll(document);
     listeners.forEach(function (fn) {
@@ -626,11 +649,20 @@
   mergeBootstrapStrings();
   applyDocumentShell();
 
+  function refreshAfterFonts() {
+    applyHomeHeadings();
+    scheduleHomeHeadingBridge();
+  }
+
   function boot() {
     mergeBootstrapStrings();
     bindSwitcher(document);
     applyAll(document);
     scheduleHomeHeadingBridge();
+    // Re-measure split-text after Manrope/Estedad swap to avoid layout jump.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(refreshAfterFonts).catch(function () {});
+    }
   }
 
   if (document.readyState === "loading") {

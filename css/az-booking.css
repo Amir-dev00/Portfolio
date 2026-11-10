@@ -1,4 +1,6 @@
-/* AZ booking — "Book a Call" trigger + Liquid Glass scheduling dialog. */
+/* AZ booking — "Book a Call" trigger + Liquid Glass scheduling dialog.
+   Modal chrome inherits Manrope/Estedad via --font-ui / --font-display.
+   Provider iframes (Cal.com / Calendly) keep their own cross-origin fonts. */
 
 /* ---------- trigger ---------- */
 
@@ -55,7 +57,7 @@ html.az-booking-open #js-cursor {
   padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
     max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
   color: var(--az-booking-ink);
-  font-family: Raleway, "Vazirmatn", sans-serif;
+  font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -220,7 +222,7 @@ html[dir="rtl"] .az-booking__back svg {
 
 .az-booking__title {
   margin: 0 0 6px;
-  font-family: Cinzel, Georgia, serif;
+  font-family: var(--font-display);
   font-size: clamp(26px, 3.2vw, 36px);
   font-weight: 400;
   line-height: 1.1;
@@ -230,12 +232,12 @@ html[dir="rtl"] .az-booking__back svg {
 }
 
 html.az-lang-fa .az-booking__title {
-  font-family: "Vazirmatn", Cinzel, Georgia, serif;
+  font-family: var(--font-display);
   letter-spacing: 0;
 }
 
 html.az-lang-fa .az-booking {
-  font-family: "Vazirmatn", Raleway, sans-serif;
+  font-family: var(--font-ui);
 }
 
 .az-booking__intro {
@@ -450,14 +452,14 @@ html.az-lang-fa .az-booking {
 
 .az-booking__notice-title {
   margin: 0;
-  font-family: Cinzel, Georgia, serif;
+  font-family: var(--font-display);
   font-size: 22px;
   font-weight: 400;
   color: var(--az-booking-ink);
 }
 
 html.az-lang-fa .az-booking__notice-title {
-  font-family: "Vazirmatn", serif;
+  font-family: var(--font-display);
 }
 
 .az-booking__notice-body {
