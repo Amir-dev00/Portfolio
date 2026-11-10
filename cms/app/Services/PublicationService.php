@@ -71,6 +71,7 @@ class PublicationService
             'social' => $settings['social'] ?? [],
             'profile' => $settings['profile'] ?? [],
             'featured_slugs' => $settings['featured_slugs'] ?? [],
+            'booking' => $settings['booking'] ?? [],
         ];
     }
 
@@ -183,10 +184,9 @@ class PublicationService
             }
             $basename = basename($asset->path);
             $isPdf = str_contains((string) $asset->mime, 'pdf') || str_ends_with(strtolower($basename), '.pdf');
-            $relative = $isPdf
-                ? 'media/published/cv/'.$basename
-                : 'media/published/img/'.$basename;
-            $dest = public_path($relative);
+            $sub = $isPdf ? 'cv/' : 'img/';
+            $relative = 'media/published/'.$sub.$basename;
+            $dest = $publicRoot.'/'.$sub.$basename;
             File::ensureDirectoryExists(dirname($dest));
             if (! is_file($dest) || filemtime($src) > filemtime($dest)) {
                 File::copy($src, $dest);

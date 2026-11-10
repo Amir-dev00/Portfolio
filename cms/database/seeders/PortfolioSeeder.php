@@ -62,6 +62,11 @@ class PortfolioSeeder extends Seeder
             'value' => array_slice(array_column($projects, 'slug'), 0, 4),
         ]);
 
+        // Never overwrite an owner's booking link on re-seed.
+        SiteSetting::query()->firstOrCreate(['key' => 'booking'], [
+            'value' => ['enabled' => true, 'url' => null, 'provider' => 'auto', 'duration' => 30],
+        ]);
+
         $pages = [
             ['en', 'page', 'home', $stringsEn['title.base'] ?? null, $stringsEn['meta.description'] ?? null],
             ['fa', 'page', 'home', $stringsFa['title.base'] ?? null, $stringsFa['meta.description'] ?? null],

@@ -116,6 +116,7 @@ class PublicSiteController extends Controller
         ];
 
         $cvUrl = $payload['resume']['url'] ?? null;
+        $booking = $this->bookingConfig((array) ($payload['booking'] ?? $payload['settings']['booking'] ?? []));
         $bootstrap = [
             'lang' => $locale,
             'dir' => $locale === 'fa' ? 'rtl' : 'ltr',
@@ -144,6 +145,7 @@ class PublicSiteController extends Controller
             'cvUrl' => $cvUrl,
             'social' => $payload['social'] ?? [],
             'profile' => $payload['profile'] ?? [],
+            'booking' => $booking,
             'initialHash' => $initialHash,
             'canonical' => $hreflang[$locale],
             'preview' => (bool) $preview,
@@ -154,6 +156,7 @@ class PublicSiteController extends Controller
             'dir' => $locale === 'fa' ? 'rtl' : 'ltr',
             'viewName' => $view,
             'slug' => $slug,
+            'project' => $project,
             'strings' => $strings,
             'projects' => $projects,
             'seo' => $seo,
@@ -163,8 +166,34 @@ class PublicSiteController extends Controller
             'cvUrl' => $cvUrl,
             'social' => $payload['social'] ?? [],
             'profile' => $payload['profile'] ?? [],
+            'booking' => $booking,
+            'bookingAdmin' => (bool) $request->user()?->isOwner(),
             'initialHash' => $initialHash,
         ]);
+    }
+
+    /**
+     * Published booking settings, with BOOKING_URL as a fallback link. Only https URLs are exposed.
+     */
+    protected function bookingConfig(array $settings): array
+    {
+        $https = static function ($value): ?string {
+            $value = trim((string) $value);
+
+            return $value !== '' && filter_var($value, FILTER_VALIDATE_URL) && str_starts_with(strtolower($value), 'https://')
+                ? $value
+                : null;
+        };
+
+        $provider = $settings['provider'] ?? 'auto';
+        $duration = (int) ($settings['duration'] ?? 0);
+
+        return [
+            'enabled' => (bool) ($settings['enabled'] ?? true),
+            'url' => $https($settings['url'] ?? null) ?? $https(config('portfolio.booking_url')),
+            'provider' => in_array($provider, ['auto', 'calcom', 'calendly', 'link'], true) ? $provider : 'auto',
+            'duration' => $duration > 0 ? $duration : null,
+        ];
     }
 
     protected function urlFor(string $locale, string $view, ?string $slug = null): string

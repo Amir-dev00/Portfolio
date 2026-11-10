@@ -1,5 +1,8 @@
-/* Project catalog for in-app Work views. Images map to assets/img/amir. */
-window.AZ_PROJECTS = [
+/* Project catalog for in-app Work views. Images map to assets/img/amir.
+   Prefer CMS bootstrap payload when present. */
+window.AZ_PROJECTS = (window.AZ_BOOTSTRAP && Array.isArray(window.AZ_BOOTSTRAP.projects) && window.AZ_BOOTSTRAP.projects.length)
+  ? window.AZ_BOOTSTRAP.projects
+  : [
   {
     slug: "personal-portfolio-website",
     title: "Personal Portfolio Website",

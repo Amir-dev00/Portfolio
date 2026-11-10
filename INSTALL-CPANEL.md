@@ -1,148 +1,201 @@
-# Install AZ Portfolio CMS on cPanel (no SSH)
+# Install AZ Portfolio on cPanel (no SSH, no terminal)
 
-This package is a **Laravel** app with a bilingual public site and owner-only `/admin`.  
-All PHP dependencies are already inside the ZIP. You do **not** run Composer, npm, Artisan, or migrations on the server.
+The ZIP contains the complete Laravel app with all PHP dependencies (`vendor/`) already installed.
+You do **not** run Composer, npm, Artisan, or migrations on the server. Everything is done with
+cPanel File Manager and phpMyAdmin.
 
-## What you need in cPanel
+Files delivered in `dist/`:
 
-Check these before uploading:
+| File | Purpose |
+| --- | --- |
+| `portfolio-cpanel.zip` | `portfolio-app/` (Laravel, outside the web root) + `public_html/` (web root) |
+| `portfolio-final.sql` | Full schema + published portfolio content. **No user accounts.** |
+| `INSTALL-CPANEL.md` | This guide |
+| `tools/make-owner-hash.php` | Run on **your PC** to generate the SQL for the first admin owner |
 
-1. **PHP 8.2 or newer** (MultiPHP / Select PHP Version). Laravel 13 needs PHP 8.2+.
-2. Extensions enabled: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `curl`, `gd`, `zip`.
-3. **MySQL or MariaDB** database you can create in cPanel (utf8mb4).
-4. Domain document root is **`public_html`** (common shared hosting). This package does **not** need a symlink.
+---
 
-Compatibility assumption if your host versions are unknown: modern cPanel with PHP 8.2+ and MariaDB 10.3+ / MySQL 5.7+.
+## 0. Requirements (check in cPanel first)
 
-## Files you received
+1. **PHP 8.3 or newer** (cPanel → MultiPHP Manager / Select PHP Version). Laravel 13 does **not** run on PHP 8.2.
+2. PHP extensions: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`, `curl`, `gd`, `zip`, `dom`.
+3. MySQL 5.7+ or MariaDB 10.3+ (utf8mb4).
+4. The domain's document root is `public_html`.
+5. An SSL certificate (cPanel → SSL/TLS Status → AutoSSL). The admin login uses secure cookies and needs HTTPS.
 
-- `portfolio-cpanel.zip` — production files
-- `portfolio-final.sql` — schema + seeded portfolio content (no admin password)
-- `tools/make-owner-hash.php` — run **on your PC** to create the first owner SQL
+---
 
-## 1. Create the database
+## Fresh installation
 
-1. cPanel → **MySQL® Databases**
-2. Create a database (example: `user_portfolio`)
-3. Create a database user with a strong password
-4. Add the user to the database with **ALL PRIVILEGES**
-5. Note the full names cPanel shows (often prefixed), host (`localhost`), username, password
+### 1. Create the database
 
-## 2. Import SQL
+1. cPanel → **MySQL® Databases**.
+2. Create a database (e.g. `account_portfolio`).
+3. Create a database user with a strong, generated password.
+4. Add the user to the database with **ALL PRIVILEGES**.
+5. Write down the full (prefixed) database name, user name, and password.
 
-1. Open **phpMyAdmin**
-2. Select the empty database
-3. **Import** → choose `portfolio-final.sql` → Go
-4. Confirm tables exist (`projects`, `publications`, `content_entries`, `migrations`, etc.)
-5. Confirm the `users` table is **empty** (no default login)
+### 2. Import the SQL
 
-## 3. Upload and extract the ZIP
+1. cPanel → **phpMyAdmin** → select the new, **empty** database.
+2. **Import** → choose `portfolio-final.sql` → **Go**.
+3. Confirm tables such as `projects`, `publications`, `content_entries`, `media_assets`, `migrations` exist.
+4. The `users` table is intentionally empty: there is no default login.
 
-1. Upload `portfolio-cpanel.zip` to your home directory (the folder that contains `public_html`), not only inside `public_html`
-2. Extract it so you get:
+> Only import `portfolio-final.sql` into an **empty** database. It recreates tables and would replace
+> existing content. For an existing site, follow **Upgrading an existing installation** below.
+
+### 3. Upload the files
+
+1. cPanel → **File Manager** → open your home directory (`/home/ACCOUNT/`, the folder that **contains** `public_html`).
+2. Upload `portfolio-cpanel.zip` there and **Extract** it. You get:
 
 ```text
-/home/YOUR_ACCOUNT/
-  portfolio-app/     ← Laravel application + vendor/
-  public_html/       ← web root (index.php, css, js, assets, media)
+/home/ACCOUNT/
+  portfolio-app/   <- Laravel app, vendor/, storage/ (NOT web-accessible)
+  public_html/     <- web root: index.php, .htaccess, css/, js/, assets/, media/
 ```
 
-If your account already has a `public_html` with an old site:
+If `public_html` already contains an old site, back it up (Compress → download), empty it, and then move
+the extracted `public_html/*` files into it, including the hidden `.htaccess` (File Manager → Settings →
+*Show Hidden Files*). `portfolio-app` must stay a **sibling** of `public_html`. No symlinks are needed.
 
-1. Back up and empty (or rename) the old `public_html`
-2. Move the extracted `public_html/*` into your real `public_html`
-3. Keep `portfolio-app` as a **sibling** of `public_html` (same parent folder)
+### 4. Generate `APP_KEY` on your PC
 
-## 4. Create `.env` on the server
-
-In File Manager open `portfolio-app/` and create a file named `.env` (copy from `.env.example` if present).
-
-Set at least:
-
-```env
-APP_NAME="AZ Portfolio"
-APP_ENV=production
-APP_KEY=
-APP_DEBUG=false
-APP_URL=https://YOUR-DOMAIN.com
-
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=your_db_name
-DB_USERNAME=your_db_user
-DB_PASSWORD=your_db_password
-
-SESSION_DRIVER=database
-CACHE_STORE=database
-QUEUE_CONNECTION=database
-LOG_LEVEL=error
-```
-
-### Generate `APP_KEY` on your PC
-
-On your computer (with PHP):
+`APP_KEY` encrypts sessions and cookies. Generate it locally; never reuse a key from another site and never commit it to Git.
 
 ```bash
 php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"
 ```
 
-Paste the result as `APP_KEY=base64:...` in `.env`.
+No PHP on your PC? From the project folder, `php artisan key:generate --show` does the same.
 
-Do **not** leave `APP_DEBUG=true` in production.
+### 5. Create `portfolio-app/.env`
 
-## 5. Folder permissions
+In File Manager, open `portfolio-app/`, copy `.env.example` to `.env`, then **Edit** it:
 
-In File Manager, make these writable (usually `0755` dirs / `0644` files; if uploads fail, set the dirs to `0775` or `0777` temporarily):
+```env
+APP_NAME="AZ Portfolio"
+APP_ENV=production
+APP_KEY=base64:PASTE_THE_KEY_FROM_STEP_4
+APP_DEBUG=false
+APP_URL=https://your-domain.com
 
-- `portfolio-app/storage` (and all subfolders)
-- `portfolio-app/bootstrap/cache`
-- `public_html/media/published`
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=account_portfolio
+DB_USERNAME=account_portfoliouser
+DB_PASSWORD=the-database-password
 
-## 6. Create the first owner (phpMyAdmin)
-
-On your PC:
-
-```bash
-php tools/make-owner-hash.php you@example.com 'YourStrongPasswordHere'
+SESSION_DRIVER=database
+SESSION_ENCRYPT=true
+SESSION_SECURE_COOKIE=true
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+LOG_LEVEL=error
 ```
 
-Copy the printed `INSERT INTO users ...` statement into phpMyAdmin → SQL → Go.
+- `APP_DEBUG` must stay `false` in production; `true` exposes stack traces and configuration.
+- `APP_URL` must be the exact `https://` address; canonical URLs, hreflang, and the sitemap use it.
+- Then right-click `.env` → **Change Permissions** → `0640` (or `0600` if your host runs PHP as your user, which is standard with suPHP/LSAPI/PHP-FPM).
 
-Then open:
+### 6. Permissions
 
-`https://YOUR-DOMAIN.com/admin/login`
+cPanel hosts run PHP as your own account user, so the defaults that File Manager creates are already correct:
 
-## 7. Verify installation
+| Path | Permission |
+| --- | --- |
+| Folders (incl. `portfolio-app/storage/**`, `portfolio-app/bootstrap/cache`, `public_html/media/published`) | `0755` |
+| Files | `0644` |
+| `portfolio-app/.env` | `0640` or `0600` |
 
-1. Public home loads: `/`
-2. Persian route works: `/fa` and `/fa/contact` (RTL + Persian copy)
-3. Project URL works: `/work/personal-portfolio-website`
-4. View source contains `og:title`, `canonical`, `hreflang`, and `AZ_BOOTSTRAP`
-5. `/sitemap.xml` and `/robots.txt` load
-6. Login to `/admin`
-7. Edit a content string → **Save draft** → confirm public page unchanged
-8. Click **Publish live** → confirm public page updates after refresh
-9. Upload a CV PDF under Resume → Publish → confirm download link appears after publish
-10. Confirm draft media is not directly guessable under a public drafts URL (drafts live outside `public_html`)
+Never use `0777`. If uploads or publishing fail with a permissions error, the folder is usually owned by a
+different user (e.g. it was created by another tool); contact your host to reset ownership to your account instead of widening permissions.
+
+### 7. Create the first admin owner
+
+On **your PC**, in the folder where you saved `tools/make-owner-hash.php`:
+
+```bash
+php make-owner-hash.php you@example.com
+```
+
+It asks for a password (minimum 12 characters) and prints an `INSERT INTO users ...` statement.
+In phpMyAdmin → your database → **SQL**, paste it and click **Go**. Don't save that output anywhere.
+
+The statement fails harmlessly if the email already exists, so it can never overwrite an existing account.
+
+### 8. Enable HTTPS redirect (recommended)
+
+After the SSL certificate is active, edit `public_html/.htaccess` and uncomment the three lines under
+`# Force HTTPS`. (Or enable cPanel → Domains → *Force HTTPS Redirect*.)
+
+### 9. Verify
+
+1. `https://your-domain.com/` shows the AZ preloader (always English), then the homepage slider.
+2. `/work`, `/about`, `/contact`, `/work/personal-portfolio-website` load directly, survive refresh, and can be shared.
+3. `/fa`, `/fa/work`, `/fa/about`, `/fa/contact` show Persian, right-to-left layout.
+4. An unknown URL (e.g. `/does-not-exist`) shows the AZ 404 page.
+5. `/sitemap.xml` and `/robots.txt` load.
+6. View page source: `<title>`, `meta description`, `canonical`, `hreflang`, `og:*` are present.
+7. `https://your-domain.com/.env` and `https://your-domain.com/portfolio-app/.env` return 403/404 (the app is outside the web root).
+8. `/admin/login` → sign in → edit a text → **Save draft** → the public site is unchanged → **Publish live** → the public site updates.
+9. Admin → Resume → upload a CV PDF → publish → the CV download link serves the new file.
+10. Admin → Dashboard → **Rollback** to the previous publication restores the old content.
+
+---
+
+## Upgrading an existing installation (keeps your data and admin accounts)
+
+Your content, projects, media and admin users live in the **database**, `portfolio-app/storage/app/`,
+`portfolio-app/.env`, and `public_html/media/published/`. An upgrade replaces code only.
+
+1. **Back up**: cPanel → Backup (home directory) and phpMyAdmin → Export (your database).
+2. **Do not import `portfolio-final.sql`** into an existing database; it would replace your content.
+   Database changes ship as separate files in the `upgrades/` folder next to the ZIP. They only add missing
+   rows/tables and never change or delete existing content, and are safe to run twice.
+   For this release run **`upgrades/2026_11_10_booking.sql`** (adds the "Book a Call" texts and setting):
+   phpMyAdmin → your database → **SQL** → paste the file's contents → **Go**.
+3. Extract the new ZIP into a temporary folder (e.g. `/home/ACCOUNT/upgrade/`).
+4. Replace code, keeping your data:
+   - `portfolio-app/`: replace everything **except** `.env` and `storage/app/` (your uploaded/private media).
+   - `public_html/`: replace `index.php`, `.htaccess`, `css/`, `js/`, `assets/`; **keep** `media/published/`.
+5. Delete the files inside `portfolio-app/bootstrap/cache/` (Laravel rebuilds them) and inside
+   `portfolio-app/storage/framework/views/` (compiled templates).
+6. In `/admin`, click **Publish live** once so the new texts reach the public site.
+7. Run the **Verify** checklist above.
+
+To roll back a bad upgrade, restore the home-directory backup files; the database stays untouched unless you ran an upgrade SQL, in which case restore the database export as well.
+
+---
 
 ## Day-to-day publishing
 
-- Edit content/projects/SEO/resume in `/admin`
-- Changes stay in **draft** until you click **Publish live**
-- Publish is atomic (one publication snapshot becomes current)
-- Use **Rollback** on the dashboard to restore a previous snapshot
+- Edit content, projects, SEO, profile, social links, and resume in `/admin`.
+- Changes stay in **draft** until **Publish live**; publishing switches the site to the new snapshot in one step.
+- **Rollback** on the dashboard restores any previous snapshot.
 
-## Backup before upgrades
+## "Book a Call" setup
 
-1. Download a full home-directory backup (or at least `portfolio-app` + `public_html`)
-2. In phpMyAdmin → Export your database
-3. Then replace files / import an upgrade SQL only if one is provided
+The Contact page's primary button opens a booking window with your real calendar. It needs your own scheduling account:
 
-## Host checks that only you can confirm in cPanel
+1. Create a free event on [Cal.com](https://cal.com) (recommended; embeds inline) or [Calendly](https://calendly.com),
+   connect your calendar, and set your availability there.
+2. Copy the public event link, e.g. `https://cal.com/your-name/30min` or `https://calendly.com/your-name/30min`.
+3. `/admin` → **Site content** → **Booking**: paste the link, keep provider on **Auto**, set the duration shown on the button, keep **Enabled** ticked, **Save**.
+   The button texts (EN/FA) are in the same page's *Booking* group.
+4. **Publish live**. Open `/contact` → **Book a Call**: your real free times appear; a booking is only shown as
+   confirmed after Cal.com/Calendly confirms it, and both of you get the calendar invite from them.
 
-- Exact PHP version and enabled extensions
-- That the domain really points at `public_html`
-- That the DB user is limited to this database
-- HTTPS / Force HTTPS for secure admin cookies
-- Disk quota large enough for `vendor/` + images
+Until a link is set, the window explains that online booking isn't open yet and offers your email instead.
+Other `https://` booking links (Google Calendar, Zoho, …) open in a new tab. Untick **Enabled** to bring back the original "Email me" button.
+
+## Things only your host can confirm
+
+- The PHP version and extensions actually active for the domain.
+- That the domain's document root is `public_html`.
+- SSL is active (secure cookies require it; without HTTPS you cannot log in with `SESSION_SECURE_COOKIE=true`).
+- Disk quota (the package is about 40 MB extracted with `vendor/` and images).

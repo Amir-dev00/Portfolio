@@ -87,6 +87,24 @@
       "contact.telegram": "Telegram",
       "contact.telegram.sub": "Quick chat · @Amir_dev00",
       "contact.note": "Available for freelance collaborations.",
+      "contact.bookCall": "Book a Call",
+      "booking.eyebrow": "Book a call",
+      "booking.title": "Let’s Talk",
+      "booking.intro": "A relaxed video call to talk through your project, role or idea. Pick a time that suits you — you’ll get a calendar invite right away.",
+      "booking.duration": "{min} min",
+      "booking.timezone": "Your time · {tz}",
+      "booking.loading": "Loading live availability…",
+      "booking.back": "Back to calendar",
+      "booking.close": "Close",
+      "booking.preferEmail": "Prefer email?",
+      "booking.confirmed": "You’re booked. Check your inbox for the confirmation and calendar invite.",
+      "booking.emailInstead": "Email me instead",
+      "booking.openExternal": "Open scheduling page",
+      "booking.setup.title": "Online booking is almost ready",
+      "booking.setup.body": "Scheduling isn’t open yet. Send me an email and we’ll find a time that works for both of us.",
+      "booking.setup.admin": "Admin: add your Cal.com or Calendly link in Admin → Site content → Booking, then click Publish live.",
+      "booking.error.title": "The scheduler didn’t load",
+      "booking.error.body": "Your connection or a content blocker may have stopped it. You can open the scheduling page directly or email me.",
       "category.Websites": "Websites",
       "category.Applications": "Applications",
       "category.APIs & Backend": "APIs & Backend",
@@ -173,6 +191,24 @@
       "contact.telegram": "تلگرام",
       "contact.telegram.sub": "گفتگوی سریع · @Amir_dev00",
       "contact.note": "آماده‌ی همکاری فریلنس هستم.",
+      "contact.bookCall": "رزرو جلسه",
+      "booking.eyebrow": "رزرو جلسه",
+      "booking.title": "گفت‌وگو کنیم",
+      "booking.intro": "یک تماس تصویری کوتاه و صمیمی برای صحبت درباره‌ی پروژه، موقعیت شغلی یا ایده‌ی شما. زمانی را که برایتان مناسب است انتخاب کنید؛ دعوت‌نامه‌ی تقویم بلافاصله برایتان ارسال می‌شود.",
+      "booking.duration": "{min} دقیقه",
+      "booking.timezone": "به وقت شما · {tz}",
+      "booking.loading": "در حال دریافت زمان‌های آزاد…",
+      "booking.back": "بازگشت به تقویم",
+      "booking.close": "بستن",
+      "booking.preferEmail": "ایمیل را ترجیح می‌دهید؟",
+      "booking.confirmed": "جلسه رزرو شد. تأیید و دعوت‌نامه‌ی تقویم را در ایمیل خود ببینید.",
+      "booking.emailInstead": "به جای آن ایمیل بزنید",
+      "booking.openExternal": "باز کردن صفحه‌ی رزرو",
+      "booking.setup.title": "رزرو آنلاین به‌زودی فعال می‌شود",
+      "booking.setup.body": "فعلاً امکان رزرو آنلاین باز نیست. ایمیل بزنید تا زمانی مناسب برای هر دو پیدا کنیم.",
+      "booking.setup.admin": "مدیر: لینک Cal.com یا Calendly را در Admin → Site content → Booking وارد کنید و سپس Publish live را بزنید.",
+      "booking.error.title": "تقویم رزرو بارگذاری نشد",
+      "booking.error.body": "ممکن است اتصال یا افزونه‌ی مسدودکننده مانع آن شده باشد. می‌توانید صفحه‌ی رزرو را مستقیم باز کنید یا ایمیل بزنید.",
       "category.Websites": "وب‌سایت‌ها",
       "category.Applications": "اپلیکیشن‌ها",
       "category.APIs & Backend": "API و بک‌اند",
@@ -335,11 +371,61 @@
     return current === "fa" ? "lines, words" : "lines, words, chars";
   }
 
+  var RTL_LETTER = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+
+  // SplitText turns each word into an inline-block, which the bidi algorithm treats as a
+  // neutral: inside RTL text "REST API" would render as "API REST". Wrap runs of
+  // consecutive Latin words in one LTR inline-block so they keep their reading order.
+  function isolateLatinRuns(el) {
+    var words = el.querySelectorAll(".split-text__word");
+    var run = [];
+
+    function flush() {
+      if (run.length > 1) {
+        var first = run[0];
+        var last = run[run.length - 1];
+        var wrap = document.createElement("span");
+        wrap.className = "az-ltr-run";
+        wrap.setAttribute("dir", "ltr");
+        wrap.style.display = "inline-block";
+        wrap.style.unicodeBidi = "isolate";
+        first.parentNode.insertBefore(wrap, first);
+        var node = first;
+        while (node) {
+          var next = node.nextSibling;
+          wrap.appendChild(node);
+          if (node === last) break;
+          node = next;
+        }
+      }
+      run = [];
+    }
+
+    Array.prototype.forEach.call(words, function (word) {
+      var latin = /[A-Za-z0-9]/.test(word.textContent) && !RTL_LETTER.test(word.textContent);
+      if (!latin) {
+        flush();
+        return;
+      }
+      if (run.length) {
+        var prev = run[run.length - 1];
+        var between = prev.nextSibling;
+        while (between && between !== word && between.nodeType === 3 && !between.textContent.trim()) {
+          between = between.nextSibling;
+        }
+        if (between !== word) flush();
+      }
+      run.push(word);
+    });
+    flush();
+  }
+
   function bridgeFaWordsAsChars(el) {
     if (!el || current !== "fa") return;
     el.querySelectorAll(".split-text__word").forEach(function (word) {
       word.classList.add("split-text__char");
     });
+    isolateLatinRuns(el);
   }
 
   function revealSplitHeading(el) {
@@ -526,10 +612,22 @@
     });
   }
 
+  function mergeBootstrapStrings() {
+    var boot = window.AZ_BOOTSTRAP;
+    if (!boot || !boot.strings) return;
+    ["en", "fa"].forEach(function (lang) {
+      if (!boot.strings[lang]) return;
+      STRINGS[lang] = Object.assign({}, STRINGS[lang] || {}, boot.strings[lang]);
+    });
+    if (boot.lang) current = normalize(boot.lang);
+  }
+
   // Apply shell ASAP; full text pass after DOM is ready.
+  mergeBootstrapStrings();
   applyDocumentShell();
 
   function boot() {
+    mergeBootstrapStrings();
     bindSwitcher(document);
     applyAll(document);
     scheduleHomeHeadingBridge();

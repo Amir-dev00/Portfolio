@@ -1,4 +1,5 @@
-/* Hash SPA router — Home / Work / About / Contact. Dock stays mounted. */
+/* SPA router — Home / Work / About / Contact. Dock stays mounted.
+   Supports hash URLs (static) and Laravel path URLs (/work, /fa/work, …). */
 (function () {
   "use strict";
 
@@ -6,6 +7,9 @@
   var app = document.getElementById("az-app");
   var nav = document.getElementById("glass-nav");
   if (!app) return;
+
+  var boot = window.AZ_BOOTSTRAP || null;
+  var serverRouted = !!(boot && boot.canonical);
 
   function tt(key, vars) {
     if (window.AZ_i18n && typeof window.AZ_i18n.t === "function") {
@@ -20,6 +24,51 @@
       return window.AZ_i18n.localizeProject(project);
     }
     return project;
+  }
+
+  function currentLang() {
+    if (window.AZ_i18n && typeof window.AZ_i18n.getLang === "function") {
+      return window.AZ_i18n.getLang();
+    }
+    return (boot && boot.lang) || "en";
+  }
+
+  function localePrefix(lang) {
+    return (lang || currentLang()) === "fa" ? "/fa" : "";
+  }
+
+  function pathForRoute(route, lang) {
+    var prefix = localePrefix(lang);
+    if (route.name === "home") return prefix || "/";
+    if (route.name === "project") {
+      return prefix + "/work/" + encodeURIComponent(route.slug || "");
+    }
+    return prefix + "/" + route.name;
+  }
+
+  function hashForRoute(route) {
+    if (route.name === "project") return "#work/" + encodeURIComponent(route.slug || "");
+    if (route.name === "home") return "#home";
+    return "#" + route.name;
+  }
+
+  function normalizePathname(pathname) {
+    var path = String(pathname || "/").replace(/\/+$/, "") || "/";
+    var fa = false;
+    if (path === "/fa") return { name: "home" };
+    if (path.indexOf("/fa/") === 0) {
+      fa = true;
+      path = path.slice(3) || "/";
+    }
+    if (path === "/" || path === "") return { name: "home" };
+    if (path === "/work") return { name: "work" };
+    if (path === "/about") return { name: "about" };
+    if (path === "/contact") return { name: "contact" };
+    var match = path.match(/^\/work\/([^/]+)$/);
+    if (match) {
+      return { name: "project", slug: decodeURIComponent(match[1]) };
+    }
+    return fa ? { name: "home" } : { name: "home" };
   }
 
   var views = {
@@ -682,7 +731,7 @@
   }
 
   function refreshLocalizedUi() {
-    var route = normalizeHash(window.location.hash);
+    var route = resolveRouteFromLocation();
     setDocumentTitle(route);
     if (workBrowser && workBrowser.dataset.ready === "1") {
       var slug = workLastSlug;
@@ -787,8 +836,34 @@
     }, 170);
   }
 
+  function resolveRouteFromLocation() {
+    if (window.location.hash && window.location.hash !== "#") {
+      return normalizeHash(window.location.hash);
+    }
+    if (serverRouted) {
+      return normalizePathname(window.location.pathname);
+    }
+    return { name: "home" };
+  }
+
   function applyFromLocation(instant) {
-    showView(normalizeHash(window.location.hash), instant);
+    showView(resolveRouteFromLocation(), instant);
+  }
+
+  function navigateClient(route, replace) {
+    var nextHash = hashForRoute(route);
+    if (serverRouted) {
+      var nextUrl = pathForRoute(route) + nextHash;
+      if (replace) history.replaceState({ az: true }, "", nextUrl);
+      else history.pushState({ az: true }, "", nextUrl);
+      showView(route, false);
+      return;
+    }
+    if (window.location.hash === nextHash) {
+      showView(route, false);
+      return;
+    }
+    window.location.hash = nextHash;
   }
 
   function onNavClick(event) {
@@ -798,30 +873,36 @@
     if (href.indexOf("mailto:") === 0 || href.indexOf("http") === 0) return;
     if (href.charAt(0) !== "#") return;
     event.preventDefault();
-    var route = normalizeHash(href);
-    var nextHash = "#" + (route.name === "project" ? "work/" + route.slug : route.name === "home" ? "home" : route.name);
-    if (window.location.hash === nextHash) {
-      showView(route, false);
-      return;
-    }
-    window.location.hash = nextHash;
+    navigateClient(normalizeHash(href), false);
   }
 
   document.addEventListener("click", onNavClick);
   window.addEventListener("hashchange", function () {
     applyFromLocation(false);
   });
+  window.addEventListener("popstate", function () {
+    if (serverRouted) applyFromLocation(false);
+  });
   window.addEventListener("resize", function () {
-    var route = normalizeHash(window.location.hash);
-    setDockActive(route);
+    setDockActive(resolveRouteFromLocation());
   });
   window.addEventListener("az:langchange", function () {
     refreshLocalizedUi();
+    if (serverRouted) {
+      var route = resolveRouteFromLocation();
+      history.replaceState({ az: true }, "", pathForRoute(route) + hashForRoute(route));
+    }
   });
 
-  // Ensure an initial hash exists for shareable Home without forcing reload loops.
+  // Keep path intact on Laravel; only ensure a hash fragment for the SPA shell.
   if (!window.location.hash || window.location.hash === "#") {
-    history.replaceState(null, "", "#home");
+    var bootRoute = resolveRouteFromLocation();
+    var ensured = hashForRoute(bootRoute);
+    if (serverRouted) {
+      history.replaceState({ az: true }, "", pathForRoute(bootRoute) + ensured);
+    } else {
+      history.replaceState(null, "", ensured);
+    }
   }
 
   document.documentElement.classList.add("az-app-ready");
