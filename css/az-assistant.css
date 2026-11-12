@@ -378,12 +378,7 @@ html[data-az-route="ask"] #glass-nav .az-assistant-nav-hint {
   cursor: pointer;
   color: var(--az-asst-ink);
   background: var(--az-asst-accent);
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--az-asst-accent) 35%, transparent);
   transition: transform 180ms var(--az-asst-ease), opacity 160ms ease;
-}
-
-html[dir="rtl"] .az-assistant__send svg {
-  transform: scaleX(-1);
 }
 
 .az-assistant__send:hover {
