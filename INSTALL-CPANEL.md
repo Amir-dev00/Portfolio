@@ -96,6 +96,12 @@ SESSION_SAME_SITE=lax
 CACHE_STORE=database
 QUEUE_CONNECTION=database
 LOG_LEVEL=error
+
+# Optional SMS.ir owner alert (see “Owner SMS via SMS.ir” below)
+SMSIR_ENABLED=false
+SMSIR_API_KEY=
+SMSIR_LINE_NUMBER=
+SMSIR_OWNER_MOBILE=
 ```
 
 - `APP_DEBUG` must stay `false` in production; `true` exposes stack traces and configuration.
@@ -158,8 +164,9 @@ Your content, projects, media and admin users live in the **database**, `portfol
    Database changes ship as separate files in the `upgrades/` folder next to the ZIP. They only add missing
    rows/tables and never change or delete existing content, and are safe to run twice.
    For the self-hosted calendar also run **`upgrades/2026_11_10_native_booking.sql`**
-   (after the earlier `upgrades/2026_11_10_booking.sql` texts if you never imported them):
-   phpMyAdmin → your database → **SQL** → paste the file's contents → **Go**.
+   (after the earlier `upgrades/2026_11_10_booking.sql` texts if you never imported them), then
+   **`upgrades/2026_11_12_booking_owner_sms.sql`** for optional SMS.ir owner-alert columns:
+   phpMyAdmin → your database → **SQL** → paste each file's contents → **Go**.
 3. Extract the new ZIP into a temporary folder (e.g. `/home/ACCOUNT/upgrade/`).
 4. Replace code, keeping your data:
    - `portfolio-app/`: replace everything **except** `.env` and `storage/app/` (your uploaded/private media).
@@ -209,6 +216,25 @@ Scheduling runs entirely on your Laravel + MySQL host — **no Cal.com, Calendly
 5. Visitors can download a local `.ics` invite. Optional SMTP notifications use your host mail settings; bookings still succeed if mail is offline.
 
 Untick **Enabled** in Site content / Booking settings to show the original “Email me” primary button instead.
+
+### Owner SMS via SMS.ir (optional)
+
+After a booking is **confirmed and saved** in MySQL, the app can send one short SMS to your phone with **only** the booking reference and the appointment date/time in **Asia/Tehran**. Visitor contact details stay in Admin → Bookings only. Date/time browsing and failed form posts never send SMS. No queue worker or SSH cron is required — the request runs inline with a short timeout.
+
+1. Existing installs: in phpMyAdmin run **`upgrades/2026_11_12_booking_owner_sms.sql`** (adds SMS tracking columns). Fresh `portfolio-final.sql` installs already include the columns.
+2. In the [SMS.ir](https://sms.ir/) panel, create an API key and note your sending line number.
+3. Edit `portfolio-app/.env` (never commit real keys):
+
+```env
+SMSIR_ENABLED=true
+SMSIR_API_KEY=your-panel-api-key
+SMSIR_LINE_NUMBER=3000xxxxxxxx
+SMSIR_OWNER_MOBILE=09xxxxxxxxx
+```
+
+4. Save `.env`, then place a real test booking from `/contact`.
+5. Check **Admin → Bookings →** the booking: **Owner SMS** should show `accepted` (provider OK), `rejected` (provider refused), or `uncertain` (timeout/network — the app will **not** auto-retry that booking, to avoid duplicates). The booking row remains either way.
+6. Leave `SMSIR_ENABLED=false` (or blank keys) to keep calendar + email-only behavior.
 
 ## Things only your host can confirm
 

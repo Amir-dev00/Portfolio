@@ -120,11 +120,12 @@ html.az-booking-open body {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 650;
+  color: #f7f3ea; /* beat Rhye global h2 #333 */
 }
 
 .az-booking__role {
   margin: 4px 0 18px;
-  color: rgba(244, 241, 234, 0.58);
+  color: rgba(247, 243, 234, 0.7);
   font-size: 0.92rem;
 }
 
@@ -133,11 +134,12 @@ html.az-booking-open body {
   font-size: clamp(1.4rem, 2.4vw, 1.85rem);
   font-weight: 650;
   letter-spacing: -0.02em;
+  color: #f7f3ea; /* beat Rhye global h3 #333 */
 }
 
 .az-booking__intro {
   margin: 0 0 18px;
-  color: rgba(244, 241, 234, 0.7);
+  color: rgba(247, 243, 234, 0.72);
   line-height: 1.55;
   font-size: 0.95rem;
 }
@@ -218,6 +220,7 @@ html.az-booking-open body {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
+  color: #f7f3ea;
 }
 
 .az-booking__weekdays,
@@ -302,7 +305,7 @@ html.az-booking-open body {
   display: grid;
   gap: 6px;
   font-size: 0.85rem;
-  color: rgba(244, 241, 234, 0.72);
+  color: rgba(247, 243, 234, 0.78);
 }
 
 .az-booking__form input,
@@ -312,9 +315,15 @@ html.az-booking-open body {
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.28);
   color: #f7f3ea;
+  caret-color: #f7f3ea;
   padding: 12px 14px;
   font: inherit;
   outline: none;
+}
+
+.az-booking__form input::placeholder,
+.az-booking__form textarea::placeholder {
+  color: rgba(247, 243, 234, 0.42);
 }
 
 .az-booking__form input:focus,
@@ -334,7 +343,7 @@ html.az-booking-open body {
 .az-booking__privacy {
   margin: 0;
   font-size: 0.8rem;
-  color: rgba(244, 241, 234, 0.48);
+  color: rgba(247, 243, 234, 0.55);
   line-height: 1.45;
 }
 
@@ -347,6 +356,18 @@ html.az-booking-open body {
 .az-booking__success {
   text-align: center;
   padding: 24px 8px 8px;
+  color: #f7f3ea;
+}
+
+.az-booking__success h3 {
+  margin: 0 0 8px;
+  color: #f7f3ea; /* beat Rhye global h3 #333 */
+}
+
+.az-booking__success p {
+  margin: 0;
+  color: rgba(247, 243, 234, 0.78);
+  line-height: 1.55;
 }
 
 .az-booking__success-icon {
@@ -369,14 +390,24 @@ html.az-booking-open body {
   text-align: start;
   display: grid;
   gap: 8px;
-  color: rgba(244, 241, 234, 0.78);
+  color: rgba(247, 243, 234, 0.82);
+}
+
+.az-booking__summary strong {
+  color: #f7f3ea;
+  font-weight: 650;
 }
 
 .az-booking__loading,
 .az-booking__empty,
 .az-booking__notice {
-  color: rgba(244, 241, 234, 0.7);
+  color: rgba(247, 243, 234, 0.78);
   line-height: 1.55;
+}
+
+.az-booking__notice h3 {
+  margin: 0 0 8px;
+  color: #f7f3ea;
 }
 
 .az-booking__day.is-skeleton {
@@ -419,6 +450,15 @@ html.az-booking-open body {
   .az-booking__day.is-skeleton span {
     animation: none;
   }
+}
+
+.az-booking__picked {
+  margin: 0 0 12px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(247, 243, 234, 0.78);
 }
 
 .az-booking__actions {

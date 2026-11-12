@@ -14,7 +14,10 @@ use Throwable;
 
 final class BookingService
 {
-    public function __construct(private AvailabilityService $availability) {}
+    public function __construct(
+        private AvailabilityService $availability,
+        private SmsIrClient $smsir,
+    ) {}
 
     /**
      * Atomically reserve a slot. Throws ValidationException on conflict.
@@ -34,7 +37,7 @@ final class BookingService
         $endsAt = $startsAt->addMinutes((int) $settings['duration']);
         $timezone = $input['timezone'] ?: $settings['timezone'];
 
-        return DB::transaction(function () use ($input, $ip, $startsAt, $endsAt, $timezone, $settings) {
+        $booking = DB::transaction(function () use ($input, $ip, $startsAt, $endsAt, $timezone, $settings) {
             $buffer = (int) $settings['buffer'];
             // Serialize concurrent writers for the overlapping window.
             Booking::query()
@@ -50,7 +53,7 @@ final class BookingService
                 ]);
             }
 
-            $booking = Booking::query()->create([
+            return Booking::query()->create([
                 'reference' => $this->uniqueReference(),
                 'visitor_name' => trim($input['name']),
                 'visitor_email' => strtolower(trim($input['email'])),
@@ -64,11 +67,12 @@ final class BookingService
                 'cancel_token' => Str::random(48),
                 'ip_hash' => $ip ? hash('sha256', $ip) : null,
             ]);
-
-            $this->maybeNotify($booking, $settings);
-
-            return $booking;
         });
+
+        // Notify only after MySQL commit. Failures never roll back the booking.
+        $this->maybeNotify($booking->fresh(), $settings);
+
+        return $booking->fresh();
     }
 
     public function cancel(Booking $booking, string $reason = 'cancelled'): Booking
@@ -135,6 +139,12 @@ final class BookingService
 
     protected function maybeNotify(Booking $booking, array $settings): void
     {
+        $this->maybeNotifyEmail($booking, $settings);
+        $this->maybeNotifyOwnerSms($booking);
+    }
+
+    protected function maybeNotifyEmail(Booking $booking, array $settings): void
+    {
         $mailConfigured = filled(config('mail.mailers.smtp.host')) || config('mail.default') === 'log';
         if (! $mailConfigured) {
             return;
@@ -165,5 +175,61 @@ final class BookingService
         } catch (Throwable $e) {
             Log::warning('booking.mail_failed', ['reference' => $booking->reference, 'error' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * One owner SMS after a confirmed row is committed. Never retries accepted/rejected/uncertain.
+     */
+    protected function maybeNotifyOwnerSms(Booking $booking): void
+    {
+        if (! $this->smsir->isConfigured()) {
+            return;
+        }
+
+        // Claim by booking id so concurrent or repeated notify cannot double-send.
+        $claimed = Booking::query()
+            ->whereKey($booking->id)
+            ->whereNull('owner_sms_status')
+            ->update([
+                'owner_sms_status' => 'pending',
+                'owner_sms_sent_at' => now(),
+            ]);
+
+        if ($claimed === 0) {
+            return;
+        }
+
+        try {
+            $result = $this->smsir->sendBulk(
+                $this->ownerSmsMessage($booking),
+                (string) config('smsir.owner_mobile'),
+                config('smsir.line_number')
+            );
+
+            Booking::query()->whereKey($booking->id)->update([
+                'owner_sms_status' => $result['outcome'],
+                'owner_sms_provider_message_id' => $result['message_id'],
+                'owner_sms_error' => $result['outcome'] === 'accepted'
+                    ? null
+                    : Str::limit((string) ($result['message'] ?: $result['outcome']), 255),
+                'owner_sms_sent_at' => now(),
+            ]);
+        } catch (Throwable $e) {
+            // Uncertain: do not auto-retry (provider may have accepted after the timeout).
+            Log::warning('booking.sms_failed', ['booking_id' => $booking->id, 'error' => $e->getMessage()]);
+            Booking::query()->whereKey($booking->id)->update([
+                'owner_sms_status' => 'uncertain',
+                'owner_sms_error' => Str::limit($e->getMessage(), 255),
+                'owner_sms_sent_at' => now(),
+            ]);
+        }
+    }
+
+    protected function ownerSmsMessage(Booking $booking): string
+    {
+        $local = CarbonImmutable::parse($booking->starts_at)->timezone('Asia/Tehran');
+
+        // Only reference + Asia/Tehran appointment time (no visitor PII).
+        return $booking->reference."\n".$local->format('Y-m-d H:i');
     }
 }

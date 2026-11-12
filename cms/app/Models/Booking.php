@@ -20,6 +20,10 @@ class Booking extends Model
         'status',
         'cancel_token',
         'ip_hash',
+        'owner_sms_status',
+        'owner_sms_provider_message_id',
+        'owner_sms_error',
+        'owner_sms_sent_at',
     ];
 
     protected function casts(): array
@@ -27,6 +31,7 @@ class Booking extends Model
         return [
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
+            'owner_sms_sent_at' => 'datetime',
         ];
     }
 

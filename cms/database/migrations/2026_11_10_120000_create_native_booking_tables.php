@@ -50,6 +50,11 @@ return new class extends Migration
             $table->string('status', 24)->default('confirmed'); // confirmed|cancelled|completed
             $table->string('cancel_token', 64)->unique();
             $table->string('ip_hash', 64)->nullable();
+            // Owner SMS.ir outcome: null|pending|accepted|rejected|uncertain
+            $table->string('owner_sms_status', 16)->nullable();
+            $table->string('owner_sms_provider_message_id', 64)->nullable();
+            $table->string('owner_sms_error', 255)->nullable();
+            $table->timestamp('owner_sms_sent_at')->nullable();
             $table->timestamps();
             $table->index(['starts_at', 'ends_at', 'status']);
             $table->index(['visitor_email', 'created_at']);

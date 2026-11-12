@@ -32,5 +32,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="SMSIR_ENABLED" value="false"/>
+        <env name="SMSIR_API_KEY" value=""/>
+        <env name="SMSIR_LINE_NUMBER" value=""/>
+        <env name="SMSIR_OWNER_MOBILE" value=""/>
     </php>
 </phpunit>

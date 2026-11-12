@@ -265,6 +265,31 @@
     });
   }
 
+  function formatSelectedSummary() {
+    var dateLabel = state.selectedDate || "";
+    var timeLabel = state.selectedSlot ? state.selectedSlot.label : "";
+    if (dateLabel && window.AZ_jalali && lang() === "fa") {
+      var parts = dateLabel.split("-");
+      if (parts.length === 3) {
+        var j = window.AZ_jalali.toJalali(+parts[0], +parts[1], +parts[2]);
+        var month = window.AZ_jalali.monthName ? window.AZ_jalali.monthName(j[1], "fa") : String(j[1]);
+        dateLabel = digits(String(j[2])) + " " + month + " " + digits(String(j[0]));
+      }
+    } else if (dateLabel) {
+      try {
+        var d = new Date(dateLabel + "T12:00:00");
+        dateLabel = d.toLocaleDateString(lang() === "fa" ? "fa-IR" : "en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+      } catch (e) {}
+    }
+    if (!timeLabel) return dateLabel;
+    return dateLabel + " · " + digits(timeLabel);
+  }
+
   function renderTimes(stage) {
     var list =
       state.slots.length === 0
@@ -286,26 +311,20 @@
             .join("") +
           "</div>";
     stage.innerHTML =
-      '<p class="az-booking__picked">' + escapeHtml(state.selectedDate) + "</p>" + list +
-      '<div class="az-booking__actions">' +
-      '  <button type="button" class="az-contact-pill az-contact-pill_primary" data-continue ' +
-      (state.selectedSlot ? "" : "disabled") +
-      '><span data-i18n="booking.continue"></span></button>' +
-      "</div>";
+      '<p class="az-booking__picked">' + escapeHtml(formatSelectedSummary()) + "</p>" + list;
     applyI18n(stage);
     stage.querySelectorAll(".az-booking__slot").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var utc = btn.getAttribute("data-start");
         state.selectedSlot = state.slots.find(function (s) { return s.start_utc === utc; }) || null;
-        renderTimes(stage);
+        if (state.selectedSlot) setStep("details");
       });
     });
-    var cont = stage.querySelector("[data-continue]");
-    if (cont) cont.addEventListener("click", function () { if (state.selectedSlot) setStep("details"); });
   }
 
   function renderForm(stage) {
     stage.innerHTML =
+      '<p class="az-booking__picked" aria-live="polite">' + escapeHtml(formatSelectedSummary()) + "</p>" +
       '<form class="az-booking__form" novalidate>' +
       '  <input type="text" name="company_website" class="az-booking__hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>' +
       '  <label><span data-i18n="booking.name"></span><input name="name" required autocomplete="name"/></label>' +
@@ -319,6 +338,16 @@
       "</form>";
     applyI18n(stage);
     stage.querySelector("form").addEventListener("submit", onSubmit);
+    var nameInput = stage.querySelector('input[name="name"]');
+    if (nameInput) {
+      window.requestAnimationFrame(function () {
+        try {
+          nameInput.focus({ preventScroll: true });
+        } catch (e) {
+          nameInput.focus();
+        }
+      });
+    }
   }
 
   function renderDone(stage) {

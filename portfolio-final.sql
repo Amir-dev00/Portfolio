@@ -105,6 +105,10 @@ CREATE TABLE `bookings` (
   `status` varchar(24) NOT NULL DEFAULT 'confirmed',
   `cancel_token` varchar(64) NOT NULL,
   `ip_hash` varchar(64) DEFAULT NULL,
+  `owner_sms_status` varchar(16) DEFAULT NULL,
+  `owner_sms_provider_message_id` varchar(64) DEFAULT NULL,
+  `owner_sms_error` varchar(255) DEFAULT NULL,
+  `owner_sms_sent_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -121,7 +125,7 @@ CREATE TABLE `bookings` (
 
 LOCK TABLES `bookings` WRITE;
 /*!40000 ALTER TABLE `bookings` DISABLE KEYS */;
-INSERT INTO `bookings` VALUES (1,'RREI-HQSX','Test Visitor','test@example.com',NULL,'Smoke test',NULL,'2026-11-11 06:30:00','2026-11-11 07:00:00','Asia/Tehran','confirmed','xQwN12RdsaTy2YOxYbJyxfidGTZAMB8Wh9y9b4DNiaS3sPZu','12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0','2026-11-10 14:17:18','2026-11-10 14:17:18');
+INSERT INTO `bookings` VALUES (1,'RREI-HQSX','Test Visitor','test@example.com',NULL,'Smoke test',NULL,'2026-11-11 06:30:00','2026-11-11 07:00:00','Asia/Tehran','confirmed','xQwN12RdsaTy2YOxYbJyxfidGTZAMB8Wh9y9b4DNiaS3sPZu','12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0',NULL,NULL,NULL,NULL,'2026-11-10 14:17:18','2026-11-10 14:17:18');
 /*!40000 ALTER TABLE `bookings` ENABLE KEYS */;
 UNLOCK TABLES;
 

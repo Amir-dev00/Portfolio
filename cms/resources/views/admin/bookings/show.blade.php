@@ -14,6 +14,19 @@
     <div><label>Ends (owner tz)</label><div>{{ $booking->ends_at?->timezone($settings['timezone'] ?? 'UTC')->toDayDateTimeString() }}</div></div>
     <div><label>Topic</label><div>{{ $booking->topic ?: '—' }}</div></div>
     <div style="grid-column:1/-1"><label>Message</label><div>{{ $booking->message ?: '—' }}</div></div>
+    <div><label>Owner SMS</label><div>
+      @if ($booking->owner_sms_status)
+        <span class="badge">{{ $booking->owner_sms_status }}</span>
+        @if ($booking->owner_sms_provider_message_id)
+          <code style="margin-inline-start:6px">{{ $booking->owner_sms_provider_message_id }}</code>
+        @endif
+        @if ($booking->owner_sms_error)
+          <div style="opacity:.75;margin-top:4px">{{ $booking->owner_sms_error }}</div>
+        @endif
+      @else
+        —
+      @endif
+    </div></div>
   </div>
   <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
     <a class="btn btn-secondary" href="{{ route('admin.bookings.index') }}">Back</a>
