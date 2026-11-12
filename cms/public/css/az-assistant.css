@@ -210,6 +210,24 @@ html[dir="rtl"] .az-assistant__composer {
   --az-avatar-gaze: -2px;
 }
 
+.az-assistant__avatar--flying {
+  position: fixed;
+  z-index: 101;
+  pointer-events: none;
+}
+
+.az-avatar-in-flight .az-assistant .az-assistant__avatar {
+  visibility: hidden;
+}
+
+.az-avatar-landing :is(.glass-nav__icon, .glass-nav__action-icon) {
+  animation: az-avatar-tap 300ms ease-out;
+}
+
+@keyframes az-avatar-tap {
+  35% { scale: 0.82; filter: brightness(1.45); }
+}
+
 .az-assistant__avatar-shell {
   display: grid;
   place-items: center;

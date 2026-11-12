@@ -2,15 +2,14 @@
   "use strict";
 
   var ROOT = "[data-az-assistant]";
+  var DESTINATIONS = ["work", "about", "contact", "cv"];
   var state = {
     root: null,
     sending: false,
     home: null,
     messages: [],
-    configured: true,
     reactionTimer: 0,
     navHint: null,
-    routeWhenSent: null,
   };
 
   function lang() {
@@ -41,14 +40,6 @@
   function apiBase() {
     var el = state.root;
     return ((el && el.getAttribute("data-assistant-api")) || "/api/assistant").replace(/\/$/, "");
-  }
-
-  function currentRouteName() {
-    if (window.AZ_nav && typeof window.AZ_nav.current === "function") {
-      var route = window.AZ_nav.current();
-      return route && route.name ? route.name : "";
-    }
-    return "";
   }
 
   function react(pose, destination) {
@@ -147,37 +138,90 @@
     el.scrollTop = el.scrollHeight;
   }
 
-  function openDestination(detail, options) {
-    options = options || {};
-    var destination = String((detail && detail.destination) || "").toLowerCase();
-    var url = String((detail && detail.url) || "");
-    if (!destination) return;
+  function flyTo(link) {
+    if (!link || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return Promise.resolve();
+    var container = document.documentElement.dataset.azRoute === "home" ? state.home : state.root;
+    var avatar = container && container.querySelector("[data-az-assistant-avatar]");
+    if (!avatar || typeof avatar.animate !== "function") return Promise.resolve();
 
-    if (destination === "cv") {
-      var cvUrl = url || (window.AZ_BOOTSTRAP && window.AZ_BOOTSTRAP.cvUrl) || "";
-      if (cvUrl) window.open(cvUrl, "_blank", "noopener,noreferrer");
-      react("point", "cv");
-      return;
+    var icon = link.querySelector(".glass-nav__icon, .glass-nav__action-icon") || link;
+    var start = avatar.getBoundingClientRect();
+    var end = icon.getBoundingClientRect();
+    if (!start.width || !end.width) return Promise.resolve();
+
+    var x = end.left + (end.width - start.width) / 2 - start.left;
+    var y = end.top + (end.height - start.height) / 2 - start.top;
+    var copy = avatar.cloneNode(true);
+    copy.classList.add("az-assistant__avatar--flying");
+    copy.setAttribute("data-az-assistant-avatar", "point");
+    copy.style.left = start.left + "px";
+    copy.style.top = start.top + "px";
+    document.body.appendChild(copy);
+
+    var animation;
+    try {
+      animation = copy.animate([
+        { transform: "translate(0, 0) scale(1)" },
+        { transform: "translate(" + x * 0.68 + "px," + (y * 0.60 - 14) + "px) scale(0.9)", offset: 0.6 },
+        { transform: "translate(" + x + "px," + y + "px) scale(0.58)" },
+      ], { duration: 300, easing: "cubic-bezier(0.22, 0.61, 0.36, 1)", fill: "forwards" });
+    } catch (err) {
+      copy.remove();
+      return Promise.resolve();
     }
 
-    if (options.force || options.auto) {
-      if (window.AZ_nav && typeof window.AZ_nav.open === "function") {
+    document.documentElement.classList.add("az-avatar-in-flight");
+    return animation.finished.then(function () { return true; }, function () { return false; }).finally(function () {
+      copy.remove();
+      document.documentElement.classList.remove("az-avatar-in-flight");
+    });
+  }
+
+  function destinationLink(id) {
+    return document.querySelector('#glass-nav a[data-nav="' + id + '"]');
+  }
+
+  function resumeHref(value) {
+    if (!value) return "";
+    try {
+      var url = new URL(value, window.location.href);
+      return url.protocol === "http:" || url.protocol === "https:" ? url.href : "";
+    } catch (err) {
+      return "";
+    }
+  }
+
+  function openDestination(detail, fromUrl) {
+    var destination = detail.destination;
+    if (DESTINATIONS.indexOf(destination) === -1 ||
+        window.location.href !== fromUrl) return Promise.resolve(false);
+
+    var link = destinationLink(destination);
+    var url = detail.url;
+    if (destination === "cv") {
+      url = resumeHref(url);
+      if (!url) return Promise.resolve(false);
+    }
+
+    react("point", destination);
+    return flyTo(link).then(function (landed) {
+      if (window.location.href !== fromUrl) return false;
+      if (landed) {
+        link.classList.add("az-avatar-landing");
+        window.setTimeout(function () { link.classList.remove("az-avatar-landing"); }, 320);
+      }
+
+      if (destination === "cv") window.location.assign(url);
+      else if (window.AZ_nav && typeof window.AZ_nav.open === "function") {
         window.AZ_nav.open({ destination: destination, url: url });
       } else {
-        window.dispatchEvent(
-          new CustomEvent("az:navigate", { detail: { destination: destination, url: url } })
-        );
+        window.dispatchEvent(new CustomEvent("az:navigate", { detail: { destination: destination, url: url } }));
       }
-    }
-    react("point", destination);
+      return true;
+    });
   }
 
-  function visitorLeftAsk() {
-    var now = currentRouteName();
-    return !!(now && now !== "ask");
-  }
-
-  function applyDecision(data) {
+  function applyDecision(data, fromUrl) {
     var action = String((data && data.action) || "answer").toLowerCase();
     var reply = String((data && data.reply) || "");
     var destination = data && data.destination ? String(data.destination).toLowerCase() : "";
@@ -195,26 +239,18 @@
       mode: mode || null,
     };
 
-    if (action === "navigate" && destination && url) {
-      if (visitorLeftAsk()) {
-        // Preserve the page they moved to; offer the destination as a clickable action.
-        message.deferred = true;
-        state.messages.push(message);
-        renderTranscript();
-        react("point", destination);
-        return;
-      }
-      // Auto-open now; keep confirmation text only (no deferred chip).
-      state.messages.push({
-        role: "assistant",
-        content: reply,
-      });
+    if (action === "navigate" && DESTINATIONS.indexOf(destination) !== -1 && url &&
+        (destination !== "cv" || resumeHref(url))) {
+      state.messages.push(message);
       renderTranscript();
-      openDestination(message, { auto: true });
-      return;
+      return openDestination(message, fromUrl).then(function (opened) {
+        if (opened) return;
+        message.deferred = true;
+        renderTranscript();
+      });
     }
 
-    state.messages.push({ role: "assistant", content: reply });
+    state.messages.push({ role: "assistant", content: reply || t("assistant.error.retry") });
     renderTranscript();
     react("reply");
   }
@@ -336,17 +372,21 @@
   function send(text) {
     var message = String(text || "").trim();
     if (!message || state.sending) return;
-    state.routeWhenSent = currentRouteName() || "ask";
+    if (/^(?:cv|resume|résumé|رزومه)[.!؟?]*$/i.test(message)) {
+      var cv = destinationLink("cv");
+      var pdf = resumeHref(cv && cv.getAttribute("href"));
+      if (pdf) {
+        setBusy(true);
+        openDestination({ destination: "cv", url: pdf }, window.location.href)
+          .finally(function () { setBusy(false); });
+        return;
+      }
+    }
+
     window.dispatchEvent(new Event("az:ask"));
+    var fromUrl = window.location.href;
     showStatus("");
     state.messages.push({ role: "user", content: message });
-
-    if (!state.configured) {
-      state.messages.push({ role: "assistant", content: t("assistant.error.config") });
-      renderTranscript();
-      react("error");
-      return;
-    }
 
     state.messages.push({ role: "assistant", content: "", pending: true });
     renderTranscript();
@@ -368,7 +408,7 @@
           react("error");
           return;
         }
-        applyDecision(res.data);
+        return applyDecision(res.data, fromUrl);
       })
       .catch(function () {
         if (state.messages.length && state.messages[state.messages.length - 1].pending) {
@@ -432,8 +472,9 @@
     if (!button || !state.root.contains(button)) return;
     var index = parseInt(button.getAttribute("data-az-nav-action"), 10);
     var message = state.messages[index];
-    if (!message || message.action !== "navigate") return;
-    openDestination(message, { force: true });
+    if (!message || message.action !== "navigate" || state.sending) return;
+    setBusy(true);
+    openDestination(message, window.location.href).finally(function () { setBusy(false); });
   }
 
   function qs(sel) {
@@ -469,18 +510,6 @@
     }
 
     renderSelectedWork();
-
-    fetch(apiBase() + "/status?locale=" + encodeURIComponent(lang()), {
-      credentials: "same-origin",
-      headers: { Accept: "application/json" },
-    })
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (data) {
-        state.configured = !!(data && data.configured);
-      })
-      .catch(function () {});
   }
 
   /** Warm remaining slider textures after first paint without blocking the first slide. */
