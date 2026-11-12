@@ -33,31 +33,25 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px;
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--az-asst-accent) 8%, transparent), transparent 42%),
-    var(--az-asst-navy);
-  border: 1px solid var(--az-asst-edge);
-  box-shadow:
-    0 18px 40px var(--az-shadow, rgba(3, 8, 18, 0.45)),
-    inset 0 1px 0 color-mix(in srgb, var(--az-asst-text) 12%, transparent);
-  backdrop-filter: blur(18px) saturate(1.15);
-  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   color: var(--az-asst-text);
   text-align: start;
   transform-origin: center top;
   transition:
     max-height 480ms var(--az-asst-ease),
     opacity 320ms ease,
-    transform 480ms var(--az-asst-ease),
-    padding 320ms ease;
-  max-height: 4.75rem;
+    transform 480ms var(--az-asst-ease);
+  max-height: none;
 }
 
 .az-assistant.is-open .az-assistant__panel {
   max-height: min(52vh, 420px);
-  padding: 14px;
 }
 
 .az-assistant__chrome {
@@ -286,19 +280,14 @@ html[dir="rtl"] .az-assistant__send svg {
 }
 
 .az-assistant__status {
+  display: none !important;
   margin: 0;
-  min-height: 1.1em;
+  min-height: 0;
+  height: 0;
+  overflow: hidden;
   font-size: 0.78rem;
   color: #ffb4b4;
   text-align: center;
-}
-
-.az-assistant__status[data-tone="info"] {
-  color: var(--az-asst-muted);
-}
-
-.az-assistant__status[hidden] {
-  display: none !important;
 }
 
 .az-assistant__sr {
@@ -356,10 +345,23 @@ html.az-preloader-open .az-assistant {
 }
 
 @media (max-width: 760px) {
+  /* Center the collapsed composer in the free band between profile intro and dock.
+     Extra bottom inset biases the flex mid-point up so the composer (below chips) lands near mid-hero. */
   .az-assistant {
-    top: auto;
-    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    top: 0;
+    bottom: 0;
     padding-inline: 12px;
+    padding-top: max(156px, calc(env(safe-area-inset-top, 0px) + 136px));
+    padding-bottom: calc(220px + env(safe-area-inset-bottom, 0px));
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  /* Expanded: sit above the dock so the keyboard leaves the transcript usable. */
+  .az-assistant.is-open {
+    align-items: flex-end;
+    padding-top: max(72px, calc(env(safe-area-inset-top, 0px) + 56px));
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
   }
 
   .az-assistant.is-open .az-assistant__panel {
@@ -372,6 +374,30 @@ html.az-preloader-open .az-assistant {
 
   .az-assistant__composer {
     min-height: 48px;
+  }
+
+  /* Avoid iOS zoom-on-focus; keeps the open chat readable with the keyboard up. */
+  .az-assistant__input {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 760px) and (max-height: 700px) {
+  .az-assistant {
+    padding-top: max(128px, calc(env(safe-area-inset-top, 0px) + 108px));
+    padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .az-assistant.is-open {
+    padding-top: max(56px, calc(env(safe-area-inset-top, 0px) + 40px));
+  }
+
+  .az-assistant.is-open .az-assistant__panel {
+    max-height: min(40dvh, 280px);
+  }
+
+  .az-assistant.is-open .az-assistant__transcript {
+    max-height: min(22dvh, 160px);
   }
 }
 

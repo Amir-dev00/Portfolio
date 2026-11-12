@@ -41,7 +41,6 @@
                   </div>
                   <!-- overlay -->
                   <div class="slider__overlay overlay overlay_circle-dark overlay_deither"></div>
-                  <div class="slider__circle"></div>
                   <!-- - overlay -->
                 </div>
                 <!-- - slider IMAGES -->

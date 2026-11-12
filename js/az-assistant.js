@@ -63,18 +63,13 @@
     );
   }
 
-  function setStatus(message, tone) {
+  /** Under-composer status is unused; keep the node empty so idle UI has no reserved text. */
+  function clearStatus() {
     var el = qs("[data-az-assistant-status]");
     if (!el) return;
-    if (!message) {
-      el.hidden = true;
-      el.textContent = "";
-      el.removeAttribute("data-tone");
-      return;
-    }
-    el.hidden = false;
-    el.textContent = message;
-    el.setAttribute("data-tone", tone || "error");
+    el.hidden = true;
+    el.textContent = "";
+    el.removeAttribute("data-tone");
   }
 
   function setOpen(open) {
@@ -153,8 +148,15 @@
     if (input) input.value = "";
 
     setOpen(true);
-    setStatus("", "info");
+    clearStatus();
     state.messages.push({ role: "user", content: message });
+
+    if (!state.configured) {
+      state.messages.push({ role: "assistant", content: t("assistant.error.config") });
+      renderTranscript();
+      return;
+    }
+
     state.messages.push({ role: "assistant", content: "", pending: true });
     renderTranscript();
 
@@ -172,21 +174,17 @@
             (res.data && res.data.message) ||
             t("assistant.error.retry");
           state.messages.push({ role: "assistant", content: err });
-          setStatus(err, "error");
           renderTranscript();
           return;
         }
         state.messages.push({ role: "assistant", content: String(res.data.reply || "") });
-        setStatus("", "info");
         renderTranscript();
       })
       .catch(function () {
         if (state.messages.length && state.messages[state.messages.length - 1].pending) {
           state.messages.pop();
         }
-        var err = t("assistant.error.retry");
-        state.messages.push({ role: "assistant", content: err });
-        setStatus(err, "error");
+        state.messages.push({ role: "assistant", content: t("assistant.error.retry") });
         renderTranscript();
       })
       .finally(function () {
@@ -210,7 +208,7 @@
     postChat({ reset: true, locale: lang() }).catch(function () {});
     state.messages = [];
     setOpen(false);
-    setStatus("", "info");
+    clearStatus();
     renderTranscript();
     var input = qs("#az-assistant-input");
     if (input) {
@@ -253,7 +251,9 @@
       });
     }
 
-    // Soft status probe (does not block UI).
+    clearStatus();
+
+    // Soft status probe — store readiness only; never show setup text under the composer.
     fetch(apiBase() + "/status?locale=" + encodeURIComponent(lang()), {
       credentials: "same-origin",
       headers: { Accept: "application/json" },
@@ -263,9 +263,6 @@
       })
       .then(function (data) {
         state.configured = !!(data && data.configured);
-        if (!state.configured) {
-          setStatus(t("assistant.error.config"), "info");
-        }
       })
       .catch(function () {});
   }

@@ -162,6 +162,11 @@ html[data-az-route]:not([data-az-route="home"]) .az-home-arrows {
     will-change: transform;
   }
 
+  /* Rhye's .arrow-left { rotate(180deg) } flips the custom SVG chevron — undo on mobile only. */
+  .az-home-arrows .arrow-left {
+    transform: none;
+  }
+
   .az-home-arrows .slider__arrow_left .arrow {
     border-radius: 0 14px 14px 0;
     border-left: 0;
