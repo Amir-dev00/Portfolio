@@ -53,7 +53,7 @@
     @if(($viewName ?? 'home') === 'home')
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp"/>
     @endif
-    <link rel="preload" href="{{ asset('assets/img/amir/az-logo.webp') }}" as="image" type="image/webp"/>
+    <link rel="preload" href="{{ asset('assets/img/amir/az-monogram-blue.webp') }}" as="image" type="image/webp"/>
     <link rel="preload" href="{{ $profilePhoto ?? asset('assets/img/amir/profile.jpg') }}" as="image"/>
     <style>
       /* While open, beat Rhye's early inline display:none on cached reloads. */
@@ -61,7 +61,7 @@
         position:fixed!important;inset:0!important;z-index:99999!important;
         display:flex!important;align-items:stretch!important;justify-content:stretch!important;
         width:100%!important;height:100%!important;min-height:100vh!important;min-height:100dvh!important;
-        background:#08090c!important;opacity:1!important;visibility:visible!important;
+        background:var(--az-bg)!important;opacity:1!important;visibility:visible!important;
         pointer-events:auto!important;overflow:hidden!important;
       }
       html.az-preloader-open #js-preloader.az-preloader--ring .preloader__content.az-preloader__layout{

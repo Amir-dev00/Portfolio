@@ -4,14 +4,14 @@
     <div class="preloader__header az-preloader__center">
       <div class="az-preloader__disc" aria-hidden="true">
         <div class="az-preloader__image-shell">
-          <img class="az-preloader__image" src="{{ asset('assets/img/amir/az-logo.webp') }}" width="1254" height="1254" alt="" decoding="async" fetchpriority="high"/>
+          <img class="az-preloader__image" src="{{ asset('assets/img/amir/az-monogram-blue.webp') }}" width="1254" height="1254" alt="" decoding="async" fetchpriority="high"/>
         </div>
         <svg class="az-preloader__ring" viewBox="0 0 360 360" focusable="false" aria-hidden="true">
           <defs>
-            <linearGradient id="az-ring-gold" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#FAE6BD"/>
-              <stop offset="45%" stop-color="#CB9251"/>
-              <stop offset="100%" stop-color="#FFF0CD"/>
+            <linearGradient id="az-ring-ice" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--az-text)"/>
+              <stop offset="45%" stop-color="var(--az-accent)"/>
+              <stop offset="100%" stop-color="var(--az-text)"/>
             </linearGradient>
           </defs>
           <circle class="az-preloader__ring-track" cx="180" cy="180" r="162"/>
