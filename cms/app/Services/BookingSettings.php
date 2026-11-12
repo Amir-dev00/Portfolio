@@ -11,7 +11,7 @@ final class BookingSettings
         return [
             'enabled' => true,
             'duration' => 30,
-            'buffer' => 15,
+            'buffer' => 0,
             'min_notice' => 120,
             'max_days' => 45,
             'timezone' => 'Asia/Tehran',

@@ -48,6 +48,10 @@
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-home-arrows.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-i18n.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-booking.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-assistant.css') }}"/>
+    @if(($viewName ?? 'home') === 'home')
+      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp"/>
+    @endif
     <link rel="preload" href="{{ asset('assets/img/amir/az-logo.webp') }}" as="image" type="image/webp"/>
     <link rel="preload" href="{{ $profilePhoto ?? asset('assets/img/amir/profile.jpg') }}" as="image"/>
     <style>

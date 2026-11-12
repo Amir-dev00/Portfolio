@@ -66,7 +66,7 @@ return new class extends Migration
         $native = [
             'enabled' => array_key_exists('enabled', $decoded) ? (bool) $decoded['enabled'] : true,
             'duration' => (int) ($decoded['duration'] ?? 30),
-            'buffer' => 15,
+            'buffer' => 0,
             'min_notice' => 120,
             'max_days' => 45,
             'timezone' => 'Asia/Tehran',
@@ -80,15 +80,17 @@ return new class extends Migration
             ['value' => json_encode($native), 'updated_at' => now(), 'created_at' => now()]
         );
 
-        // Seed sensible Asia/Tehran weekdays (Sat–Wed mornings + afternoons). Admin can edit.
+        // Every day 19:00–22:00 Asia/Tehran → six 30-min slots (19:00…21:30). Admin can edit.
         $now = now();
         $windows = [
-            // Saturday(6), Sunday(0), Monday(1), Tuesday(2), Wednesday(3)
-            [6, '10:00:00', '13:00:00'], [6, '15:00:00', '18:00:00'],
-            [0, '10:00:00', '13:00:00'], [0, '15:00:00', '18:00:00'],
-            [1, '10:00:00', '13:00:00'], [1, '15:00:00', '18:00:00'],
-            [2, '10:00:00', '13:00:00'], [2, '15:00:00', '18:00:00'],
-            [3, '10:00:00', '13:00:00'], [3, '15:00:00', '18:00:00'],
+            // Sunday(0) … Saturday(6)
+            [0, '19:00:00', '22:00:00'],
+            [1, '19:00:00', '22:00:00'],
+            [2, '19:00:00', '22:00:00'],
+            [3, '19:00:00', '22:00:00'],
+            [4, '19:00:00', '22:00:00'],
+            [5, '19:00:00', '22:00:00'],
+            [6, '19:00:00', '22:00:00'],
         ];
         foreach ($windows as $i => [$weekday, $start, $end]) {
             DB::table('availability_rules')->insert([

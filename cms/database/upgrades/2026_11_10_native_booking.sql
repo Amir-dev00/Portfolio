@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `bookings` (
 INSERT INTO `site_settings` (`key`, `value`, `created_at`, `updated_at`)
 VALUES (
   'booking',
-  '{"enabled":true,"duration":30,"buffer":15,"min_notice":120,"max_days":45,"timezone":"Asia\\/Tehran","slot_interval":30,"owner_notify":true,"visitor_notify":true}',
+  '{"enabled":true,"duration":30,"buffer":0,"min_notice":120,"max_days":45,"timezone":"Asia\\/Tehran","slot_interval":30,"owner_notify":true,"visitor_notify":true}',
   NOW(),
   NOW()
 )
@@ -67,16 +67,13 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO `availability_rules` (`weekday`,`start_time`,`end_time`,`is_active`,`sort_order`,`created_at`,`updated_at`)
 SELECT * FROM (
-  SELECT 6 AS weekday, '10:00:00' AS start_time, '13:00:00' AS end_time, 1 AS is_active, 0 AS sort_order, NOW() AS created_at, NOW() AS updated_at
-  UNION ALL SELECT 6,'15:00:00','18:00:00',1,1,NOW(),NOW()
-  UNION ALL SELECT 0,'10:00:00','13:00:00',1,2,NOW(),NOW()
-  UNION ALL SELECT 0,'15:00:00','18:00:00',1,3,NOW(),NOW()
-  UNION ALL SELECT 1,'10:00:00','13:00:00',1,4,NOW(),NOW()
-  UNION ALL SELECT 1,'15:00:00','18:00:00',1,5,NOW(),NOW()
-  UNION ALL SELECT 2,'10:00:00','13:00:00',1,6,NOW(),NOW()
-  UNION ALL SELECT 2,'15:00:00','18:00:00',1,7,NOW(),NOW()
-  UNION ALL SELECT 3,'10:00:00','13:00:00',1,8,NOW(),NOW()
-  UNION ALL SELECT 3,'15:00:00','18:00:00',1,9,NOW(),NOW()
+  SELECT 0 AS weekday, '19:00:00' AS start_time, '22:00:00' AS end_time, 1 AS is_active, 0 AS sort_order, NOW() AS created_at, NOW() AS updated_at
+  UNION ALL SELECT 1,'19:00:00','22:00:00',1,1,NOW(),NOW()
+  UNION ALL SELECT 2,'19:00:00','22:00:00',1,2,NOW(),NOW()
+  UNION ALL SELECT 3,'19:00:00','22:00:00',1,3,NOW(),NOW()
+  UNION ALL SELECT 4,'19:00:00','22:00:00',1,4,NOW(),NOW()
+  UNION ALL SELECT 5,'19:00:00','22:00:00',1,5,NOW(),NOW()
+  UNION ALL SELECT 6,'19:00:00','22:00:00',1,6,NOW(),NOW()
 ) AS seed
 WHERE NOT EXISTS (SELECT 1 FROM `availability_rules` LIMIT 1);
 

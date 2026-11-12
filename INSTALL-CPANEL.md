@@ -165,8 +165,9 @@ Your content, projects, media and admin users live in the **database**, `portfol
    rows/tables and never change or delete existing content, and are safe to run twice.
    For the self-hosted calendar also run **`upgrades/2026_11_10_native_booking.sql`**
    (after the earlier `upgrades/2026_11_10_booking.sql` texts if you never imported them), then
-   **`upgrades/2026_11_12_booking_owner_sms.sql`** for optional SMS.ir owner-alert columns, and
-   **`upgrades/2026_11_12_contact_booking_copy.sql`** for the Contact / booking confirmation copy refresh:
+   **`upgrades/2026_11_12_booking_owner_sms.sql`** for optional SMS.ir owner-alert columns,
+   **`upgrades/2026_11_12_contact_booking_copy.sql`** for the Contact / booking confirmation copy refresh, and
+   **`upgrades/2026_11_12_booking_evening_schedule.sql`** for daily 19:00–22:00 Asia/Tehran slots (keeps reservations):
    phpMyAdmin → your database → **SQL** → paste each file's contents → **Go**.
    Then open **Admin → Site content**, confirm the Contact strings (title, intro, Book a call, LinkedIn/GitHub/Telegram
    subtitles) and **booking.confirmed** / **booking.confirmed.email**, and click **Publish live**.
@@ -213,7 +214,8 @@ After unzipping, open DevTools → Network → Font and confirm the WOFF2 files 
 Scheduling runs entirely on your Laravel + MySQL host — **no Cal.com, Calendly, or Google Calendar**.
 
 1. Import `portfolio-app/database/upgrades/2026_11_10_native_booking.sql` in phpMyAdmin (creates `bookings`, `availability_rules`, `blocked_slots`).
-2. `/admin` → **Bookings** → set weekly hours, duration, buffers, blocked dates (defaults: Sat–Wed mornings/afternoons, Asia/Tehran).
+2. `/admin` → **Bookings** → set weekly hours, duration, buffers, blocked dates (defaults: every day **19:00–22:00 Asia/Tehran**, six 30-min slots).
+   Existing installs: run **`upgrades/2026_11_12_booking_evening_schedule.sql`** in phpMyAdmin (replaces availability windows only; keeps reservations).
 3. `/admin` → **Site content** → keep **Book a Call** enabled; edit EN/FA labels if you like → **Publish live**.
 4. Open `/contact` → **Book a Call**: pick a date/time, submit details. The appointment is stored in MySQL and listed under **Admin → Bookings**.
 5. Visitors can download a local `.ics` invite. Optional SMTP notifications use your host mail settings; bookings still succeed if mail is offline.
@@ -256,6 +258,28 @@ Locale JS defaults ship the new Contact wording. For databases that already stor
 | `booking.confirmed.email` | Same, plus email only when SMTP delivery is verified | … |
 
 Unrelated content keys are not modified by the upgrade SQL.
+
+### Homepage AI assistant (optional)
+
+The homepage frosted composer talks to OpenAI’s **Responses** API from Laravel over HTTPS. No queue worker or Node process is required.
+
+**File Manager setup**
+
+1. Confirm the four backgrounds exist under `public_html/assets/img/amir/home/` as
+   `home-bg-01.webp` … `home-bg-04.webp` (PNG fallbacks sit beside them).
+2. Edit **`portfolio-app/.env`** only (never put secrets in `public_html`):
+
+```env
+ASSISTANT_ENABLED=true
+OPENAI_API_KEY=sk-your-key-here
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+3. Save `.env`. No database migration is required (conversation history uses the PHP session; rate limits use the existing cache store).
+4. Hosting must allow **outbound HTTPS** to `https://api.openai.com`. If the host firewalls external API calls, the UI shows a localized error and Contact / Book a call still work.
+5. Open `/` → ask a quick question. Leave `OPENAI_API_KEY` blank to keep the composer visible but report “not configured”.
+
+Tunables (optional): `ASSISTANT_TIMEOUT`, `ASSISTANT_MAX_OUTPUT_TOKENS`, `ASSISTANT_RATE_LIMIT`, `ASSISTANT_DAILY_GLOBAL_CAP` — see `portfolio-app/.env.example`.
 
 ## Things only your host can confirm
 

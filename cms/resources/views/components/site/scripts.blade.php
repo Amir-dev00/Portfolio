@@ -26,4 +26,5 @@
     <script src="{{ $assetV('js/az-app.js') }}"></script>
     <script src="{{ $assetV('js/az-jalali.js') }}"></script>
     <script src="{{ $assetV('js/az-booking.js') }}"></script>
+    <script src="{{ $assetV('js/az-assistant.js') }}"></script>
     <!-- - COMPONENTS -->
