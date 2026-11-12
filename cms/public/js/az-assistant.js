@@ -10,6 +10,7 @@
     configured: true,
     reactionTimer: 0,
     navHint: null,
+    routeWhenSent: null,
   };
 
   function lang() {
@@ -42,11 +43,15 @@
     return ((el && el.getAttribute("data-assistant-api")) || "/api/assistant").replace(/\/$/, "");
   }
 
-  function qs(sel) {
-    return state.root ? state.root.querySelector(sel) : null;
+  function currentRouteName() {
+    if (window.AZ_nav && typeof window.AZ_nav.current === "function") {
+      var route = window.AZ_nav.current();
+      return route && route.name ? route.name : "";
+    }
+    return "";
   }
 
-  function react(pose, reply) {
+  function react(pose, destination) {
     var avatar = qs("[data-az-assistant-avatar]");
     if (!avatar) return;
 
@@ -54,10 +59,9 @@
     if (state.navHint) state.navHint.classList.remove("az-assistant-nav-hint");
     state.navHint = null;
 
-    // Highlight a known dock item only when the AI reply includes a local site path.
-    var destination = reply && /(?:^|[\s(\[`])\/(?:fa\/)?(work|about|contact)(?=$|[\s/?)\]`.,!،؟])/i.exec(reply);
-    if (destination) {
-      state.navHint = document.querySelector('#glass-nav [data-nav="' + destination[1].toLowerCase() + '"]');
+    var dest = String(destination || "").toLowerCase();
+    if (dest === "work" || dest === "about" || dest === "contact" || dest === "cv") {
+      state.navHint = document.querySelector('#glass-nav [data-nav="' + dest + '"]');
       if (state.navHint) {
         state.navHint.classList.add("az-assistant-nav-hint");
         pose = "point";
@@ -78,7 +82,7 @@
       .replace(/"/g, "&quot;");
   }
 
-  /** Keep tech names / URLs readable inside RTL. */
+  /** Keep tech names / URLs readable inside RTL. Links stay plain text, never navigation. */
   function formatText(text) {
     var safe = escapeHtml(text);
     return safe.replace(
@@ -87,6 +91,15 @@
         return '<span class="az-assistant__ltr">' + m + "</span>";
       }
     );
+  }
+
+  function actionLabel(message) {
+    if (message && message.label) return String(message.label);
+    var dest = String((message && message.destination) || "").toLowerCase();
+    var key = "assistant.open." + dest;
+    var labeled = t(key);
+    if (labeled && labeled !== key) return labeled;
+    return dest || t("assistant.open.page");
   }
 
   function showStatus(message) {
@@ -102,7 +115,7 @@
     var reset = qs("[data-az-assistant-reset]");
     if (reset) reset.hidden = !state.messages.length;
     el.innerHTML = state.messages
-      .map(function (m) {
+      .map(function (m, index) {
         var cls = m.role === "user" ? "az-assistant__bubble--user" : "az-assistant__bubble--assistant";
         var body =
           m.pending
@@ -110,10 +123,100 @@
               escapeHtml(t("assistant.thinking")) +
               '"><i></i><i></i><i></i></span>'
             : formatText(m.content);
-        return '<div class="az-assistant__bubble ' + cls + '" data-role="' + m.role + '" dir="auto">' + body + "</div>";
+        var action = "";
+        if (!m.pending && m.deferred && m.action === "navigate" && m.destination && m.url) {
+          action =
+            '<button type="button" class="az-assistant__nav-action" data-az-nav-action="' +
+            index +
+            '">' +
+            escapeHtml(t("assistant.open.action", { label: actionLabel(m) })) +
+            "</button>";
+        }
+        return (
+          '<div class="az-assistant__bubble ' +
+          cls +
+          '" data-role="' +
+          m.role +
+          '" dir="auto">' +
+          body +
+          action +
+          "</div>"
+        );
       })
       .join("");
     el.scrollTop = el.scrollHeight;
+  }
+
+  function openDestination(detail, options) {
+    options = options || {};
+    var destination = String((detail && detail.destination) || "").toLowerCase();
+    var url = String((detail && detail.url) || "");
+    if (!destination) return;
+
+    if (destination === "cv") {
+      var cvUrl = url || (window.AZ_BOOTSTRAP && window.AZ_BOOTSTRAP.cvUrl) || "";
+      if (cvUrl) window.open(cvUrl, "_blank", "noopener,noreferrer");
+      react("point", "cv");
+      return;
+    }
+
+    if (options.force || options.auto) {
+      if (window.AZ_nav && typeof window.AZ_nav.open === "function") {
+        window.AZ_nav.open({ destination: destination, url: url });
+      } else {
+        window.dispatchEvent(
+          new CustomEvent("az:navigate", { detail: { destination: destination, url: url } })
+        );
+      }
+    }
+    react("point", destination);
+  }
+
+  function visitorLeftAsk() {
+    var now = currentRouteName();
+    return !!(now && now !== "ask");
+  }
+
+  function applyDecision(data) {
+    var action = String((data && data.action) || "answer").toLowerCase();
+    var reply = String((data && data.reply) || "");
+    var destination = data && data.destination ? String(data.destination).toLowerCase() : "";
+    var url = data && data.url ? String(data.url) : "";
+    var label = data && data.label ? String(data.label) : "";
+    var mode = data && data.mode ? String(data.mode) : "";
+
+    var message = {
+      role: "assistant",
+      content: reply,
+      action: action,
+      destination: destination || null,
+      url: url || null,
+      label: label || null,
+      mode: mode || null,
+    };
+
+    if (action === "navigate" && destination && url) {
+      if (visitorLeftAsk()) {
+        // Preserve the page they moved to; offer the destination as a clickable action.
+        message.deferred = true;
+        state.messages.push(message);
+        renderTranscript();
+        react("point", destination);
+        return;
+      }
+      // Auto-open now; keep confirmation text only (no deferred chip).
+      state.messages.push({
+        role: "assistant",
+        content: reply,
+      });
+      renderTranscript();
+      openDestination(message, { auto: true });
+      return;
+    }
+
+    state.messages.push({ role: "assistant", content: reply });
+    renderTranscript();
+    react("reply");
   }
 
   function syncDirection() {
@@ -233,6 +336,7 @@
   function send(text) {
     var message = String(text || "").trim();
     if (!message || state.sending) return;
+    state.routeWhenSent = currentRouteName() || "ask";
     window.dispatchEvent(new Event("az:ask"));
     showStatus("");
     state.messages.push({ role: "user", content: message });
@@ -252,7 +356,6 @@
 
     postChat({ message: message, locale: lang() })
       .then(function (res) {
-        // Drop pending bubble.
         if (state.messages.length && state.messages[state.messages.length - 1].pending) {
           state.messages.pop();
         }
@@ -265,10 +368,7 @@
           react("error");
           return;
         }
-        var reply = String(res.data.reply || "");
-        state.messages.push({ role: "assistant", content: reply });
-        renderTranscript();
-        react("reply", reply);
+        applyDecision(res.data);
       })
       .catch(function () {
         if (state.messages.length && state.messages[state.messages.length - 1].pending) {
@@ -327,6 +427,19 @@
     send(message);
   }
 
+  function onTranscriptClick(e) {
+    var button = e.target.closest("[data-az-nav-action]");
+    if (!button || !state.root.contains(button)) return;
+    var index = parseInt(button.getAttribute("data-az-nav-action"), 10);
+    var message = state.messages[index];
+    if (!message || message.action !== "navigate") return;
+    openDestination(message, { force: true });
+  }
+
+  function qs(sel) {
+    return state.root ? state.root.querySelector(sel) : null;
+  }
+
   function bind() {
     state.root = document.querySelector(ROOT);
     if (!state.root) return;
@@ -340,6 +453,8 @@
     });
     var reset = qs("[data-az-assistant-reset]");
     if (reset) reset.addEventListener("click", resetChat);
+    var transcript = qs("[data-az-assistant-transcript]");
+    if (transcript) transcript.addEventListener("click", onTranscriptClick);
     setBusy(false);
 
     var viewport = window.visualViewport;
@@ -355,7 +470,6 @@
 
     renderSelectedWork();
 
-    // Soft status probe — store readiness only; never show setup text under the composer.
     fetch(apiBase() + "/status?locale=" + encodeURIComponent(lang()), {
       credentials: "same-origin",
       headers: { Accept: "application/json" },
@@ -390,9 +504,8 @@
     }
   }
 
-  window.addEventListener("az:langchange", function () {
+  document.addEventListener("az:langchange", function () {
     syncDirection();
-    // Keep transcript; re-render for LTR isolates / dir.
     renderTranscript();
     renderSelectedWork();
   });

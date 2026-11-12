@@ -68,6 +68,11 @@ class AssistantController extends Controller
         return response()->json([
             'ok' => true,
             'reply' => $result['reply'],
+            'action' => $result['action'] ?? 'answer',
+            'destination' => $result['destination'] ?? null,
+            'url' => $result['url'] ?? null,
+            'label' => $result['label'] ?? null,
+            'mode' => $result['mode'] ?? null,
             'locale' => $locale,
             // Client keeps a mirrored transcript; server session is the source of truth for continuity.
             'turns' => count($result['history']),

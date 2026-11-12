@@ -39,7 +39,7 @@ class PortfolioAssistantContext
         $locale = $locale === 'fa' ? 'fa' : 'en';
         $payload = $this->content->payload($preview);
 
-        return $this->buildCompact($payload, $locale, $question, $priorExchange);
+        return $this->buildCompact($payload, $locale, $question, $priorExchange, $preview);
     }
 
     /**
@@ -52,8 +52,8 @@ class PortfolioAssistantContext
         $version = (string) ($payload['built_at'] ?? 'draft');
         $cacheKey = 'assistant.context.full.'.$locale.'.'.sha1($version.($preview ? '.preview' : ''));
 
-        return Cache::remember($cacheKey, now()->addHours(12), function () use ($payload, $locale) {
-            return $this->buildFull($payload, $locale);
+        return Cache::remember($cacheKey, now()->addHours(12), function () use ($payload, $locale, $preview) {
+            return $this->buildFull($payload, $locale, $preview);
         });
     }
 
@@ -70,7 +70,24 @@ class PortfolioAssistantContext
     public function publicContactFacts(string $locale, bool $preview = false): array
     {
         $locale = $locale === 'fa' ? 'fa' : 'en';
-        $payload = $this->content->payload($preview);
+
+        return $this->contactFactsFromPayload($this->content->payload($preview), $locale);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array{
+     *   resume_url:string,
+     *   email:?string,
+     *   linkedin:?string,
+     *   github:?string,
+     *   telegram:?string,
+     *   contact_path:string
+     * }
+     */
+    protected function contactFactsFromPayload(array $payload, string $locale): array
+    {
+        $locale = $locale === 'fa' ? 'fa' : 'en';
         $social = (array) ($payload['social'] ?? []);
         $resume = (array) ($payload['resume'] ?? []);
         $resumeUrl = trim((string) ($resume['url'] ?? ''));
@@ -91,13 +108,13 @@ class PortfolioAssistantContext
     /**
      * @param  list<array{role:string,content:string}>  $priorExchange
      */
-    protected function buildCompact(array $payload, string $locale, string $question, array $priorExchange): string
+    protected function buildCompact(array $payload, string $locale, string $question, array $priorExchange, bool $preview = false): string
     {
         $strings = (array) ($payload['strings'][$locale] ?? []);
         $profile = (array) ($payload['profile'] ?? []);
         $projects = (array) ($payload['projects'] ?? []);
         $featuredSlugs = array_values(array_filter((array) ($payload['featured_slugs'] ?? [])));
-        $contact = $this->publicContactFacts($locale);
+        $contact = $this->contactFactsFromPayload($payload, $locale);
 
         $name = $locale === 'fa'
             ? (string) ($profile['name_fa'] ?? $strings['home.profile.name'] ?? 'امیرحسین زمان‌زاده')
@@ -147,13 +164,13 @@ class PortfolioAssistantContext
         return $this->clip(implode("\n", $lines), 2200);
     }
 
-    protected function buildFull(array $payload, string $locale): string
+    protected function buildFull(array $payload, string $locale, bool $preview = false): string
     {
         // Legacy full dump (up to 12 projects) for before/after size reporting.
         $strings = (array) ($payload['strings'][$locale] ?? []);
         $profile = (array) ($payload['profile'] ?? []);
         $projects = (array) ($payload['projects'] ?? []);
-        $contact = $this->publicContactFacts($locale);
+        $contact = $this->contactFactsFromPayload($payload, $locale);
 
         $name = $locale === 'fa'
             ? (string) ($profile['name_fa'] ?? $strings['home.profile.name'] ?? 'امیرحسین زمان‌زاده')

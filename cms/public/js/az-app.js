@@ -988,6 +988,18 @@
   window.addEventListener("az:ask", function () {
     navigateClient({ name: "ask" }, false);
   });
+  window.addEventListener("az:navigate", function (event) {
+    var detail = (event && event.detail) || {};
+    var destination = String(detail.destination || "").toLowerCase();
+    var url = String(detail.url || "");
+    if (destination === "cv") {
+      if (url) window.open(url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (destination === "work" || destination === "about" || destination === "contact" || destination === "ask" || destination === "home") {
+      navigateClient({ name: destination }, false);
+    }
+  });
   window.addEventListener("hashchange", function () {
     if (serverRouted) {
       canonicalizeLegacyUrl();
@@ -1023,4 +1035,19 @@
 
   applyFromLocation(true);
   document.documentElement.classList.add("az-app-ready");
+
+  window.AZ_nav = {
+    go: function (name) {
+      var routeName = String(name || "");
+      if (!routeName) return;
+      navigateClient({ name: routeName }, false);
+    },
+    open: function (detail) {
+      window.dispatchEvent(new CustomEvent("az:navigate", { detail: detail || {} }));
+    },
+    current: function () {
+      return resolveRouteFromLocation();
+    },
+    pathFor: pathForRoute,
+  };
 })();

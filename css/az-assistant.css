@@ -158,6 +158,27 @@
   display: inline;
 }
 
+.az-assistant__nav-action {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--az-asst-accent, #6ee7ff) 45%, transparent);
+  background: color-mix(in srgb, var(--az-asst-accent, #6ee7ff) 14%, transparent);
+  color: var(--az-asst-text, #f4f7ff);
+  font: inherit;
+  font-size: 0.84rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.az-assistant__nav-action:hover,
+.az-assistant__nav-action:focus-visible {
+  background: color-mix(in srgb, var(--az-asst-accent, #6ee7ff) 24%, transparent);
+  outline: none;
+}
+
 .az-assistant__composer {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

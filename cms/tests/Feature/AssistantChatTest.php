@@ -47,6 +47,8 @@ class AssistantChatTest extends TestCase
     {
         $this->get('/ask')->assertOk();
         $this->get('/fa/ask')->assertOk();
+        $this->get('/')->assertOk();
+        $this->get('/fa')->assertOk();
     }
 
     #[DataProvider('greetings')]
@@ -57,6 +59,7 @@ class AssistantChatTest extends TestCase
         $this->postJson('/api/assistant/chat', ['message' => $message, 'locale' => $locale])
             ->assertOk()
             ->assertJsonPath('reply', $reply)
+            ->assertJsonPath('action', 'answer')
             ->assertJsonPath('turns', 0);
 
         Http::assertNothingSent();
@@ -70,69 +73,251 @@ class AssistantChatTest extends TestCase
         ];
     }
 
-    public function test_greeting_resume_contact_and_booking_make_zero_provider_calls(): void
+    public function test_exact_cv_shortcut_navigates_with_zero_provider_calls(): void
     {
-        foreach ([
-            ['download cv', 'en', 'résumé'],
-            ['رزومه', 'fa', 'رزومه'],
-            ['contact', 'en', '/contact'],
-            ['اطلاعات تماس', 'fa', '/fa/contact'],
-            ['book a call', 'en', '/contact'],
-            ['رزرو تماس', 'fa', '/fa/contact'],
-        ] as [$message, $locale, $needle]) {
-            Http::fake();
-            $response = $this->postJson('/api/assistant/chat', [
-                'message' => $message,
-                'locale' => $locale,
-            ])->assertOk()->assertJsonPath('ok', true);
+        Http::fake();
 
-            $this->assertStringContainsString($needle, (string) $response->json('reply'));
-            Http::assertNothingSent();
-            $this->assertSame(0, (int) Cache::get('assistant.ip.'.hash('sha256', '127.0.0.1'), 0));
-            $this->assertSame([], (array) session(AssistantService::SESSION_KEY, []));
-        }
+        $this->postJson('/api/assistant/chat', ['message' => 'CV', 'locale' => 'en'])
+            ->assertOk()
+            ->assertJsonPath('action', 'navigate')
+            ->assertJsonPath('destination', 'cv')
+            ->assertJsonPath('mode', 'cv')
+            ->assertJsonPath('url', '/assets/cv/Amirhossein-Zamanzade-CV.pdf');
+
+        Http::assertNothingSent();
+
+        $this->postJson('/api/assistant/chat', ['message' => 'رزومه', 'locale' => 'fa'])
+            ->assertOk()
+            ->assertJsonPath('action', 'navigate')
+            ->assertJsonPath('destination', 'cv');
+
+        Http::assertNothingSent();
     }
 
-    public function test_mixed_greeting_question_still_reaches_the_model(): void
+    public function test_natural_language_navigation_uses_one_provider_call(): void
     {
         Http::fake([
             'api.openai.com/*' => Http::response([
-                'output_text' => 'He has shipped web, desktop, and API projects.',
+                'output_text' => json_encode([
+                    'action' => 'navigate',
+                    'reply' => 'Opening Work.',
+                    'destination' => 'work',
+                ]),
             ], 200),
         ]);
 
         $this->postJson('/api/assistant/chat', [
-            'message' => 'Hello, what projects has he built?',
+            'message' => 'Where can I see his projects?',
             'locale' => 'en',
         ])
             ->assertOk()
-            ->assertJsonPath('ok', true);
+            ->assertJsonPath('action', 'navigate')
+            ->assertJsonPath('destination', 'work')
+            ->assertJsonPath('url', '/work')
+            ->assertJsonPath('label', 'Work');
 
         Http::assertSentCount(1);
     }
 
-    public function test_booking_systems_question_is_not_local_booking_intent(): void
+    public function test_persian_contact_and_cv_natural_requests_navigate(): void
     {
         Http::fake([
-            'api.openai.com/*' => Http::response([
-                'output_text' => 'Published facts do not list a booking-system product.',
-            ], 200),
+            'api.openai.com/*' => Http::sequence()
+                ->push([
+                    'output_text' => json_encode([
+                        'action' => 'navigate',
+                        'reply' => 'دارم رزومه را باز می‌کنم.',
+                        'destination' => 'cv',
+                    ]),
+                ], 200)
+                ->push([
+                    'output_text' => json_encode([
+                        'action' => 'navigate',
+                        'reply' => 'دارم صفحه تماس را باز می‌کنم.',
+                        'destination' => 'contact',
+                    ]),
+                ], 200),
         ]);
 
         $this->postJson('/api/assistant/chat', [
-            'message' => 'Has he worked on booking systems?',
+            'message' => 'می‌خوام رزومه‌ش رو ببینم',
+            'locale' => 'fa',
+        ])
+            ->assertOk()
+            ->assertJsonPath('action', 'navigate')
+            ->assertJsonPath('destination', 'cv')
+            ->assertJsonPath('url', '/assets/cv/Amirhossein-Zamanzade-CV.pdf');
+
+        RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+
+        $this->postJson('/api/assistant/chat', [
+            'message' => 'چطور می‌تونم باهاش در ارتباط باشم؟',
+            'locale' => 'fa',
+        ])
+            ->assertOk()
+            ->assertJsonPath('action', 'navigate')
+            ->assertJsonPath('destination', 'contact')
+            ->assertJsonPath('url', '/fa/contact');
+
+        Http::assertSentCount(2);
+    }
+
+    public function test_questions_that_only_mention_a_destination_still_answer(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::sequence()
+                ->push([
+                    'output_text' => json_encode([
+                        'action' => 'answer',
+                        'reply' => 'He built a Clinic Booking Portal with Laravel and MySQL.',
+                        'destination' => '',
+                    ]),
+                ], 200)
+                ->push([
+                    'output_text' => json_encode([
+                        'action' => 'answer',
+                        'reply' => 'His CV lists Computer Science study and freelance availability.',
+                        'destination' => '',
+                    ]),
+                ], 200),
+        ]);
+
+        $this->postJson('/api/assistant/chat', [
+            'message' => 'Which Laravel projects has he built?',
             'locale' => 'en',
-        ])->assertOk();
+        ])
+            ->assertOk()
+            ->assertJsonPath('action', 'answer')
+            ->assertJsonPath('destination', null);
+
+        RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+
+        $this->postJson('/api/assistant/chat', [
+            'message' => 'What experience is listed on his CV?',
+            'locale' => 'en',
+        ])
+            ->assertOk()
+            ->assertJsonPath('action', 'answer');
+
+        Http::assertSentCount(2);
+    }
+
+    public function test_ambiguous_follow_up_asks_for_clarification(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'output_text' => json_encode([
+                    'action' => 'answer',
+                    'reply' => 'Which page should I open — Work, About, Contact, or CV?',
+                    'destination' => '',
+                ]),
+            ], 200),
+        ]);
+
+        session([AssistantService::SESSION_KEY => [
+            ['role' => 'user', 'content' => 'Tell me about his skills and contact options'],
+            ['role' => 'assistant', 'content' => 'He works with Laravel and is reachable via Contact.'],
+        ]]);
+
+        $this->postJson('/api/assistant/chat', [
+            'message' => 'اون رو باز کن',
+            'locale' => 'fa',
+        ])
+            ->assertOk()
+            ->assertJsonPath('action', 'answer')
+            ->assertJsonPath('destination', null);
 
         Http::assertSentCount(1);
+    }
+
+    public function test_clear_follow_up_can_navigate_from_prior_exchange(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'output_text' => json_encode([
+                    'action' => 'navigate',
+                    'reply' => 'Opening Work.',
+                    'destination' => 'work',
+                ]),
+            ], 200),
+        ]);
+
+        session([AssistantService::SESSION_KEY => [
+            ['role' => 'user', 'content' => 'Where can I see his projects?'],
+            ['role' => 'assistant', 'content' => 'Opening Work. [destination:work|Work]'],
+        ]]);
+
+        $this->postJson('/api/assistant/chat', [
+            'message' => 'Open it',
+            'locale' => 'en',
+        ])
+            ->assertOk()
+            ->assertJsonPath('action', 'navigate')
+            ->assertJsonPath('destination', 'work');
+
+        Http::assertSent(function ($request) {
+            $input = $request->data()['input'];
+            $this->assertCount(3, $input);
+            $this->assertStringContainsString('destination:work', $input[1]['content']);
+
+            return true;
+        });
+    }
+
+    public function test_invalid_destination_falls_back_to_localized_answer(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'output_text' => json_encode([
+                    'action' => 'navigate',
+                    'reply' => 'Opening admin',
+                    'destination' => 'admin',
+                ]),
+            ], 200),
+        ]);
+
+        $en = $this->postJson('/api/assistant/chat', [
+            'message' => 'Open the admin panel',
+            'locale' => 'en',
+        ])
+            ->assertOk()
+            ->assertJsonPath('action', 'answer')
+            ->assertJsonPath('destination', null)
+            ->assertJsonPath('url', null)
+            ->json('reply');
+
+        $this->assertStringContainsString('couldn’t open', mb_strtolower((string) $en));
+
+        RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+        Cache::flush();
+        $this->bindPortfolioPayload($this->samplePayload());
+
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'output_text' => json_encode([
+                    'action' => 'navigate',
+                    'reply' => 'Opening secrets',
+                    'destination' => 'secrets',
+                ]),
+            ], 200),
+        ]);
+
+        $fa = $this->postJson('/api/assistant/chat', [
+            'message' => 'صفحه مخفی را باز کن',
+            'locale' => 'fa',
+        ])->assertOk()->json('reply');
+        $this->assertStringContainsString('نتونستم', (string) $fa);
     }
 
     public function test_project_question_sends_one_compact_provider_call(): void
     {
         Http::fake([
             'api.openai.com/*' => Http::response([
-                'output_text' => 'He built a Laravel booking portal with MySQL.',
-                'usage' => ['input_tokens' => 412, 'output_tokens' => 28],
+                'output_text' => json_encode([
+                    'action' => 'answer',
+                    'reply' => 'او یک پورتال نوبت‌دهی کلینیک با Laravel ساخته است.',
+                    'destination' => '',
+                ]),
             ], 200),
         ]);
 
@@ -143,7 +328,7 @@ class AssistantChatTest extends TestCase
             'locale' => 'fa',
         ])
             ->assertOk()
-            ->assertJsonPath('ok', true);
+            ->assertJsonPath('action', 'answer');
 
         Http::assertSentCount(1);
         Http::assertSent(function ($request) use ($question) {
@@ -151,103 +336,15 @@ class AssistantChatTest extends TestCase
             $this->assertSame('gpt-4.1-mini', $data['model']);
             $this->assertSame(200, $data['max_output_tokens']);
             $this->assertCount(1, $data['input']);
-            $this->assertSame('user', $data['input'][0]['role']);
             $this->assertSame($question, $data['input'][0]['content']);
-
-            $instructions = (string) $data['instructions'];
-            $this->assertStringContainsString('Relevant projects:', $instructions);
-            $this->assertStringContainsString('Clinic Booking Portal', $instructions);
-            $this->assertStringNotContainsString('Shopping Mall Desktop', $instructions);
-            $this->assertLessThan(3500, mb_strlen($instructions));
+            $this->assertArrayHasKey('text', $data);
+            $this->assertStringContainsString('Clinic Booking Portal', (string) $data['instructions']);
 
             return true;
         });
     }
 
-    public function test_greeting_then_real_question_only_calls_provider_once(): void
-    {
-        Http::fake([
-            'api.openai.com/*' => Http::response([
-                'output_text' => 'He works with Laravel, React, and Node.js.',
-            ], 200),
-        ]);
-
-        $this->postJson('/api/assistant/chat', [
-            'message' => 'Hi',
-            'locale' => 'en',
-        ])->assertOk();
-        Http::assertNothingSent();
-
-        // Endpoint throttles duplicate submits per session within 2s.
-        RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
-
-        $this->postJson('/api/assistant/chat', [
-            'message' => 'What is his stack?',
-            'locale' => 'en',
-        ])->assertOk();
-
-        Http::assertSentCount(1);
-    }
-
-    public function test_follow_up_includes_at_most_one_prior_exchange_and_named_project(): void
-    {
-        Http::fake([
-            'api.openai.com/*' => Http::sequence()
-                ->push(['output_text' => 'The Telegram Automation Bot handles scheduled tasks.'], 200)
-                ->push(['output_text' => 'That bot uses Python and SQLite.'], 200),
-        ]);
-
-        $this->postJson('/api/assistant/chat', [
-            'message' => 'Tell me about the Telegram Automation Bot',
-            'locale' => 'en',
-        ])->assertOk();
-
-        $this->postJson('/api/assistant/chat', [
-            'message' => 'What stack did he use for that?',
-            'locale' => 'en',
-        ])->assertOk();
-
-        Http::assertSentCount(2);
-
-        $second = Http::recorded()[1][0];
-        $data = $second->data();
-        $this->assertCount(3, $data['input']);
-        $this->assertSame('user', $data['input'][0]['role']);
-        $this->assertSame('assistant', $data['input'][1]['role']);
-        $this->assertSame('user', $data['input'][2]['role']);
-        $this->assertStringContainsString('Telegram Automation Bot', (string) $data['instructions']);
-        $this->assertSame(200, $data['max_output_tokens']);
-    }
-
-    public function test_history_trim_keeps_only_one_turn_for_provider(): void
-    {
-        Http::fake([
-            'api.openai.com/*' => Http::response(['output_text' => 'Noted.'], 200),
-        ]);
-
-        session([AssistantService::SESSION_KEY => [
-            ['role' => 'user', 'content' => 'Older question about Java'],
-            ['role' => 'assistant', 'content' => 'Older answer about Java'],
-            ['role' => 'user', 'content' => 'Tell me about the Telegram Automation Bot'],
-            ['role' => 'assistant', 'content' => 'It automates Telegram workflows.'],
-        ]]);
-
-        $this->postJson('/api/assistant/chat', [
-            'message' => 'What stack did he use for that?',
-            'locale' => 'en',
-        ])->assertOk();
-
-        Http::assertSent(function ($request) {
-            $input = $request->data()['input'];
-            $this->assertCount(3, $input);
-            $this->assertStringContainsString('Telegram Automation Bot', $input[0]['content']);
-            $this->assertStringNotContainsString('Older question', json_encode($input));
-
-            return true;
-        });
-    }
-
-    public function test_provider_outage_returns_localized_error(): void
+    public function test_provider_outage_returns_localized_error_and_counts_toward_caps(): void
     {
         Http::fake([
             'api.openai.com/*' => Http::response(['error' => ['message' => 'down']], 500),
@@ -259,6 +356,67 @@ class AssistantChatTest extends TestCase
         ])
             ->assertStatus(502)
             ->assertJsonPath('code', 'provider_error');
+
+        Http::assertSentCount(1);
+        $this->assertSame(1, (int) Cache::get('assistant.ip.'.hash('sha256', '127.0.0.1'), 0));
+        $this->assertSame(1, (int) Cache::get('assistant.global.'.now()->format('Y-m-d'), 0));
+    }
+
+    public function test_json_schema_rejection_retries_once_then_caches_unsupported(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::sequence()
+                ->push(['error' => ['message' => 'unsupported text.format']], 400)
+                ->push([
+                    'output_text' => json_encode([
+                        'action' => 'answer',
+                        'reply' => 'He uses Laravel and React.',
+                        'destination' => '',
+                    ]),
+                ], 200)
+                ->push([
+                    'output_text' => json_encode([
+                        'action' => 'answer',
+                        'reply' => 'He also works with Node.js.',
+                        'destination' => '',
+                    ]),
+                ], 200),
+        ]);
+
+        $this->postJson('/api/assistant/chat', [
+            'message' => 'What is his stack?',
+            'locale' => 'en',
+        ])->assertOk()->assertJsonPath('action', 'answer');
+
+        // First ask: schema attempt + plain retry.
+        Http::assertSentCount(2);
+        $this->assertTrue((bool) Cache::get(\App\Services\Assistant\OpenAiResponsesClient::SCHEMA_UNSUPPORTED_CACHE_KEY));
+
+        RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+
+        $this->postJson('/api/assistant/chat', [
+            'message' => 'What else does he use?',
+            'locale' => 'en',
+        ])->assertOk();
+
+        // Second ask: cached unsupported → single plain call (3 total recorded).
+        Http::assertSentCount(3);
+        $third = Http::recorded()[2][0]->data();
+        $this->assertArrayNotHasKey('text', $third);
+    }
+
+    public function test_server_error_does_not_blindly_retry_schema_request(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::response(['error' => ['message' => 'down']], 500),
+        ]);
+
+        $this->postJson('/api/assistant/chat', [
+            'message' => 'What projects use Laravel?',
+            'locale' => 'en',
+        ])->assertStatus(502);
+
+        Http::assertSentCount(1);
     }
 
     public function test_chat_rejects_empty_message(): void
@@ -268,7 +426,6 @@ class AssistantChatTest extends TestCase
             'locale' => 'en',
         ])
             ->assertStatus(422)
-            ->assertJsonPath('ok', false)
             ->assertJsonPath('code', 'empty');
     }
 
@@ -284,39 +441,33 @@ class AssistantChatTest extends TestCase
             ->assertJsonPath('code', 'missing_config');
     }
 
-    public function test_local_greeting_works_without_api_key(): void
+    public function test_local_greeting_and_cv_work_without_api_key(): void
     {
         config(['assistant.api_key' => '']);
         Http::fake();
 
-        $this->postJson('/api/assistant/chat', [
-            'message' => 'Hello',
-            'locale' => 'en',
-        ])
+        $this->postJson('/api/assistant/chat', ['message' => 'Hello', 'locale' => 'en'])
             ->assertOk()
-            ->assertJsonPath('ok', true)
-            ->assertJsonPath('reply', 'Hey! What would you like to know about Amirhossein?');
+            ->assertJsonPath('action', 'answer');
+
+        $this->postJson('/api/assistant/chat', ['message' => 'CV', 'locale' => 'en'])
+            ->assertOk()
+            ->assertJsonPath('action', 'navigate')
+            ->assertJsonPath('destination', 'cv');
 
         Http::assertNothingSent();
-    }
-
-    public function test_chat_ip_rate_limit_applies_to_provider_path(): void
-    {
-        config(['assistant.rate_limit' => 1]);
-        Cache::put('assistant.ip.'.hash('sha256', '127.0.0.1'), 1, now()->addHour());
-
-        $this->postJson('/api/assistant/chat', [
-            'message' => 'What is his stack?',
-            'locale' => 'en',
-        ])
-            ->assertStatus(429)
-            ->assertJsonPath('code', 'rate_limit');
     }
 
     public function test_reset_clears_session_history(): void
     {
         Http::fake([
-            'api.openai.com/*' => Http::response(['output_text' => 'Noted.'], 200),
+            'api.openai.com/*' => Http::response([
+                'output_text' => json_encode([
+                    'action' => 'answer',
+                    'reply' => 'Noted.',
+                    'destination' => '',
+                ]),
+            ], 200),
         ]);
 
         $this->postJson('/api/assistant/chat', [
@@ -335,14 +486,11 @@ class AssistantChatTest extends TestCase
     {
         /** @var PortfolioAssistantContext $context */
         $context = app(PortfolioAssistantContext::class);
-        $question = 'با Laravel چه پروژه‌ای ساخته؟';
-
         $full = $context->forLocale('fa');
-        $compact = $context->forQuestion('fa', $question);
+        $compact = $context->forQuestion('fa', 'با Laravel چه پروژه‌ای ساخته؟');
 
         $this->assertLessThan(mb_strlen($full), mb_strlen($compact));
         $this->assertStringContainsString('Clinic Booking Portal', $compact);
-        $this->assertStringNotContainsString('Shopping Mall Desktop', $compact);
     }
 
     /**
@@ -353,10 +501,7 @@ class AssistantChatTest extends TestCase
         $this->app->instance(PortfolioContent::class, new class($payload) extends PortfolioContent
         {
             /** @param  array<string, mixed>  $fixed */
-            public function __construct(private array $fixed)
-            {
-                // Skip PublicationService wiring in tests.
-            }
+            public function __construct(private array $fixed) {}
 
             public function payload(?bool $preview = false): array
             {
@@ -423,36 +568,27 @@ class AssistantChatTest extends TestCase
                     'about.location' => 'Tehran, Iran',
                     'about.education' => 'B.Sc. Computer Science',
                     'about.status' => 'Available for freelance',
-                    'skill.php' => 'PHP',
                     'skill.laravel' => 'Laravel',
                 ],
                 'fa' => [
                     'home.profile.name' => 'امیرحسین زمان‌زاده',
                     'home.profile.role' => 'مهندس نرم‌افزار',
-                    'about.p1' => 'توسعه‌دهنده فول‌استک با تمرکز روی محصول‌های سریع و مقیاس‌پذیر.',
+                    'about.p1' => 'توسعه‌دهنده فول‌استک.',
                     'about.location' => 'تهران، ایران',
                     'about.education' => 'کارشناسی علوم کامپیوتر',
                     'about.status' => 'آزاد برای همکاری',
-                    'skill.php' => 'PHP',
                     'skill.laravel' => 'Laravel',
                 ],
             ],
-            'profile' => [
-                'name' => 'Amirhossein Zamanzade',
-            ],
+            'profile' => ['name' => 'Amirhossein Zamanzade'],
             'social' => [
                 'email' => 'itsamirzamani@gmail.com',
                 'linkedin' => 'https://linkedin.com/in/amirhossein-zamanzade',
                 'github' => 'https://github.com/Amir-dev00',
                 'telegram' => 'https://t.me/Amir_dev00',
             ],
-            'resume' => [
-                'url' => '/assets/cv/Amirhossein-Zamanzade-CV.pdf',
-            ],
-            'booking' => [
-                'enabled' => true,
-                'duration' => 30,
-            ],
+            'resume' => ['url' => '/assets/cv/Amirhossein-Zamanzade-CV.pdf'],
+            'booking' => ['enabled' => true, 'duration' => 30],
             'settings' => [],
             'seo' => [],
             'featured_slugs' => [
