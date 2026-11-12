@@ -195,10 +195,11 @@ html.az-loading .az-profile:not(.is-visible) {
   }
 }
 
-@media (max-width: 720px) {
+/* Mobile homepage: sit the whole profile block just under the header row. */
+@media (max-width: 767px) {
   .az-profile {
     --az-profile-size: clamp(90px, 24vw, 112px);
-    top: max(16px, env(safe-area-inset-top, 0px));
+    top: var(--az-header-below, calc(12px + env(safe-area-inset-top, 0px) + 44px + 12px));
     gap: 11px;
     width: min(280px, calc(100% - 32px));
   }
@@ -214,10 +215,11 @@ html.az-loading .az-profile:not(.is-visible) {
   }
 }
 
-@media (max-height: 700px) {
+@media (max-width: 767px) and (max-height: 700px) {
   .az-profile {
-    --az-profile-size: clamp(84px, 18vh, 112px);
-    top: max(10px, env(safe-area-inset-top, 0px));
+    --az-profile-size: clamp(84px, 18vh, 104px);
+    /* Keep below the header row — never pull the photo back into it. */
+    top: var(--az-header-below, calc(12px + env(safe-area-inset-top, 0px) + 44px + 12px));
     gap: 8px;
   }
 }

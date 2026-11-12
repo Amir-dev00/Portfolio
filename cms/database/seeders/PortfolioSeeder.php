@@ -53,7 +53,7 @@ class PortfolioSeeder extends Seeder
         SiteSetting::query()->updateOrCreate(['key' => 'profile'], [
             'value' => [
                 'name' => 'Amirhossein Zamanzade',
-                'photo' => 'assets/img/amir/profile.jpg',
+                'photo' => 'assets/img/amir/profile.webp',
                 'logo' => 'assets/img/amir/az-logo.webp',
             ],
         ]);
@@ -167,7 +167,7 @@ class PortfolioSeeder extends Seeder
         }
 
         // Import profile photo into media library for admin reuse.
-        $this->importAsset($root, 'assets/img/amir/profile.jpg', 'profile');
+        $this->importAsset($root, 'assets/img/amir/profile.webp', 'profile');
         $this->importAsset($root, 'assets/img/amir/az-logo.webp', 'logo');
 
         SiteState::current();

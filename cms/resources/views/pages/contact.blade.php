@@ -15,7 +15,7 @@
                     data-booking-email="{{ $social['email'] }}"
                     data-booking-name="{{ $profile['name'] ?? 'Amirhossein Zamanzade' }}"
                     data-booking-name-fa="{{ $profile['name_fa'] ?? 'امیرحسین زمان زاده' }}"
-                    data-booking-photo="{{ $profilePhoto ?? asset('assets/img/amir/profile.jpg') }}"
+                    data-booking-photo="{{ $profilePhoto ?? asset('assets/img/amir/profile.webp') }}"
                     @if ($bookingAdmin ?? false) data-booking-admin="1" @endif
                     aria-haspopup="dialog" aria-expanded="false">
                     <svg class="az-contact-pill__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>

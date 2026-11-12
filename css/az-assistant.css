@@ -115,7 +115,6 @@ html.az-lang-fa .az-assistant__title {
 
 .az-assistant__text-btn:focus-visible,
 .az-assistant__icon-btn:focus-visible,
-.az-assistant__chip:focus-visible,
 .az-assistant__send:focus-visible,
 .az-assistant__input:focus-visible {
   outline: 2px solid var(--az-asst-accent);
@@ -168,49 +167,6 @@ html.az-lang-fa .az-assistant__title {
   unicode-bidi: isolate;
   direction: ltr;
   display: inline;
-}
-
-.az-assistant__suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: max-height 360ms var(--az-asst-ease), opacity 280ms ease, margin 280ms ease;
-  margin: 0;
-}
-
-.az-assistant.is-ready:not(.is-open) .az-assistant__suggestions,
-.az-assistant.is-open:not(.has-messages) .az-assistant__suggestions {
-  max-height: 6rem;
-  opacity: 1;
-  margin-bottom: 2px;
-}
-
-.az-assistant.is-open.has-messages .az-assistant__suggestions {
-  max-height: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.az-assistant__chip {
-  appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--az-asst-text);
-  border-radius: 999px;
-  padding: 7px 12px;
-  font-size: 0.75rem;
-  line-height: 1.2;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-}
-
-.az-assistant__chip:hover {
-  border-color: rgba(126, 182, 255, 0.45);
-  background: rgba(126, 182, 255, 0.12);
 }
 
 .az-assistant__composer {
@@ -344,9 +300,48 @@ html.az-preloader-open .az-assistant {
   background-size: cover !important;
 }
 
+/* Mobile homepage: single WebP plane; desktop slideshow stays off the network. */
+.az-home-mobile-bg {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  #view-home .section-fullheight__inner {
+    position: relative;
+  }
+
+  .az-home-mobile-bg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-color: var(--az-bg, #0b1c2c);
+    background-image: url("../assets/img/amir/home/home-mobile-bg.webp");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  .az-home-mobile-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11, 28, 44, 0.35) 0%, rgba(11, 28, 44, 0.55) 100%);
+    pointer-events: none;
+  }
+
+  #view-home .slider-fullscreen-projects__images,
+  #view-home .slider__wrapper-canvas,
+  #view-home .az-home-arrows,
+  #view-home .slider__overlay {
+    display: none !important;
+  }
+}
+
 @media (max-width: 760px) {
   /* Center the collapsed composer in the free band between profile intro and dock.
-     Extra bottom inset biases the flex mid-point up so the composer (below chips) lands near mid-hero. */
+     Extra bottom inset biases the flex mid-point up so the composer lands near mid-hero. */
   .az-assistant {
     top: 0;
     bottom: 0;
@@ -409,7 +404,6 @@ html.az-preloader-open .az-assistant {
 
 @media (prefers-reduced-motion: reduce) {
   .az-assistant__panel,
-  .az-assistant__suggestions,
   .az-assistant__send,
   .az-assistant__typing i {
     transition: none !important;

@@ -18,12 +18,6 @@
 
                   <div class="az-assistant__transcript" data-az-assistant-transcript hidden tabindex="0" aria-live="polite" aria-relevant="additions" aria-label="Conversation" data-i18n-attr="aria-label:assistant.transcript"></div>
 
-                  <div class="az-assistant__suggestions" data-az-assistant-suggestions>
-                    <button type="button" class="az-assistant__chip" data-az-assistant-q="assistant.q.projects" data-i18n="assistant.q.projects">What projects has he shipped?</button>
-                    <button type="button" class="az-assistant__chip" data-az-assistant-q="assistant.q.experience" data-i18n="assistant.q.experience">What’s his experience?</button>
-                    <button type="button" class="az-assistant__chip" data-az-assistant-q="assistant.q.stack" data-i18n="assistant.q.stack">Which technologies does he use?</button>
-                  </div>
-
                   <form class="az-assistant__composer" data-az-assistant-form>
                     <label class="az-assistant__sr" for="az-assistant-input" data-i18n="assistant.prompt">Ask about Amirhossein</label>
                     <input

@@ -153,17 +153,17 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-fill {
   stroke: url(#az-ring-ice); stroke-width: 4; stroke-dasharray: 100 100; stroke-dashoffset: 100;
-  transition: stroke-dashoffset .19s linear;
-  /* Promote stroke updates without filter re-rasterization each percent tick. */
+  /* Progress geometry is rAF-driven — never transition stroke-dashoffset here. */
+  transition: none;
   will-change: stroke-dashoffset;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head {
   position: absolute; z-index: 4; inset: 0; display: block; pointer-events: none;
-  transform: rotate(calc(var(--az-progress, 0) * 3.6deg));
+  transform: rotate(0deg);
   opacity: 0;
-  transition:
-    transform .19s linear,
-    opacity 260ms ease;
+  /* Dot angle matches the arc via JS; only fade uses CSS. */
+  transition: opacity 260ms ease;
+  will-change: transform, opacity;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head.is-active {
   opacity: 1;

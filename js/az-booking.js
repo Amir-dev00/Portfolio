@@ -91,7 +91,7 @@
   /** Root-absolute media URLs so /fa/* pages do not resolve relative CMS paths under /fa/. */
   function resolveAssetUrl(url) {
     var raw = String(url || "").trim();
-    if (!raw) return "/assets/img/amir/profile.jpg";
+    if (!raw) return "/assets/img/amir/profile.webp";
     if (/^(https?:)?\/\//i.test(raw) || raw.charAt(0) === "/" || raw.charAt(0) === "data:") return raw;
     return "/" + raw.replace(/^\.\//, "");
   }
@@ -217,7 +217,7 @@
     var photo = resolveAssetUrl(
       (cfg.profile && cfg.profile.photo) ||
         (trigger && trigger.getAttribute("data-booking-photo")) ||
-        "/assets/img/amir/profile.jpg"
+        "/assets/img/amir/profile.webp"
     );
     // Prefer localized API/CMS name; never let the English trigger attribute beat FA.
     var name = isFa()

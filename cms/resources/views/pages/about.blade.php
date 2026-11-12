@@ -4,7 +4,7 @@
               <div class="az-about">
                 <aside class="az-about__aside">
                   <div class="az-about__portrait">
-                    <img src="{{ asset('assets/img/amir/profile.jpg') }}" width="640" height="640" alt="Portrait of Amirhossein Zamanzade" decoding="async" data-i18n-attr="alt:about.portrait.alt"/>
+                    <img src="{{ asset('assets/img/amir/profile.webp') }}" width="640" height="640" alt="Portrait of Amirhossein Zamanzade" decoding="async" data-i18n-attr="alt:about.portrait.alt"/>
                   </div>
                   <ul class="az-about__meta">
                     <li><strong data-i18n="about.meta.location.label">Location:</strong> <span data-i18n="about.meta.location.value">Tehran, Iran</span></li>

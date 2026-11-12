@@ -51,10 +51,11 @@
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-booking.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-assistant.css') }}"/>
     @if(($viewName ?? 'home') === 'home')
-      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp"/>
+      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg.webp') }}" type="image/webp" media="(max-width: 767px)"/>
+      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp" media="(min-width: 768px)"/>
     @endif
     <link rel="preload" href="{{ asset('assets/img/amir/az-monogram-blue.webp') }}" as="image" type="image/webp"/>
-    <link rel="preload" href="{{ $profilePhoto ?? asset('assets/img/amir/profile.jpg') }}" as="image"/>
+    <link rel="preload" href="{{ $profilePhoto ?? asset('assets/img/amir/profile.webp') }}" as="image" type="image/webp"/>
     <style>
       /* While open, beat Rhye's early inline display:none on cached reloads. */
       html.az-preloader-open #js-preloader.az-preloader--ring{

@@ -38,7 +38,7 @@
       'telegram_handle' => '@Amir_dev00',
   ], array_filter((array) ($social ?? []), fn ($v) => is_string($v) && trim($v) !== ''));
 
-  $profilePhoto = $assetUrl(($profile ?? [])['photo'] ?? '', 'assets/img/amir/profile.jpg');
+  $profilePhoto = $assetUrl(($profile ?? [])['photo'] ?? '', 'assets/img/amir/profile.webp');
 @endphp
 
 @section('content')

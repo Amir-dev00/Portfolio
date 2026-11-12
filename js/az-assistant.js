@@ -109,15 +109,6 @@
     state.root.setAttribute("lang", l);
     state.root.setAttribute("dir", l === "fa" ? "rtl" : "ltr");
     applyI18n(state.root);
-    // Refresh chip labels without clearing custom typed value.
-    qsAllChips().forEach(function (btn) {
-      var key = btn.getAttribute("data-az-assistant-q");
-      if (key) btn.textContent = t(key);
-    });
-  }
-
-  function qsAllChips() {
-    return state.root ? Array.prototype.slice.call(state.root.querySelectorAll("[data-az-assistant-q]")) : [];
   }
 
   function postChat(payload) {
@@ -198,9 +189,6 @@
     var sendBtn = qs("[data-az-assistant-send]");
     if (input) input.disabled = !!busy;
     if (sendBtn) sendBtn.disabled = !!busy;
-    qsAllChips().forEach(function (b) {
-      b.disabled = !!busy;
-    });
   }
 
   function resetChat() {
@@ -234,13 +222,6 @@
     var form = qs("[data-az-assistant-form]");
     if (form) form.addEventListener("submit", onSubmit);
 
-    qsAllChips().forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var key = btn.getAttribute("data-az-assistant-q");
-        send(key ? t(key) : btn.textContent);
-      });
-    });
-
     var reset = qs("[data-az-assistant-reset]");
     if (reset) reset.addEventListener("click", resetChat);
 
@@ -269,6 +250,7 @@
 
   /** Warm remaining slider textures after first paint without blocking the first slide. */
   function deferHomeTextures() {
+    if (window.matchMedia("(max-width: 767px)").matches) return;
     var nodes = document.querySelectorAll(".az-home-bg[data-az-defer-texture]");
     if (!nodes.length) return;
     var run = function () {

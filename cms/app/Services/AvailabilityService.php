@@ -60,7 +60,7 @@ final class AvailabilityService
                     'name_en' => $profile['name'] ?? 'Amirhossein Zamanzade',
                     'name_fa' => $profile['name_fa'] ?? 'امیرحسین زمان زاده',
                     // Root-absolute URL so /fa/* pages do not resolve relative CMS paths under /fa/.
-                    'photo' => $this->publicAssetUrl($profile['photo'] ?? null, 'assets/img/amir/profile.jpg'),
+                    'photo' => $this->publicAssetUrl($profile['photo'] ?? null, 'assets/img/amir/profile.webp'),
                     'email' => $social['email'] ?? null,
                 ],
                 'now' => CarbonImmutable::now('UTC')->toIso8601String(),

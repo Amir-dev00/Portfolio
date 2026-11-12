@@ -3,6 +3,8 @@
           <!-- section PROJECTS SLIDER FULLSCREEN -->
           <section id="selected-work" class="section section-fullheight section-projects section-projects-slider bg-dark-1 overflow" data-arts-theme-text="light" data-arts-os-animation>
             <div class="section-fullheight__inner section-fullheight__inner_mobile text-center">
+              {{-- Mobile-only static hero; desktop keeps the WebGL slideshow (sources stripped on mobile before vendor.js). --}}
+              <div class="az-home-mobile-bg" aria-hidden="true"></div>
               @include('components.site.profile')
               @include('components.site.assistant')
               <div class="slider slider-fullscreen-projects js-slider-fullscreen-projects js-slider">
@@ -15,8 +17,8 @@
                     <div class="swiper-slide"></div>
                   </div>
                 </div>
-                <!-- slider IMAGES: four authored home backgrounds (WebP preferred). First loads promptly; others defer. -->
-                <div class="slider-fullscreen-projects__images swiper-container js-slider-fullscreen-projects__images" data-mousewheel-enabled="data-mousewheel-enabled" data-direction="horizontal" data-transition-effect="distortion" data-aspect-ratio="1.5" data-transition-displacement-img="assets/img/general/bg-displacement-7.jpg" data-speed="1200" data-autoplay-enabled="true" data-autoplay-delay="6000" data-counter-style="roman">
+                <!-- slider IMAGES: four authored home backgrounds (WebP). Desktop only — mobile strips textures before Rhye boots. -->
+                <div class="slider-fullscreen-projects__images swiper-container js-slider-fullscreen-projects__images" data-mousewheel-enabled="data-mousewheel-enabled" data-direction="horizontal" data-transition-effect="distortion" data-aspect-ratio="1.5" data-transition-displacement-img="assets/img/general/bg-displacement-7.webp" data-speed="1200" data-autoplay-enabled="true" data-autoplay-delay="6000" data-counter-style="roman">
                   <div class="swiper-wrapper">
                     <div class="swiper-slide overflow">
                       <div class="slider__images-slide-inner js-transition-img overflow" data-swiper-parallax="90%">
