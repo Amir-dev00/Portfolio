@@ -153,9 +153,17 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-fill {
   stroke: url(#az-ring-ice); stroke-width: 4; stroke-dasharray: 100 100; stroke-dashoffset: 100;
-  /* Progress geometry is rAF-driven — never transition stroke-dashoffset here. */
+  /* Progress geometry is rAF-driven once JS owns the ring. */
   transition: none;
   will-change: stroke-dashoffset;
+}
+/* Blade-first waiting motion: runs before large scripts finish downloading. */
+html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-preloader__ring-fill {
+  animation: az-ring-wait-sweep 2.4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-preloader__ring-head {
+  opacity: 1;
+  animation: az-ring-wait-spin 2.4s linear infinite;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head {
   position: absolute; z-index: 4; inset: 0; display: block; pointer-events: none;
@@ -169,7 +177,9 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   opacity: 1;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head.is-complete,
-#js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-head {
+#js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-head,
+#js-preloader.az-preloader--ring.az-preloader--recovered .az-preloader__ring-head,
+#js-preloader.az-preloader--ring.az-preloader--retry .az-preloader__ring-head {
   opacity: 0;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head::after {
@@ -195,8 +205,9 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   opacity: 1;
   animation: az-ring-fade-up 700ms 220ms both;
 }
+/* No fixed ch reservations — the whole 0 / 100 group stays centered on the logo axis. */
 #js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-current {
-  width: auto; min-width: 3ch; text-align: right;
+  width: auto;
   color: var(--az-text); font: inherit; font-variant-numeric: tabular-nums;
 }
 #js-preloader.az-preloader--ring .az-preloader__counter-sep,
@@ -206,7 +217,7 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   letter-spacing: -.02em;
 }
 #js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-total {
-  min-width: 3ch; text-align: left;
+  width: auto;
 }
 #js-preloader.az-preloader--ring .az-preloader__identity {
   margin-top: clamp(18px, 2.4vw, 27px); padding-top: clamp(18px, 2.4vw, 27px);
@@ -235,6 +246,53 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 #js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-fill {
   /* Static finish glow via stroke width only — no filter at exit. */
   stroke-width: 4.25;
+  animation: none;
+}
+#js-preloader.az-preloader--ring .az-preloader__retry {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  max-width: 22rem;
+  text-align: center;
+}
+#js-preloader.az-preloader--ring.az-preloader--retry .az-preloader__retry {
+  display: flex;
+  animation: az-ring-fade-up 500ms both;
+}
+#js-preloader.az-preloader--ring.az-preloader--retry .preloader__counter.az-preloader__percentage {
+  opacity: 0.55;
+}
+#js-preloader.az-preloader--ring .az-preloader__retry-msg {
+  margin: 0;
+  color: var(--az-text-secondary);
+  font-family: var(--font-en);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+#js-preloader.az-preloader--ring .az-preloader__retry-btn {
+  appearance: none;
+  border: 1px solid var(--az-line);
+  background: color-mix(in srgb, var(--az-glass) 80%, transparent);
+  color: var(--az-text);
+  font-family: var(--font-en);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  min-height: 44px;
+  border-radius: 999px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#js-preloader.az-preloader--ring .az-preloader__retry-btn:hover,
+#js-preloader.az-preloader--ring .az-preloader__retry-btn:focus-visible {
+  border-color: var(--az-accent);
+  color: var(--az-accent);
+  outline: none;
 }
 @keyframes az-ring-arrive {
   /* No filter here — animating filter overrides the metallic drop-shadow and looks matte. */
@@ -244,6 +302,16 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 @keyframes az-ring-fade-up {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+/* Early waiting: partial arc breathes before JS owns progress. */
+@keyframes az-ring-wait-sweep {
+  0% { stroke-dashoffset: 92; }
+  50% { stroke-dashoffset: 74; }
+  100% { stroke-dashoffset: 92; }
+}
+@keyframes az-ring-wait-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 @media (max-width: 600px) {
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: clamp(222px, 70vw, 290px); margin-bottom: 21px; }
@@ -266,4 +334,10 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   #js-preloader.az-preloader--ring *,
   #js-preloader.az-preloader--ring *::before,
   #js-preloader.az-preloader--ring *::after { animation: none !important; transition: none !important; }
+  html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-preloader__ring-fill {
+    stroke-dashoffset: 88;
+  }
+  html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-preloader__ring-head {
+    opacity: 0;
+  }
 }

@@ -127,12 +127,14 @@ class PublicSiteController extends Controller
                     'liveUrl' => $p['liveUrl'] ?? null,
                     'githubUrl' => $p['githubUrl'] ?? null,
                     'date' => $p['date'] ?? null,
+                    'is_featured' => (bool) ($p['is_featured'] ?? false),
                     'i18n' => [
                         'en' => $p['en'] ?? [],
                         'fa' => $p['fa'] ?? [],
                     ],
                 ];
             }, $payload['projects'] ?? []),
+            'featured_slugs' => array_values(array_filter((array) ($payload['featured_slugs'] ?? []))),
             'seo' => $payload['seo'] ?? [],
             'cvUrl' => $cvUrl,
             'social' => $payload['social'] ?? [],

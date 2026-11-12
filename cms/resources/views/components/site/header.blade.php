@@ -14,9 +14,9 @@
               >
                 <img
                   class="az-brand-logo__img"
-                  src="{{ asset('assets/img/amir/az-monogram-blue.webp') }}"
-                  width="1254"
-                  height="1254"
+                  src="{{ $azLogoSrc ?? asset('assets/img/amir/az-monogram-blue.webp') }}"
+                  width="720"
+                  height="720"
                   alt=""
                   decoding="async"
                 />

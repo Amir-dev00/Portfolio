@@ -111,6 +111,89 @@
     applyI18n(state.root);
   }
 
+  function projectHref(slug) {
+    var prefix = lang() === "fa" ? "/fa" : "";
+    var boot = window.AZ_BOOTSTRAP;
+    if (boot && boot.canonical) {
+      return prefix + "/work/" + encodeURIComponent(slug);
+    }
+    return "#work/" + encodeURIComponent(slug);
+  }
+
+  function projectTitle(project) {
+    if (!project) return "";
+    if (window.AZ_i18n && typeof window.AZ_i18n.localizeProject === "function") {
+      var localized = window.AZ_i18n.localizeProject(project);
+      if (localized && localized.title) return localized.title;
+    }
+    var pack = project.i18n && project.i18n[lang()];
+    if (pack && pack.title) return pack.title;
+    return project.title || "";
+  }
+
+  /** Prefer featured projects; otherwise the first two in Work sort order. */
+  function pickSelectedProjects() {
+    var all = (window.AZ_PROJECTS || []).filter(function (p) {
+      return p && p.slug && p.title;
+    });
+    if (all.length < 2) return [];
+
+    var featured = all.filter(function (p) {
+      return !!p.is_featured;
+    });
+    if (featured.length >= 2) return featured.slice(0, 2);
+
+    var slugs = (window.AZ_BOOTSTRAP && window.AZ_BOOTSTRAP.featured_slugs) || [];
+    if (slugs.length) {
+      var bySlug = {};
+      all.forEach(function (p) {
+        bySlug[p.slug] = p;
+      });
+      var ordered = slugs
+        .map(function (slug) {
+          return bySlug[slug];
+        })
+        .filter(Boolean);
+      if (ordered.length >= 2) return ordered.slice(0, 2);
+    }
+
+    return all.slice(0, 2);
+  }
+
+  function renderSelectedWork() {
+    if (!state.root) return;
+    var nav = qs("[data-az-selected-work]");
+    var linksHost = qs("[data-az-selected-work-links]");
+    if (!nav || !linksHost) return;
+
+    var picks = pickSelectedProjects();
+    if (picks.length < 2) {
+      nav.hidden = true;
+      linksHost.innerHTML = "";
+      return;
+    }
+
+    linksHost.innerHTML = picks
+      .map(function (project) {
+        var title = escapeHtml(projectTitle(project));
+        var href = escapeHtml(projectHref(project.slug));
+        return (
+          '<a class="az-selected-work__link" href="' +
+          href +
+          '">' +
+          '<span class="az-selected-work__name">' +
+          title +
+          "</span>" +
+          '<svg class="az-selected-work__arrow" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>' +
+          "</a>"
+        );
+      })
+      .join("");
+
+    nav.hidden = false;
+    applyI18n(nav);
+  }
+
   function postChat(payload) {
     return fetch(apiBase() + "/chat", {
       method: "POST",
@@ -233,6 +316,7 @@
     }
 
     clearStatus();
+    renderSelectedWork();
 
     // Soft status probe — store readiness only; never show setup text under the composer.
     fetch(apiBase() + "/status?locale=" + encodeURIComponent(lang()), {
@@ -273,6 +357,7 @@
     syncDirection();
     // Keep transcript; re-render for LTR isolates / dir.
     renderTranscript();
+    renderSelectedWork();
   });
 
   if (document.readyState === "loading") {

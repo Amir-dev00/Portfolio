@@ -1,0 +1,277 @@
+/* Homepage astronaut guide — launcher + spotlight tour. */
+
+.az-guide-launch {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--az-line, rgba(244, 247, 255, 0.18));
+  border-radius: 50%;
+  background: var(--az-glass-translucent, rgba(20, 34, 56, 0.72));
+  color: var(--az-text, #f4f7ff);
+  box-shadow: 0 8px 20px var(--az-shadow, rgba(3, 8, 18, 0.45));
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  backdrop-filter: blur(12px) saturate(1.2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.az-guide-launch__orb {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.az-guide-launch__icon {
+  display: block;
+  color: var(--az-accent, #6ee7ff);
+}
+
+.az-guide-launch:hover {
+  border-color: var(--az-line-strong, rgba(110, 231, 255, 0.42));
+}
+
+.az-guide-launch:focus {
+  outline: none;
+}
+
+.az-guide-launch:focus-visible {
+  outline: 2px solid var(--az-accent, #6ee7ff);
+  outline-offset: 2px;
+}
+
+/* Homepage only — keep AZ logo + profile clear on narrow phones. */
+html[data-az-route]:not([data-az-route="home"]) .az-guide-launch,
+html.az-preloader-open .az-guide-launch {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.az-guide[hidden] {
+  display: none !important;
+}
+
+.az-guide:not([hidden]) {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  pointer-events: none;
+}
+
+.az-guide.is-active {
+  pointer-events: auto;
+}
+
+.az-guide__scrim {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  pointer-events: auto;
+}
+
+.az-guide__spotlight {
+  position: fixed;
+  z-index: 1;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 1.5px solid color-mix(in srgb, var(--az-accent, #6ee7ff) 75%, white);
+  box-shadow:
+    0 0 0 9999px color-mix(in srgb, var(--az-bg, #0b1220) 72%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--az-accent, #6ee7ff) 35%, transparent),
+    0 0 28px color-mix(in srgb, var(--az-accent, #6ee7ff) 22%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.az-guide.is-touring .az-guide__spotlight {
+  opacity: 1;
+}
+
+.az-guide__canvas,
+.az-guide__fallback {
+  position: fixed;
+  z-index: 3;
+  width: 120px;
+  height: 120px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease, transform 220ms ease;
+}
+
+.az-guide.is-open .az-guide__canvas:not([hidden]),
+.az-guide.is-open .az-guide__fallback:not([hidden]) {
+  opacity: 1;
+}
+
+.az-guide__fallback {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--az-glass-translucent-strong, rgba(20, 34, 56, 0.86));
+  border: 1px solid var(--az-line, rgba(244, 247, 255, 0.18));
+  box-shadow: 0 12px 28px var(--az-shadow, rgba(3, 8, 18, 0.45));
+}
+
+.az-guide__fallback-glyph {
+  font-size: 42px;
+  line-height: 1;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--az-accent, #6ee7ff) 40%, transparent));
+}
+
+.az-guide__invite,
+.az-guide__callout {
+  position: fixed;
+  z-index: 4;
+  width: min(300px, calc(100vw - 28px));
+  padding: 14px 14px 12px;
+  border-radius: 16px;
+  background: var(--az-glass-translucent-strong, rgba(20, 34, 56, 0.86));
+  border: 1px solid var(--az-line, rgba(244, 247, 255, 0.18));
+  box-shadow:
+    0 16px 36px var(--az-shadow, rgba(3, 8, 18, 0.45)),
+    inset 0 1px 0 color-mix(in srgb, var(--az-text, #f4f7ff) 10%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  backdrop-filter: blur(16px) saturate(1.25);
+  color: var(--az-text, #f4f7ff);
+  pointer-events: auto;
+}
+
+.az-guide__invite[hidden],
+.az-guide__callout[hidden] {
+  display: none !important;
+}
+
+.az-guide__invite-title,
+.az-guide__callout-title {
+  margin: 0 0 6px;
+  font-family: var(--font-ui, "Manrope", sans-serif);
+  font-size: 0.95rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.az-guide__invite-body,
+.az-guide__callout-body {
+  margin: 0;
+  font-family: var(--font-ui, "Manrope", sans-serif);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--az-text-secondary, #a8b8cc);
+}
+
+html.az-lang-fa .az-guide__invite-title,
+html.az-lang-fa .az-guide__callout-title,
+html.az-lang-fa .az-guide__invite-body,
+html.az-lang-fa .az-guide__callout-body,
+html.az-lang-fa .az-guide__step,
+html.az-lang-fa .az-guide__btn {
+  font-family: var(--font-fa, "Estedad", "Manrope", sans-serif);
+  letter-spacing: 0;
+}
+
+.az-guide__step {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--az-accent, #6ee7ff);
+}
+
+.az-guide__invite-actions,
+.az-guide__callout-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.az-guide__btn {
+  appearance: none;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.az-guide__btn--ghost {
+  background: transparent;
+  border-color: var(--az-line, rgba(244, 247, 255, 0.18));
+  color: var(--az-text-secondary, #a8b8cc);
+}
+
+.az-guide__btn--primary {
+  background: var(--az-accent-soft, rgba(110, 231, 255, 0.22));
+  border-color: var(--az-line-strong, rgba(110, 231, 255, 0.42));
+  color: var(--az-text, #f4f7ff);
+}
+
+.az-guide__btn:focus {
+  outline: none;
+}
+
+.az-guide__btn:focus-visible {
+  outline: 2px solid var(--az-accent, #6ee7ff);
+  outline-offset: 2px;
+}
+
+/* Keep highlighted targets readable above the scrim without activating them. */
+.az-guide-target-live {
+  position: relative;
+  z-index: 121 !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 390px) {
+  .az-guide-launch {
+    width: 34px;
+    height: 34px;
+  }
+
+  .az-guide__canvas,
+  .az-guide__fallback {
+    width: 96px;
+    height: 96px;
+  }
+
+  .az-guide__invite,
+  .az-guide__callout {
+    width: min(280px, calc(100vw - 20px));
+    padding: 12px;
+  }
+}
+
+@media (max-width: 320px) {
+  .az-guide-launch {
+    width: 32px;
+    height: 32px;
+  }
+
+  .az-guide__canvas,
+  .az-guide__fallback {
+    width: 84px;
+    height: 84px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .az-guide__spotlight,
+  .az-guide__canvas,
+  .az-guide__fallback {
+    transition: none !important;
+  }
+}

@@ -1,11 +1,29 @@
 /* Language switcher + RTL/LTR reading direction helpers. */
 
-.az-lang-switch {
+/* Physical top-right cluster: guide launcher + language switch. */
+.az-header-end {
   position: fixed;
   z-index: 90;
-  top: calc(14px + env(safe-area-inset-top, 0px));
-  /* Physical top-right so the control does not jump when dir flips. */
-  right: calc(14px + env(safe-area-inset-right, 0px));
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.az-header-end > * {
+  pointer-events: auto;
+}
+
+.az-lang-switch {
+  position: relative;
+  z-index: 1;
+  top: auto;
+  right: auto;
   left: auto;
   display: inline-flex;
   align-items: center;
@@ -185,9 +203,13 @@ html.az-lang-fa .az-profile__role {
 }
 
 @media (max-width: 390px) {
+  .az-header-end {
+    top: calc(8px + env(safe-area-inset-top, 0px));
+    right: calc(8px + env(safe-area-inset-right, 0px));
+    gap: 6px;
+  }
+
   .az-lang-switch {
-    top: calc(10px + env(safe-area-inset-top, 0px));
-    right: calc(10px + env(safe-area-inset-right, 0px));
     padding: 2px;
   }
 
@@ -198,6 +220,10 @@ html.az-lang-fa .az-profile__role {
 }
 
 @media (max-width: 320px) {
+  .az-header-end {
+    gap: 5px;
+  }
+
   .az-lang-switch__btn {
     padding: 5px 8px;
   }

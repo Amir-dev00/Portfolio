@@ -10,7 +10,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <meta name="robots" content="noindex,follow"/>
   <title>{{ $isFa ? 'صفحه پیدا نشد' : 'Page not found' }} — Amirhossein Zamanzade</title>
-  <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/amir/favicon.png') }}"/>
+  @php
+    $azLogoFile = public_path('assets/img/amir/az-monogram-blue.webp');
+    $azLogoSrc = asset('assets/img/amir/az-monogram-blue.webp').(is_file($azLogoFile) ? '?v='.filemtime($azLogoFile) : '');
+    $azFavFile = public_path('assets/img/amir/favicon.png');
+    $azFavSrc = asset('assets/img/amir/favicon.png').(is_file($azFavFile) ? '?v='.filemtime($azFavFile) : '');
+  @endphp
+  <link rel="icon" type="image/png" href="{{ $azFavSrc }}"/>
   <link rel="stylesheet" href="{{ asset('css/typography.css') }}"/>
   <style>
     :root { --az-bg: #0b0b0d; --az-ink: #f2f2f2; --az-mute: rgba(242,242,242,.62); --az-line: rgba(255,255,255,.18); }
@@ -37,7 +43,7 @@
 </head>
 <body>
   <main>
-    <img src="{{ asset('assets/img/amir/az-logo.webp') }}" alt="AZ" width="72" height="72"/>
+    <img src="{{ $azLogoSrc }}" alt="AZ" width="720" height="720"/>
     <p class="code" aria-hidden="true">404</p>
     <h1>{{ $isFa ? 'صفحه پیدا نشد' : 'Page not found' }}</h1>
     <p>{{ $isFa ? 'صفحه‌ای که دنبالش هستید وجود ندارد یا جابه‌جا شده است.' : 'The page you are looking for does not exist or has moved.' }}</p>
