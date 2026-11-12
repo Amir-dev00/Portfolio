@@ -12,7 +12,8 @@
 
 .az-assistant--home {
   position: absolute;
-  z-index: 30;
+  /* Above the fullscreen slider (z-index 50) so the composer receives clicks. */
+  z-index: 70;
   left: 0;
   right: 0;
   top: clamp(42%, 46vh, 52%);

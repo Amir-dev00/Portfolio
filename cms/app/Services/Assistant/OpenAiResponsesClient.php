@@ -28,7 +28,7 @@ class OpenAiResponsesClient
                 ];
             }, $messages),
             'store' => (bool) config('assistant.store', false),
-            'max_output_tokens' => (int) config('assistant.max_output_tokens', 450),
+            'max_output_tokens' => (int) config('assistant.max_output_tokens', 200),
         ];
 
         try {

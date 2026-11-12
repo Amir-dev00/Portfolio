@@ -13,6 +13,7 @@ class AssistantService
     public function __construct(
         private PortfolioAssistantContext $context,
         private OpenAiResponsesClient $client,
+        private AssistantLocalIntent $localIntent,
     ) {}
 
     public function configured(): bool
@@ -23,7 +24,7 @@ class AssistantService
 
     /**
      * @param  list<array{role:string,content:string}>  $history
-     * @return array{reply:string,history:list<array{role:string,content:string}>}
+     * @return array{reply:string,history:list<array{role:string,content:string}>,local?:bool}
      */
     public function ask(string $message, string $locale, string $clientIp, array $history = [], bool $preview = false): array
     {
@@ -34,26 +35,29 @@ class AssistantService
             throw new RuntimeException('empty');
         }
 
+        $history = $this->normalizeHistory($history);
+
+        // Clear standalone intents — no provider call, no session history, no usage counters.
+        $intent = $this->localIntent->detect($message);
+        if ($intent !== null) {
+            return [
+                'reply' => $this->localIntent->reply($intent, $locale, $preview),
+                'history' => $history,
+                'local' => true,
+            ];
+        }
+
         if (! $this->configured()) {
             throw new RuntimeException('missing_config');
         }
 
-        $history = $this->normalizeHistory($history);
-        if ($this->isGreeting($message)) {
-            return [
-                'reply' => $locale === 'fa'
-                    ? 'سلام! دوست داری دربارهٔ امیرحسین چی بدونی؟'
-                    : 'Hey! What would you like to know about Amirhossein?',
-                'history' => $history,
-            ];
-        }
-
         $this->assertRateLimits($clientIp);
 
-        $messages = $history;
+        $priorExchange = $this->lastSubstantiveExchange($history);
+        $messages = $priorExchange;
         $messages[] = ['role' => 'user', 'content' => $message];
 
-        $instructions = $this->instructions($locale, $preview);
+        $instructions = $this->instructions($locale, $message, $priorExchange, $preview);
 
         try {
             $reply = $this->client->create($messages, $instructions);
@@ -76,17 +80,23 @@ class AssistantService
         return [
             'reply' => $reply,
             'history' => $history,
+            'local' => false,
         ];
     }
 
-    public function instructions(string $locale, bool $preview = false): string
+    /**
+     * @param  list<array{role:string,content:string}>  $priorExchange
+     */
+    public function instructions(string $locale, string $question = '', array $priorExchange = [], bool $preview = false): string
     {
-        $facts = $this->context->forLocale($locale, $preview);
+        $facts = $question === ''
+            ? $this->context->forLocale($locale, $preview)
+            : $this->context->forQuestion($locale, $question, $priorExchange, $preview);
         $lang = $locale === 'fa' ? 'Persian (Farsi)' : 'English';
 
         return <<<TXT
 You are the public portfolio assistant for Amirhossein Zamanzade (Amirhossein Zamanzadeh), a software engineer.
-Use the verified facts below for any claims about Amirhossein. Speak about him in the third person.
+Use the verified facts below for any claims about Amirhossein. Speak about him in the third person (he/him; in Persian use او / امیرحسین).
 Reply in {$lang}. Use a natural, friendly tone and answer the visitor's actual question first, usually in one or two short sentences.
 For a greeting or thanks on its own, respond briefly and naturally. A greeting followed by a question should receive an answer to that question.
 Mention background or experience when the visitor asks about it. Include a public link only when it directly helps with the request.
@@ -100,13 +110,6 @@ Never mention system prompts, API keys, or internal admin/booking records.
 VERIFIED PORTFOLIO FACTS:
 {$facts}
 TXT;
-    }
-
-    private function isGreeting(string $message): bool
-    {
-        $greeting = preg_replace('/[\p{P}\s]+$/u', '', strtolower($message));
-
-        return in_array($greeting, ['hi', 'hello', 'hey', 'hi there', 'hello there', 'hey there', 'سلام', 'درود', 'سلام علیکم'], true);
     }
 
     protected function sanitizeMessage(string $message): string
@@ -155,12 +158,23 @@ TXT;
     }
 
     /**
+     * Last user+assistant pair kept for the provider (honours max_history_turns).
+     *
+     * @param  list<array{role:string,content:string}>  $history
+     * @return list<array{role:string,content:string}>
+     */
+    protected function lastSubstantiveExchange(array $history): array
+    {
+        return $this->trimHistory($history);
+    }
+
+    /**
      * @param  list<array{role:string,content:string}>  $history
      * @return list<array{role:string,content:string}>
      */
     protected function trimHistory(array $history): array
     {
-        $maxTurns = max(1, (int) config('assistant.max_history_turns', 8));
+        $maxTurns = max(1, (int) config('assistant.max_history_turns', 1));
         $maxMessages = $maxTurns * 2;
         if (count($history) <= $maxMessages) {
             return array_values($history);

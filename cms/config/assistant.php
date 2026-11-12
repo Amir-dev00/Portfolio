@@ -24,13 +24,13 @@ return [
     'connect_timeout' => (int) env('ASSISTANT_CONNECT_TIMEOUT', 5),
 
     /** Max output tokens for the Responses API. */
-    'max_output_tokens' => (int) env('ASSISTANT_MAX_OUTPUT_TOKENS', 450),
+    'max_output_tokens' => (int) env('ASSISTANT_MAX_OUTPUT_TOKENS', 200),
 
     /** Visitor message hard cap (characters). */
     'max_message_chars' => (int) env('ASSISTANT_MAX_MESSAGE_CHARS', 500),
 
     /** Turns kept in the PHP session (user+assistant pairs). */
-    'max_history_turns' => (int) env('ASSISTANT_MAX_HISTORY_TURNS', 8),
+    'max_history_turns' => (int) env('ASSISTANT_MAX_HISTORY_TURNS', 1),
 
     /** Per-IP requests allowed per rolling window (minutes). */
     'rate_limit' => (int) env('ASSISTANT_RATE_LIMIT', 20),
