@@ -4,10 +4,91 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Keep Rhye's header in the DOM for its scripts, but it is not the visible nav. */
-#page-header,
-#page-header .logo,
+/* Keep Rhye's header chrome inert; the homepage brand mark is the only visible piece. */
+#page-header {
+  /* visibility:hidden (not opacity) so .az-brand-logo can opt back in. */
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#page-header .header__burger,
+#page-header .header__wrapper-overlay-menu,
+#page-header .header__overlay-menu-back,
 #page-header .logo-wordmark {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Top-left AZ monogram — physical left in EN and FA; Home via client nav. */
+#page-header .header__col-left,
+#page-header .az-brand-logo {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#page-header .header__col-left {
+  position: fixed;
+  z-index: 90;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: calc(14px + env(safe-area-inset-left, 0px));
+  right: auto;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  /* Keep the mark on the physical left when the document is RTL. */
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+#page-header .az-brand-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#page-header .az-brand-logo__img {
+  display: block;
+  width: 44px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (min-width: 768px) {
+  #page-header .header__col-left {
+    top: calc(16px + env(safe-area-inset-top, 0px));
+    left: calc(20px + env(safe-area-inset-left, 0px));
+  }
+
+  #page-header .az-brand-logo,
+  #page-header .az-brand-logo__img {
+    width: 52px;
+  }
+}
+
+/* Homepage only — hide on other SPA routes / while the AZ preloader covers the hero. */
+html[data-az-route]:not([data-az-route="home"]) #page-header .header__col-left,
+html[data-az-route]:not([data-az-route="home"]) #page-header .az-brand-logo,
+html.az-preloader-open #page-header .header__col-left,
+html.az-preloader-open #page-header .az-brand-logo {
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
@@ -29,11 +110,6 @@ html.cursor-disabled body,
 html.cursor-disabled a,
 html.cursor-disabled button {
   cursor: auto !important;
-}
-
-#page-header .logo-wordmark {
-  display: none !important;
-  font-size: 0 !important;
 }
 
 /* Hide empty slider footer CTA rail so it does not sit behind the dock. */

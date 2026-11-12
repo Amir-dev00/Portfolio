@@ -102,14 +102,6 @@ class PublicSiteController extends Controller
             }
         }
 
-        $initialHash = match ($view) {
-            'work' => '#work',
-            'about' => '#about',
-            'contact' => '#contact',
-            'project' => '#work/'.rawurlencode((string) $slug),
-            default => '#home',
-        };
-
         $hreflang = [
             'en' => $this->urlFor('en', $view, $slug),
             'fa' => $this->urlFor('fa', $view, $slug),
@@ -146,7 +138,6 @@ class PublicSiteController extends Controller
             'social' => $payload['social'] ?? [],
             'profile' => $payload['profile'] ?? [],
             'booking' => $booking,
-            'initialHash' => $initialHash,
             'canonical' => $hreflang[$locale],
             'preview' => (bool) $preview,
         ];
@@ -168,7 +159,6 @@ class PublicSiteController extends Controller
             'profile' => $payload['profile'] ?? [],
             'booking' => $booking,
             'bookingAdmin' => (bool) $request->user()?->isOwner(),
-            'initialHash' => $initialHash,
         ]);
     }
 

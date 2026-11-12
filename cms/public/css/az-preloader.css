@@ -100,7 +100,7 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   margin: 0 auto clamp(18px, 2.4vw, 28px);
   opacity: 1;
   visibility: visible;
-  filter: drop-shadow(0 12px 34px color-mix(in srgb, var(--az-accent) 10%, transparent));
+  /* No filter here — filtering the disc re-rasterizes the animating ring every tick. */
   animation: az-ring-arrive 1100ms cubic-bezier(.16,1,.3,1) both;
 }
 #js-preloader.az-preloader--ring .az-preloader__disc::before {
@@ -117,29 +117,28 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 #js-preloader.az-preloader--ring .az-preloader__image-shell {
   position: absolute; inset: 8.25%; overflow: hidden; border-radius: 50%;
   background: var(--az-glass);
+  /* Soft ice bloom lives on the static shell (not a filter on the animating disc). */
   box-shadow:
-    inset 0 0 35px color-mix(in srgb, var(--az-bg) 55%, transparent),
-    0 1px 36px color-mix(in srgb, var(--az-accent) 16%, transparent);
+    inset 0 0 28px rgba(3, 8, 18, 0.45),
+    0 1px 28px rgba(110, 231, 255, 0.14),
+    0 10px 34px rgba(11, 18, 32, 0.35);
   border: 1px solid var(--az-line);
 }
 #js-preloader.az-preloader--ring .az-preloader__image-shell::after {
   content: '';
   position: absolute; inset: 0; z-index: 1; border-radius: 50%; pointer-events: none;
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--az-text) 10%, transparent),
-      transparent 25%,
-      transparent 70%,
-      color-mix(in srgb, var(--az-accent) 6%, transparent)
-    ),
-    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--az-accent) 8%, transparent), transparent 52%);
-  mix-blend-mode: screen;
+  /* Avoid mix-blend-mode during startup — cheap opaque highlight instead. */
+  background: linear-gradient(
+    145deg,
+    rgba(244, 247, 255, 0.08),
+    transparent 32%,
+    transparent 68%,
+    rgba(110, 231, 255, 0.05)
+  );
 }
 #js-preloader.az-preloader--ring .az-preloader__image {
   display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
   transform: scale(1.17); transform-origin: center;
-  filter: saturate(1.02) contrast(1.08);
 }
 #js-preloader.az-preloader--ring .az-preloader__ring {
   position: absolute; inset: 0; display: block; width: 100%; height: 100%;
@@ -154,8 +153,9 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-fill {
   stroke: url(#az-ring-ice); stroke-width: 4; stroke-dasharray: 100 100; stroke-dashoffset: 100;
-  transition: stroke-dashoffset .19s linear; will-change: stroke-dashoffset;
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--az-accent) 55%, transparent));
+  transition: stroke-dashoffset .19s linear;
+  /* Promote stroke updates without filter re-rasterization each percent tick. */
+  will-change: stroke-dashoffset;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head {
   position: absolute; z-index: 4; inset: 0; display: block; pointer-events: none;
@@ -175,9 +175,10 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 #js-preloader.az-preloader--ring .az-preloader__ring-head::after {
   content: ''; position: absolute; top: 4.5%; left: calc(50% - 3px);
   width: 6px; height: 6px; background: var(--az-accent); border-radius: 50%;
+  /* Glow stays on the tiny moving dot — cheap vs filtering the whole ring path. */
   box-shadow:
-    0 0 8px 2px color-mix(in srgb, var(--az-accent) 55%, transparent),
-    0 0 22px color-mix(in srgb, var(--az-accent) 28%, transparent);
+    0 0 8px 2px rgba(110, 231, 255, 0.55),
+    0 0 18px rgba(110, 231, 255, 0.28);
 }
 #js-preloader.az-preloader--ring .az-preloader__load-label {
   display: block; color: var(--az-text-secondary); font-size: 11px; line-height: 1.5;
@@ -232,7 +233,8 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 }
 #js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__disc::before { opacity: 1; }
 #js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-fill {
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--az-accent) 70%, transparent));
+  /* Static finish glow via stroke width only — no filter at exit. */
+  stroke-width: 4.25;
 }
 @keyframes az-ring-arrive {
   /* No filter here — animating filter overrides the metallic drop-shadow and looks matte. */

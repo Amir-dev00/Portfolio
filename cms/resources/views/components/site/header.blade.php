@@ -3,12 +3,24 @@
         <!-- top bar -->
         <div class="header__container header__controls">
           <div class="row justify-content-between align-items-center">
-            <!-- logo -->
-            <div class="col-auto header__col header__col-left"><a class="logo" href="/" aria-label="Home">
-                <div class="logo__wrapper-img">
-                  <!-- primary logo version (for light backgrounds)--><span class="logo__img-primary logo-wordmark" aria-hidden="true"></span>
-                  <!-- secondary logo version (for dark backgrounds)--><span class="logo__img-secondary logo-wordmark" aria-hidden="true"></span>
-                </div></a>
+            <!-- logo: homepage brand mark (SPA home link) -->
+            <div class="col-auto header__col header__col-left">
+              <a
+                class="logo az-brand-logo"
+                href="{{ $navPaths['home'] ?? '/' }}"
+                data-nav="home"
+                aria-label="{{ $strings['nav.home'] ?? 'Home' }}"
+                data-i18n-attr="aria-label:nav.home"
+              >
+                <img
+                  class="az-brand-logo__img"
+                  src="{{ asset('assets/img/amir/az-monogram-blue.webp') }}"
+                  width="1254"
+                  height="1254"
+                  alt=""
+                  decoding="async"
+                />
+              </a>
             </div>
             <!-- - logo -->
             <!-- burger icon -->

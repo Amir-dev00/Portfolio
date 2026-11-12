@@ -22,6 +22,13 @@
 
   $cvHref = $assetUrl($cvUrl ?? '', 'assets/cv/Amirhossein-Zamanzade-CV.pdf');
   $activeView = $viewName ?? 'home';
+  $localePrefix = (($locale ?? 'en') === 'fa') ? '/fa' : '';
+  $navPaths = [
+      'home' => $localePrefix !== '' ? $localePrefix : '/',
+      'work' => $localePrefix.'/work',
+      'about' => $localePrefix.'/about',
+      'contact' => $localePrefix.'/contact',
+  ];
 
   $social = array_merge([
       'email' => 'itsamirzamani@gmail.com',

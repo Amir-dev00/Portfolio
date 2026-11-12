@@ -1,5 +1,6 @@
 /* SPA router — Home / Work / About / Contact. Dock stays mounted.
-   Supports hash URLs (static) and Laravel path URLs (/work, /fa/work, …). */
+   Laravel mode: clean path URLs (/, /work, /fa/work/{slug}, …) with no route fragments.
+   Static mode: hash URLs (#home, #work, …) for hosts without path rewrites. */
 (function () {
   "use strict";
 
@@ -39,7 +40,7 @@
 
   function pathForRoute(route, lang) {
     var prefix = localePrefix(lang);
-    if (route.name === "home") return prefix || "/";
+    if (!route || !route.name || route.name === "home") return prefix || "/";
     if (route.name === "project") {
       return prefix + "/work/" + encodeURIComponent(route.slug || "");
     }
@@ -52,23 +53,35 @@
     return "#" + route.name;
   }
 
-  function normalizePathname(pathname) {
-    var path = String(pathname || "/").replace(/\/+$/, "") || "/";
-    var fa = false;
-    if (path === "/fa") return { name: "home" };
-    if (path.indexOf("/fa/") === 0) {
-      fa = true;
-      path = path.slice(3) || "/";
+  /** Parse a portfolio SPA path, or null when the URL is not one of our public pages. */
+  function parsePortfolioPath(pathname) {
+    var raw = String(pathname || "/");
+    if (raw.length > 1) raw = raw.replace(/\/+$/, "");
+    if (raw === "/fa") return { name: "home" };
+    if (raw.indexOf("/fa/") === 0) {
+      raw = raw.slice(3) || "/";
+      if (raw.length > 1) raw = raw.replace(/\/+$/, "");
     }
-    if (path === "/" || path === "") return { name: "home" };
-    if (path === "/work") return { name: "work" };
-    if (path === "/about") return { name: "about" };
-    if (path === "/contact") return { name: "contact" };
-    var match = path.match(/^\/work\/([^/]+)$/);
+    if (raw === "/" || raw === "") return { name: "home" };
+    if (raw === "/work") return { name: "work" };
+    if (raw === "/about") return { name: "about" };
+    if (raw === "/contact") return { name: "contact" };
+    var match = raw.match(/^\/work\/([^/]+)$/);
     if (match) {
       return { name: "project", slug: decodeURIComponent(match[1]) };
     }
-    return fa ? { name: "home" } : { name: "home" };
+    return null;
+  }
+
+  function normalizePathname(pathname) {
+    return parsePortfolioPath(pathname) || { name: "home" };
+  }
+
+  function isPortfolioHash(raw) {
+    var hash = String(raw || "").replace(/^#/, "").replace(/^\/+/, "");
+    if (!hash || hash === "selected-work" || hash === "/") return true;
+    if (hash === "home" || hash === "work" || hash === "about" || hash === "contact") return true;
+    return hash.indexOf("work/") === 0;
   }
 
   var views = {
@@ -378,7 +391,9 @@
   }
 
   function spotlightHtml(project) {
-    var href = "#work/" + encodeURIComponent(project.slug);
+    var href = serverRouted
+      ? pathForRoute({ name: "project", slug: project.slug })
+      : "#work/" + encodeURIComponent(project.slug);
     return (
       '<a class="az-work-spotlight__cover" href="' +
       href +
@@ -661,7 +676,9 @@
     if (!project) {
       projectRoot.innerHTML =
         '<div class="az-panel">' +
-        '<a class="az-project__back" href="#work">' +
+        '<a class="az-project__back" href="' +
+        (serverRouted ? pathForRoute({ name: "work" }) : "#work") +
+        '">' +
         escapeHtml(tt("project.back")) +
         "</a>" +
         '<h1 class="az-panel__title">' +
@@ -697,7 +714,9 @@
       .join("");
     projectRoot.innerHTML =
       '<article class="az-panel az-project">' +
-      '<a class="az-project__back" href="#work">' +
+      '<a class="az-project__back" href="' +
+      (serverRouted ? pathForRoute({ name: "work" }) : "#work") +
+      '">' +
       escapeHtml(tt("project.back")) +
       "</a>" +
       '<p class="az-panel__eyebrow">' +
@@ -838,11 +857,17 @@
   }
 
   function resolveRouteFromLocation() {
+    if (serverRouted) {
+      // Pathname is authoritative; portfolio hashes are normalized away on boot.
+      var pathRoute = parsePortfolioPath(window.location.pathname);
+      if (pathRoute) return pathRoute;
+      if (window.location.hash && isPortfolioHash(window.location.hash)) {
+        return normalizeHash(window.location.hash);
+      }
+      return { name: "home" };
+    }
     if (window.location.hash && window.location.hash !== "#") {
       return normalizeHash(window.location.hash);
-    }
-    if (serverRouted) {
-      return normalizePathname(window.location.pathname);
     }
     return { name: "home" };
   }
@@ -851,15 +876,61 @@
     showView(resolveRouteFromLocation(), instant);
   }
 
+  /** Rewrite dock / brand hrefs after language switches so middle-click stays correct. */
+  function syncNavHrefs(lang) {
+    var prefix = localePrefix(lang);
+    var paths = {
+      home: prefix || "/",
+      work: prefix + "/work",
+      about: prefix + "/about",
+      contact: prefix + "/contact",
+    };
+    document.querySelectorAll("a[data-nav]").forEach(function (link) {
+      var key = link.getAttribute("data-nav");
+      if (paths[key]) link.setAttribute("href", paths[key]);
+    });
+    document.querySelectorAll("a.az-brand-logo").forEach(function (link) {
+      link.setAttribute("href", paths.home);
+    });
+  }
+
+  /**
+   * Convert legacy /#contact, /work#work, /fa#about into clean paths.
+   * Keeps query params; drops portfolio route fragments only.
+   */
+  function canonicalizeLegacyUrl() {
+    if (!serverRouted) return resolveRouteFromLocation();
+    var query = window.location.search || "";
+    var hash = window.location.hash || "";
+    var route = null;
+    if (hash && hash !== "#" && isPortfolioHash(hash)) {
+      route = normalizeHash(hash);
+    } else {
+      route = parsePortfolioPath(window.location.pathname) || { name: "home" };
+    }
+    var clean = pathForRoute(route) + query;
+    var currentClean = window.location.pathname + (window.location.search || "");
+    if (currentClean !== clean || (hash && hash !== "#")) {
+      history.replaceState({ az: true }, "", clean);
+    }
+    return route;
+  }
+
   function navigateClient(route, replace) {
-    var nextHash = hashForRoute(route);
     if (serverRouted) {
-      var nextUrl = pathForRoute(route) + nextHash;
-      if (replace) history.replaceState({ az: true }, "", nextUrl);
-      else history.pushState({ az: true }, "", nextUrl);
+      var nextUrl = pathForRoute(route);
+      var current = window.location.pathname.replace(/\/+$/, "") || "/";
+      var nextNorm = nextUrl.replace(/\/+$/, "") || "/";
+      if (replace || current !== nextNorm || window.location.hash) {
+        if (replace) history.replaceState({ az: true }, "", nextUrl);
+        else if (current !== nextNorm || window.location.hash) {
+          history.pushState({ az: true }, "", nextUrl);
+        }
+      }
       showView(route, false);
       return;
     }
+    var nextHash = hashForRoute(route);
     if (window.location.hash === nextHash) {
       showView(route, false);
       return;
@@ -867,22 +938,53 @@
     window.location.hash = nextHash;
   }
 
+  function routeFromHref(href) {
+    var raw = String(href || "").trim();
+    if (!raw || raw.indexOf("mailto:") === 0 || raw.indexOf("tel:") === 0) return null;
+    if (raw.charAt(0) === "#") {
+      return isPortfolioHash(raw) ? normalizeHash(raw) : null;
+    }
+    try {
+      var url = new URL(raw, window.location.origin);
+      if (url.origin !== window.location.origin) return null;
+      if (url.hash && isPortfolioHash(url.hash)) {
+        // Legacy path+hash: /#contact, /work#about, /fa#work/slug
+        return normalizeHash(url.hash);
+      }
+      return parsePortfolioPath(url.pathname);
+    } catch (err) {
+      return null;
+    }
+  }
+
   function onNavClick(event) {
-    var link = event.target.closest("a[data-nav], a[href^='#']");
+    if (event.defaultPrevented) return;
+    if (event.button != null && event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    var link = event.target.closest("a[href]");
     if (!link || link.hasAttribute("download")) return;
+    if (link.target && link.target !== "" && link.target !== "_self") return;
     var href = link.getAttribute("href") || "";
-    if (href.indexOf("mailto:") === 0 || href.indexOf("http") === 0) return;
-    if (href.charAt(0) !== "#") return;
+    var route = routeFromHref(href);
+    if (!route) return;
     event.preventDefault();
-    navigateClient(normalizeHash(href), false);
+    navigateClient(route, false);
   }
 
   document.addEventListener("click", onNavClick);
   window.addEventListener("hashchange", function () {
+    if (serverRouted) {
+      canonicalizeLegacyUrl();
+    }
     applyFromLocation(false);
   });
   window.addEventListener("popstate", function () {
-    if (serverRouted) applyFromLocation(false);
+    if (serverRouted) {
+      canonicalizeLegacyUrl();
+      applyFromLocation(false);
+      return;
+    }
+    applyFromLocation(false);
   });
   window.addEventListener("resize", function () {
     setDockActive(resolveRouteFromLocation());
@@ -891,19 +993,16 @@
     refreshLocalizedUi();
     if (serverRouted) {
       var route = resolveRouteFromLocation();
-      history.replaceState({ az: true }, "", pathForRoute(route) + hashForRoute(route));
+      history.replaceState({ az: true }, "", pathForRoute(route));
+      syncNavHrefs(currentLang());
     }
   });
 
-  // Keep path intact on Laravel; only ensure a hash fragment for the SPA shell.
-  if (!window.location.hash || window.location.hash === "#") {
-    var bootRoute = resolveRouteFromLocation();
-    var ensured = hashForRoute(bootRoute);
-    if (serverRouted) {
-      history.replaceState({ az: true }, "", pathForRoute(bootRoute) + ensured);
-    } else {
-      history.replaceState(null, "", ensured);
-    }
+  if (serverRouted) {
+    canonicalizeLegacyUrl();
+    syncNavHrefs(currentLang());
+  } else if (!window.location.hash || window.location.hash === "#") {
+    history.replaceState(null, "", hashForRoute(resolveRouteFromLocation()));
   }
 
   document.documentElement.classList.add("az-app-ready");
