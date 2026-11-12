@@ -19,6 +19,11 @@
     slots: [],
     inerted: [],
     timeline: null,
+    monthToken: 0,
+    slotsToken: 0,
+    bootstrapPromise: null,
+    bootstrapKey: "",
+    prefetchBound: false,
   };
 
   var ICONS = {
@@ -60,6 +65,11 @@
 
   function digits(v) {
     return window.AZ_jalali ? window.AZ_jalali.digits(v, lang()) : String(v);
+  }
+
+  function resolveApi(trigger) {
+    var el = trigger || document.querySelector(TRIGGER);
+    return ((el && el.getAttribute("data-booking-api")) || state.api || "/api/booking").replace(/\/$/, "");
   }
 
   function api(path, opts) {
@@ -170,11 +180,32 @@
     }
   }
 
+  function renderCalendarSkeleton(stage) {
+    var weekdays = lang() === "fa"
+      ? ["ش", "ی", "د", "س", "چ", "پ", "ج"]
+      : ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+    var cells = "";
+    var i;
+    for (i = 0; i < 35; i++) {
+      cells += '<span class="az-booking__day is-skeleton" aria-hidden="true"><span></span></span>';
+    }
+    stage.innerHTML =
+      '<div class="az-booking__cal-nav">' +
+      '  <span class="az-booking__icon-btn is-ghost" aria-hidden="true">' + ICONS.chevL + "</span>" +
+      '  <h3 class="az-booking__month az-booking__month--pulse" data-i18n="booking.loading"></h3>' +
+      '  <span class="az-booking__icon-btn is-ghost" aria-hidden="true">' + ICONS.chevR + "</span>" +
+      "</div>" +
+      '<div class="az-booking__weekdays">' +
+      weekdays.map(function (w) { return "<span>" + escapeHtml(w) + "</span>"; }).join("") +
+      "</div>" +
+      '<div class="az-booking__grid" aria-busy="true">' + cells + "</div>";
+    applyI18n(stage);
+  }
+
   function renderCalendar(stage) {
     var data = state.monthData;
     if (!data) {
-      stage.innerHTML = '<p class="az-booking__loading" data-i18n="booking.loading"></p>';
-      applyI18n(stage);
+      renderCalendarSkeleton(stage);
       return;
     }
     var startPad = ((data.days[0] && data.days[0].weekday) - (data.week_starts_on || 0) + 7) % 7;
@@ -222,7 +253,14 @@
     stage.querySelectorAll(".az-booking__day[data-date]:not([disabled])").forEach(function (btn) {
       btn.addEventListener("click", function () {
         state.selectedDate = btn.getAttribute("data-date");
-        loadSlots().then(function () { setStep("time"); });
+        var token = ++state.slotsToken;
+        var stageEl = state.root.querySelector(".az-booking__stage");
+        stageEl.innerHTML = '<p class="az-booking__loading" data-i18n="booking.loading"></p>';
+        applyI18n(stageEl);
+        loadSlots().then(function () {
+          if (token !== state.slotsToken || !state.open) return;
+          setStep("time");
+        });
       });
     });
   }
@@ -302,6 +340,21 @@
     applyI18n(stage);
   }
 
+  function showBootstrapError(stage, trigger, err) {
+    var key = err && err.code === "disabled" ? "booking.disabled" : "booking.error.body";
+    stage.innerHTML =
+      '<div class="az-booking__notice"><h3 data-i18n="booking.setup.title"></h3><p data-i18n="' +
+      key +
+      '"></p>' +
+      (trigger && trigger.getAttribute("data-booking-email")
+        ? '<a class="az-contact-pill az-contact-pill_primary" href="mailto:' +
+          escapeAttr(trigger.getAttribute("data-booking-email")) +
+          '"><span data-i18n="booking.emailInstead"></span></a>'
+        : "") +
+      "</div>";
+    applyI18n(stage);
+  }
+
   function onSubmit(event) {
     event.preventDefault();
     var form = event.currentTarget;
@@ -350,10 +403,53 @@
     }
     state.year = y;
     state.month = m;
-    loadMonth().then(function () { setStep("date"); });
+    var token = ++state.monthToken;
+    var stage = state.root.querySelector(".az-booking__stage");
+    renderCalendarSkeleton(stage);
+    loadMonth().then(function () {
+      if (token !== state.monthToken || !state.open) return;
+      setStep("date");
+    }).catch(function (err) {
+      if (token !== state.monthToken || !state.open) return;
+      showBootstrapError(stage, state.trigger, err);
+    });
+  }
+
+  function applyBootstrapPayload(data) {
+    if (!data || !data.config) throw new Error("Invalid bootstrap");
+    state.config = data.config;
+    state.calendar = data.config.calendar || (lang() === "fa" ? "jalali" : "gregorian");
+    if (!data.config.enabled) {
+      throw Object.assign(new Error("Booking is disabled"), { code: "disabled" });
+    }
+    if (data.month) {
+      state.monthData = data.month;
+      state.year = data.month.year;
+      state.month = data.month.month;
+      state.calendar = data.month.calendar || state.calendar;
+    }
+  }
+
+  function fetchBootstrap(force) {
+    state.api = resolveApi(state.trigger);
+    var key = state.api + "|" + lang();
+    if (!force && state.bootstrapPromise && state.bootstrapKey === key) {
+      return state.bootstrapPromise;
+    }
+    state.bootstrapKey = key;
+    state.bootstrapPromise = api("/bootstrap?locale=" + encodeURIComponent(lang()))
+      .then(function (data) {
+        return data;
+      })
+      .catch(function (err) {
+        if (state.bootstrapKey === key) state.bootstrapPromise = null;
+        throw err;
+      });
+    return state.bootstrapPromise;
   }
 
   function loadMonth() {
+    var token = state.monthToken;
     var q =
       "?year=" +
       encodeURIComponent(state.year) +
@@ -364,29 +460,19 @@
       "&locale=" +
       encodeURIComponent(lang());
     return api("/month" + q).then(function (data) {
+      if (token !== state.monthToken) return;
       state.monthData = data;
+      state.year = data.year;
+      state.month = data.month;
     });
   }
 
   function loadSlots() {
+    var token = state.slotsToken;
     return api("/slots?date=" + encodeURIComponent(state.selectedDate) + "&tz=" + encodeURIComponent(visitorTz())).then(function (data) {
+      if (token !== state.slotsToken) return;
       state.slots = data.slots || [];
       state.selectedSlot = null;
-    });
-  }
-
-  function loadConfig(trigger) {
-    return api("/config?locale=" + encodeURIComponent(lang())).then(function (cfg) {
-      state.config = cfg;
-      state.calendar = cfg.calendar || (lang() === "fa" ? "jalali" : "gregorian");
-      var parts = window.AZ_jalali
-        ? window.AZ_jalali.todayParts(state.calendar)
-        : { year: new Date().getFullYear(), month: new Date().getMonth() + 1 };
-      state.year = parts.year;
-      state.month = parts.month;
-      if (!cfg.enabled) {
-        throw Object.assign(new Error("Booking is disabled"), { code: "disabled" });
-      }
     });
   }
 
@@ -426,54 +512,50 @@
     window.gsap.set(dialog, { opacity: 0, y: 24, scale: 0.96 });
     state.timeline = window.gsap.timeline();
     state.timeline
-      .to(shade, { opacity: 1, duration: 0.35, ease: "power2.out" }, 0)
-      .to(blur, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.05)
-      .to(dialog, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out" }, 0.08);
+      .to(shade, { opacity: 1, duration: 0.22, ease: "power2.out" }, 0)
+      .to(blur, { opacity: 1, duration: 0.26, ease: "power2.out" }, 0.02)
+      .to(dialog, { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "power3.out" }, 0.04);
     state.root.classList.add("is-open");
   }
 
   function animateStage(stage) {
     if (reducedMotion() || !window.gsap) return;
-    window.gsap.fromTo(stage, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.28, ease: "power2.out" });
+    window.gsap.fromTo(stage, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" });
   }
 
   function open(trigger) {
     if (state.open) return;
     ensureRoot();
-    state.api = (trigger.getAttribute("data-booking-api") || "/api/booking").replace(/\/$/, "");
+    state.api = resolveApi(trigger);
     state.open = true;
     state.step = "date";
     state.selectedDate = null;
     state.selectedSlot = null;
     state.confirmed = null;
+    state.monthToken += 1;
+    var openToken = state.monthToken;
     trigger.setAttribute("aria-expanded", "true");
     state.trigger = trigger;
     lockPage(true);
     renderAside(trigger);
     renderSteps();
     var stage = state.root.querySelector(".az-booking__stage");
-    stage.innerHTML = '<p class="az-booking__loading" data-i18n="booking.loading"></p>';
-    applyI18n(stage);
+    renderCalendarSkeleton(stage);
     animateIn();
-    loadConfig(trigger)
-      .then(function () { return loadMonth(); })
-      .then(function () { setStep("date"); })
-      .catch(function (err) {
-        var key = err && err.code === "disabled" ? "booking.disabled" : "booking.error.body";
-        stage.innerHTML =
-          '<div class="az-booking__notice"><h3 data-i18n="booking.setup.title"></h3><p data-i18n="' +
-          key +
-          '"></p>' +
-          (trigger.getAttribute("data-booking-email")
-            ? '<a class="az-contact-pill az-contact-pill_primary" href="mailto:' +
-              escapeAttr(trigger.getAttribute("data-booking-email")) +
-              '"><span data-i18n="booking.emailInstead"></span></a>'
-            : "") +
-          "</div>";
-        applyI18n(stage);
-      });
     document.addEventListener("keydown", onKey);
     if (window.AZ_i18n && window.AZ_i18n.apply) window.AZ_i18n.apply(state.root);
+
+    fetchBootstrap(false)
+      .then(function (data) {
+        if (!state.open || openToken !== state.monthToken) return;
+        applyBootstrapPayload(data);
+        renderAside(trigger);
+        setStep("date");
+      })
+      .catch(function (err) {
+        if (!state.open || openToken !== state.monthToken) return;
+        showBootstrapError(stage, trigger, err);
+      });
   }
 
   function close() {
@@ -495,13 +577,13 @@
       opacity: 0,
       y: 16,
       scale: 0.97,
-      duration: 0.25,
+      duration: 0.2,
       ease: "power2.in",
       onComplete: done,
     });
     window.gsap.to([state.root.querySelector(".az-booking__shade"), state.root.querySelector(".az-booking__blur")], {
       opacity: 0,
-      duration: 0.25,
+      duration: 0.2,
     });
   }
 
@@ -527,6 +609,49 @@
     return escapeHtml(s);
   }
 
+  function schedulePrefetch() {
+    var run = function () {
+      var trigger = document.querySelector(TRIGGER);
+      if (!trigger) return;
+      state.api = resolveApi(trigger);
+      fetchBootstrap(false).catch(function () {});
+    };
+    var kick = function () {
+      if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: 1800 });
+      else window.setTimeout(run, 400);
+    };
+    var maybeKick = function () {
+      var contact = document.getElementById("view-contact");
+      var onContact =
+        document.documentElement.getAttribute("data-az-route") === "contact" ||
+        (contact && contact.classList.contains("is-active"));
+      if (onContact) kick();
+    };
+
+    if (!state.prefetchBound) {
+      state.prefetchBound = true;
+      window.addEventListener("hashchange", maybeKick);
+      window.addEventListener("popstate", maybeKick);
+      if ("MutationObserver" in window) {
+        var mo = new MutationObserver(maybeKick);
+        mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-az-route"] });
+      }
+      var contact = document.getElementById("view-contact");
+      if (contact && "IntersectionObserver" in window) {
+        var io = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) kick();
+            });
+          },
+          { root: null, threshold: 0.12 }
+        );
+        io.observe(contact);
+      }
+    }
+    maybeKick();
+  }
+
   function bind() {
     document.querySelectorAll(TRIGGER).forEach(function (btn) {
       if (btn.dataset.azBookingBound === "1") return;
@@ -536,23 +661,34 @@
         open(btn);
       });
     });
+    schedulePrefetch();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
   else bind();
 
   window.addEventListener("az:langchange", function () {
+    state.bootstrapPromise = null;
+    state.bootstrapKey = "";
     if (state.open && state.step === "date") {
-      state.calendar = lang() === "fa" ? "jalali" : "gregorian";
-      var parts = window.AZ_jalali ? window.AZ_jalali.todayParts(state.calendar) : { year: state.year, month: state.month };
-      state.year = parts.year;
-      state.month = parts.month;
-      loadMonth().then(function () {
-        renderAside(state.trigger);
-        setStep("date");
-      });
+      var token = ++state.monthToken;
+      var stage = state.root.querySelector(".az-booking__stage");
+      renderCalendarSkeleton(stage);
+      fetchBootstrap(true)
+        .then(function (data) {
+          if (!state.open || token !== state.monthToken) return;
+          applyBootstrapPayload(data);
+          renderAside(state.trigger);
+          setStep("date");
+        })
+        .catch(function (err) {
+          if (!state.open || token !== state.monthToken) return;
+          showBootstrapError(stage, state.trigger, err);
+        });
+    } else {
+      schedulePrefetch();
     }
   });
 
-  window.AZ_booking = { open: open, close: close, bind: bind };
+  window.AZ_booking = { open: open, close: close, bind: bind, prefetch: fetchBootstrap };
 })();

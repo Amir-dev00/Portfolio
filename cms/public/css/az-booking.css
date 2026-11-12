@@ -379,6 +379,48 @@ html.az-booking-open body {
   line-height: 1.55;
 }
 
+.az-booking__day.is-skeleton {
+  pointer-events: none;
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.az-booking__day.is-skeleton span {
+  display: block;
+  width: 42%;
+  height: 0.55em;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: rgba(244, 241, 234, 0.18);
+}
+
+.az-booking__month--pulse,
+.az-booking__day.is-skeleton span {
+  animation: az-booking-pulse 1.1s ease-in-out infinite;
+}
+
+.az-booking__icon-btn.is-ghost {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+@keyframes az-booking-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .az-booking__month--pulse,
+  .az-booking__day.is-skeleton span {
+    animation: none;
+  }
+}
+
 .az-booking__actions {
   display: flex;
   justify-content: flex-end;

@@ -24,27 +24,17 @@ class BookingController extends Controller
 
     public function config(Request $request): JsonResponse
     {
-        $settings = BookingSettings::get();
         $locale = $request->query('locale') === 'fa' ? 'fa' : 'en';
-        $profile = (array) (\App\Models\SiteSetting::query()->where('key', 'profile')->value('value') ?? []);
-        $social = (array) (\App\Models\SiteSetting::query()->where('key', 'social')->value('value') ?? []);
 
-        return response()->json([
-            'enabled' => (bool) ($settings['enabled'] ?? true),
-            'duration' => (int) $settings['duration'],
-            'timezone' => $settings['timezone'],
-            'max_days' => (int) $settings['max_days'],
-            'min_notice' => (int) $settings['min_notice'],
-            'calendar' => $locale === 'fa' ? 'jalali' : 'gregorian',
-            'profile' => [
-                'name' => $locale === 'fa'
-                    ? ($profile['name_fa'] ?? $profile['name'] ?? 'امیرحسین زمان زاده')
-                    : ($profile['name'] ?? 'Amirhossein Zamanzade'),
-                'photo' => $profile['photo'] ?? asset('assets/img/amir/profile.jpg'),
-                'email' => $social['email'] ?? null,
-            ],
-            'now' => CarbonImmutable::now('UTC')->toIso8601String(),
-        ]);
+        return response()->json($this->availability->bootstrap($locale)['config']);
+    }
+
+    /** Config + initial month in one round-trip for first paint. */
+    public function bootstrap(Request $request): JsonResponse
+    {
+        $locale = $request->query('locale') === 'fa' ? 'fa' : 'en';
+
+        return response()->json($this->availability->bootstrap($locale));
     }
 
     public function month(Request $request): JsonResponse

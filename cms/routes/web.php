@@ -19,6 +19,7 @@ Route::get('/robots.txt', [PublicSiteController::class, 'robots'])->name('robots
 
 /* Self-hosted Book a Call API (no Cal.com / Calendly). */
 Route::prefix('api/booking')->name('api.booking.')->group(function () {
+    Route::get('/bootstrap', [PublicBookingController::class, 'bootstrap'])->middleware('throttle:60,1')->name('bootstrap');
     Route::get('/config', [PublicBookingController::class, 'config'])->name('config');
     Route::get('/month', [PublicBookingController::class, 'month'])->middleware('throttle:60,1')->name('month');
     Route::get('/slots', [PublicBookingController::class, 'slots'])->middleware('throttle:60,1')->name('slots');

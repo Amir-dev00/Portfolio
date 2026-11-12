@@ -23,15 +23,59 @@ final class AvailabilityService
     }
 
     /**
+     * Public bootstrap payload: config + initial month for the booking timezone.
+     *
+     * @return array{config:array,month:array}
+     */
+    public function bootstrap(string $locale = 'en'): array
+    {
+        $locale = $locale === 'fa' ? 'fa' : 'en';
+        $settings = $this->settings();
+        $tz = $settings['timezone'] ?: 'Asia/Tehran';
+        $calendar = $locale === 'fa' ? 'jalali' : 'gregorian';
+        $now = CarbonImmutable::now($tz);
+
+        if ($calendar === 'jalali') {
+            [$year, $month] = Jalali::toJalali($now->year, $now->month, $now->day);
+        } else {
+            $year = $now->year;
+            $month = $now->month;
+        }
+
+        $profile = (array) (\App\Models\SiteSetting::query()->where('key', 'profile')->value('value') ?? []);
+        $social = (array) (\App\Models\SiteSetting::query()->where('key', 'social')->value('value') ?? []);
+
+        return [
+            'config' => [
+                'enabled' => (bool) ($settings['enabled'] ?? true),
+                'duration' => (int) $settings['duration'],
+                'timezone' => $tz,
+                'max_days' => (int) $settings['max_days'],
+                'min_notice' => (int) $settings['min_notice'],
+                'calendar' => $calendar,
+                'profile' => [
+                    'name' => $locale === 'fa'
+                        ? ($profile['name_fa'] ?? $profile['name'] ?? 'امیرحسین زمان زاده')
+                        : ($profile['name'] ?? 'Amirhossein Zamanzade'),
+                    'photo' => $profile['photo'] ?? asset('assets/img/amir/profile.jpg'),
+                    'email' => $social['email'] ?? null,
+                ],
+                'now' => CarbonImmutable::now('UTC')->toIso8601String(),
+            ],
+            'month' => $this->monthGrid((int) $year, (int) $month, $calendar, $locale, $settings),
+        ];
+    }
+
+    /**
      * Month availability for the public calendar.
      *
      * @return array{year:int,month:int,calendar:string,days:array<int,array>,weekdays:array,month_label:string}
      */
-    public function monthGrid(int $year, int $month, string $calendar = 'gregorian', string $locale = 'en'): array
+    public function monthGrid(int $year, int $month, string $calendar = 'gregorian', string $locale = 'en', ?array $settings = null): array
     {
         $calendar = $calendar === 'jalali' ? 'jalali' : 'gregorian';
-        $settings = $this->settings();
-        $tz = $this->ownerTz();
+        $settings ??= $this->settings();
+        $tz = $settings['timezone'] ?: 'Asia/Tehran';
 
         if ($calendar === 'jalali') {
             [$gy, $gm, $gd] = Jalali::toGregorian($year, $month, 1);
@@ -50,6 +94,8 @@ final class AvailabilityService
         }
 
         $rules = AvailabilityRule::query()->where('is_active', true)->orderBy('sort_order')->get()->groupBy('weekday');
+        $busy = $this->busyIntervalsForRange($start, $end, $settings);
+
         $days = [];
         for ($d = 1; $d <= $daysInMonth; $d++) {
             if ($calendar === 'jalali') {
@@ -59,11 +105,11 @@ final class AvailabilityService
                 $day = CarbonImmutable::create($year, $month, $d, 12, 0, 0, $tz);
             }
             $iso = $day->toDateString();
-            $slots = $this->slotsForDate($iso, $settings, $rules);
+            $available = $this->dayHasOpenSlot($iso, $settings, $rules, $busy);
             $days[] = [
                 'day' => $d,
                 'date' => $iso,
-                'available' => count($slots) > 0,
+                'available' => $available,
                 'weekday' => (int) $day->format('w'),
                 'label' => Jalali::digits((string) $d, $locale),
             ];
@@ -94,9 +140,12 @@ final class AvailabilityService
         if (! ($settings['enabled'] ?? true)) {
             return [];
         }
+        $tz = $settings['timezone'] ?: 'Asia/Tehran';
+        $day = CarbonImmutable::createFromFormat('Y-m-d', $dateYmd, $tz)->startOfDay();
         $rules = AvailabilityRule::query()->where('is_active', true)->orderBy('sort_order')->get()->groupBy('weekday');
-        $slots = $this->slotsForDate($dateYmd, $settings, $rules);
-        $displayTz = $visitorTz ?: $this->ownerTz();
+        $busy = $this->busyIntervalsForRange($day, $day->endOfDay(), $settings);
+        $slots = $this->slotsForDate($dateYmd, $settings, $rules, $busy);
+        $displayTz = $visitorTz ?: $tz;
 
         return array_map(function (array $slot) use ($displayTz) {
             $start = CarbonImmutable::parse($slot['start_utc'])->timezone($displayTz);
@@ -115,11 +164,13 @@ final class AvailabilityService
     public function isSlotOpen(CarbonImmutable $startsAtUtc, CarbonImmutable $endsAtUtc, ?int $ignoreBookingId = null): bool
     {
         $settings = $this->settings();
-        $tz = $this->ownerTz();
+        $tz = $settings['timezone'] ?: 'Asia/Tehran';
         $localStart = $startsAtUtc->timezone($tz);
         $date = $localStart->toDateString();
+        $day = CarbonImmutable::createFromFormat('Y-m-d', $date, $tz)->startOfDay();
         $rules = AvailabilityRule::query()->where('is_active', true)->orderBy('sort_order')->get()->groupBy('weekday');
-        $open = $this->slotsForDate($date, $settings, $rules, $ignoreBookingId);
+        $busy = $this->busyIntervalsForRange($day, $day->endOfDay(), $settings, $ignoreBookingId);
+        $open = $this->slotsForDate($date, $settings, $rules, $busy);
 
         foreach ($open as $slot) {
             if ($slot['start_utc'] === $startsAtUtc->utc()->toIso8601String()
@@ -133,10 +184,25 @@ final class AvailabilityService
 
     /**
      * @param  Collection<int,Collection<int,AvailabilityRule>>  $rulesByWeekday
+     * @param  list<array{0:CarbonImmutable,1:CarbonImmutable}>  $busy
+     */
+    protected function dayHasOpenSlot(string $dateYmd, array $settings, Collection $rulesByWeekday, array $busy): bool
+    {
+        return $this->slotsForDate($dateYmd, $settings, $rulesByWeekday, $busy, true) !== [];
+    }
+
+    /**
+     * @param  Collection<int,Collection<int,AvailabilityRule>>  $rulesByWeekday
+     * @param  list<array{0:CarbonImmutable,1:CarbonImmutable}>  $busy
      * @return list<array{start_utc:string,end_utc:string}>
      */
-    protected function slotsForDate(string $dateYmd, array $settings, Collection $rulesByWeekday, ?int $ignoreBookingId = null): array
-    {
+    protected function slotsForDate(
+        string $dateYmd,
+        array $settings,
+        Collection $rulesByWeekday,
+        array $busy,
+        bool $stopAtFirst = false,
+    ): array {
         $tz = $settings['timezone'] ?: 'Asia/Tehran';
         $day = CarbonImmutable::createFromFormat('Y-m-d', $dateYmd, $tz)->startOfDay();
         $now = CarbonImmutable::now('UTC');
@@ -157,7 +223,6 @@ final class AvailabilityService
         $duration = (int) $settings['duration'];
         $buffer = (int) $settings['buffer'];
         $interval = (int) $settings['slot_interval'];
-        $busy = $this->busyIntervals($day, $ignoreBookingId);
 
         $slots = [];
         foreach ($windows as $window) {
@@ -181,6 +246,9 @@ final class AvailabilityService
                     'start_utc' => $startUtc->toIso8601String(),
                     'end_utc' => $endUtc->toIso8601String(),
                 ];
+                if ($stopAtFirst) {
+                    return $slots;
+                }
             }
         }
 
@@ -188,14 +256,18 @@ final class AvailabilityService
     }
 
     /**
+     * Load bookings + blocked ranges once for an owner-local date span.
+     *
      * @return list<array{0:CarbonImmutable,1:CarbonImmutable}>
      */
-    protected function busyIntervals(CarbonImmutable $dayLocal, ?int $ignoreBookingId = null): array
-    {
-        $tz = $this->ownerTz();
-        $dayStart = $dayLocal->startOfDay()->utc();
-        $dayEnd = $dayLocal->endOfDay()->utc();
-        $settings = $this->settings();
+    protected function busyIntervalsForRange(
+        CarbonImmutable $rangeStartLocal,
+        CarbonImmutable $rangeEndLocal,
+        array $settings,
+        ?int $ignoreBookingId = null,
+    ): array {
+        $dayStart = $rangeStartLocal->startOfDay()->utc();
+        $dayEnd = $rangeEndLocal->endOfDay()->utc();
         $buffer = (int) $settings['buffer'];
 
         $busy = [];
@@ -259,10 +331,7 @@ final class AvailabilityService
             return 30;
         }
 
-        // Esfand: 29 or 30 (leap).
         [, , $gd29] = Jalali::toGregorian($jy, 12, 29);
-        [, , $gd30] = Jalali::toGregorian($jy, 12, 30);
-        // If 30 Esfand maps to a valid next-day progression vs 29, accept 30.
         [$gy29, $gm29] = Jalali::toGregorian($jy, 12, 29);
         [$gy30, $gm30, $d30] = Jalali::toGregorian($jy, 12, 30);
         $a = Carbon::create($gy29, $gm29, $gd29)->addDay();

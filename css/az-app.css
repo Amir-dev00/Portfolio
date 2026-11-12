@@ -696,8 +696,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   line-height: 1;
 }
 
-.az-contact-pill:focus-visible,
-.az-contact-link:focus-visible {
+.az-contact-pill:focus-visible {
   outline: 2px solid #f4f1ea;
   outline-offset: 3px;
 }
@@ -706,21 +705,52 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-inline: -10px;
+  padding-inline: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .az-contact-link {
+  position: relative;
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
   width: 100%;
-  padding: 22px 0;
+  padding: 22px 10px;
+  margin: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
   color: inherit;
   text-decoration: none;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 160ms ease, opacity 160ms ease;
+  touch-action: manipulation;
+}
+
+.az-contact-link::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 4px 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in srgb, #f4f1ea 12%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -6px 12px rgba(255, 255, 255, 0.04);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  backdrop-filter: blur(10px) saturate(1.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.az-contact-link > * {
+  position: relative;
+  z-index: 1;
 }
 
 .az-contact-link__icon {
@@ -729,6 +759,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   width: 28px;
   height: 28px;
   color: rgba(244, 241, 234, 0.72);
+  transition: color 160ms ease;
 }
 
 .az-contact-link__copy {
@@ -747,6 +778,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 160ms ease;
 }
 
 .az-contact-link__copy small {
@@ -754,11 +786,49 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   font-size: 13px;
   font-weight: 500;
   color: rgba(244, 241, 234, 0.48);
+  transition: color 160ms ease;
 }
 
 .az-contact-link__arrow {
   font-size: 15px;
   color: rgba(244, 241, 234, 0.38);
+  transition: color 160ms ease;
+}
+
+.az-contact-link:focus {
+  outline: none;
+}
+
+.az-contact-link:focus-visible {
+  outline: 2px solid #f4f1ea;
+  outline-offset: 2px;
+}
+
+.az-contact-link:focus-visible::before,
+.az-contact-link:active::before {
+  opacity: 1;
+}
+
+.az-contact-link:focus-visible .az-contact-link__icon,
+.az-contact-link:focus-visible .az-contact-link__arrow,
+.az-contact-link:active .az-contact-link__icon,
+.az-contact-link:active .az-contact-link__arrow {
+  color: #fff;
+}
+
+.az-contact-link:focus-visible .az-contact-link__copy strong,
+.az-contact-link:active .az-contact-link__copy strong {
+  color: #fff;
+}
+
+.az-contact-link:focus-visible .az-contact-link__copy small,
+.az-contact-link:active .az-contact-link__copy small {
+  color: rgba(244, 241, 234, 0.78);
+}
+
+.az-contact-link:active::before {
+  background: rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, #f4f1ea 16%, transparent);
 }
 
 .az-contact-note {
@@ -791,12 +861,27 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
     background: rgba(255, 255, 255, 0.05);
   }
 
-  .az-contact-link:hover {
-    opacity: 0.92;
+  .az-contact-link:hover::before {
+    opacity: 1;
   }
 
+  .az-contact-link:hover .az-contact-link__icon,
   .az-contact-link:hover .az-contact-link__arrow {
-    color: rgba(244, 241, 234, 0.72);
+    color: #fff;
+  }
+
+  .az-contact-link:hover .az-contact-link__copy strong {
+    color: #fff;
+  }
+
+  .az-contact-link:hover .az-contact-link__copy small {
+    color: rgba(244, 241, 234, 0.78);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .az-contact-link::before {
+    background: rgba(28, 28, 28, 0.88);
   }
 }
 
@@ -924,7 +1009,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
   .az-contact-link {
     gap: 12px;
-    padding: 18px 0;
+    padding: 18px 10px;
   }
 
   .az-contact-link__copy strong {
@@ -983,7 +1068,12 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   .az-work-wheel__track,
   .az-work-row,
   .az-contact-pill,
-  .az-contact-link {
+  .az-contact-link,
+  .az-contact-link::before,
+  .az-contact-link__icon,
+  .az-contact-link__copy strong,
+  .az-contact-link__copy small,
+  .az-contact-link__arrow {
     transition: none !important;
     animation: none !important;
   }
