@@ -41,6 +41,7 @@
     <!-- Template Main Stylesheet -->
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/main.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/typography.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-tokens.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/navbar-glass.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-preloader.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-profile.css') }}"/>

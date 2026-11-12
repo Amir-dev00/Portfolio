@@ -2,9 +2,6 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --glass-fg: #f4f1ea;
-  --glass-muted: rgba(244, 241, 234, 0.58);
-  --glass-line: rgba(255, 255, 255, 0.22);
 }
 
 /* Keep Rhye's header in the DOM for its scripts, but it is not the visible nav. */
@@ -70,12 +67,11 @@ html.cursor-disabled button {
   overflow: visible;
   pointer-events: auto;
   border-radius: 22px;
-  background: rgba(16, 16, 16, 0.58);
-  background: color-mix(in srgb, #121212 66%, transparent);
-  border: 1px solid var(--glass-line);
+  background: var(--az-glass-translucent);
+  border: 1px solid var(--az-line);
   box-shadow:
-    0 14px 32px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.26);
+    0 14px 32px var(--az-shadow),
+    inset 0 1px 0 color-mix(in srgb, var(--az-text) 18%, transparent);
   -webkit-backdrop-filter: blur(22px) saturate(1.35);
   backdrop-filter: blur(22px) saturate(1.35);
   transform: translateY(16px);
@@ -89,10 +85,10 @@ html.cursor-disabled button {
 }
 
 .glass-nav.is-scrolled .glass-nav__bar {
-  background: rgba(10, 10, 10, 0.82);
+  background: var(--az-glass-translucent-strong);
   box-shadow:
-    0 18px 38px rgba(0, 0, 0, 0.44),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 18px 38px var(--az-shadow),
+    inset 0 1px 0 color-mix(in srgb, var(--az-text) 14%, transparent);
 }
 
 @keyframes glass-nav-in {
@@ -141,15 +137,15 @@ html.cursor-disabled button {
   width: 36px;
   height: 36px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  background: color-mix(in srgb, #f4f1ea 14%, transparent);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  /* Centered translucent ice-blue pill wrapping icon + label. */
+  background: var(--az-accent-soft);
+  border: 1px solid var(--az-line-strong);
   box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.34),
-    inset 0 -6px 12px rgba(255, 255, 255, 0.04);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  backdrop-filter: blur(10px) saturate(1.2);
+    0 6px 16px var(--az-shadow),
+    inset 0 1px 0 color-mix(in srgb, var(--az-accent) 35%, transparent),
+    0 0 18px color-mix(in srgb, var(--az-accent) 18%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.25);
+  backdrop-filter: blur(10px) saturate(1.25);
   pointer-events: none;
   opacity: 0;
   transform: translate3d(0, 0, 0);
@@ -191,8 +187,14 @@ html.cursor-disabled button {
     transform 180ms var(--ease-spring);
 }
 
-.glass-nav__tab.is-active {
-  color: var(--glass-fg);
+.glass-nav__tab.is-active,
+.glass-nav__action.is-active {
+  color: var(--az-text);
+}
+
+.glass-nav__tab.is-active .glass-nav__icon,
+.glass-nav__action.is-active .glass-nav__action-icon {
+  color: var(--az-accent);
 }
 
 .glass-nav__tab:active {
@@ -249,20 +251,19 @@ html.cursor-disabled button {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  background: color-mix(in srgb, #f4f1ea 12%, transparent);
-  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: var(--az-accent-softer);
+  border: 1px solid var(--az-line);
   box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    inset 0 -8px 18px rgba(255, 255, 255, 0.05);
+    0 10px 24px var(--az-shadow),
+    inset 0 1px 0 color-mix(in srgb, var(--az-text) 28%, transparent),
+    inset 0 -8px 18px color-mix(in srgb, var(--az-accent) 8%, transparent);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   backdrop-filter: blur(20px) saturate(1.4);
   transition:
     transform 220ms var(--ease-spring),
     box-shadow 220ms var(--ease-out),
-    background-color 220ms var(--ease-out);
+    background-color 220ms var(--ease-out),
+    border-color 220ms var(--ease-out);
 }
 
 .glass-nav__home-icon {
@@ -278,14 +279,17 @@ html.cursor-disabled button {
 }
 
 .glass-nav__home.is-active .glass-nav__home-glass {
-  background: rgba(255, 255, 255, 0.14);
-  background: color-mix(in srgb, #f4f1ea 16%, transparent);
-  border-color: rgba(255, 255, 255, 0.46);
+  background: var(--az-accent-soft);
+  border-color: var(--az-line-strong);
   box-shadow:
-    0 12px 26px rgba(0, 0, 0, 0.36),
-    0 0 18px rgba(244, 241, 234, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -8px 18px rgba(255, 255, 255, 0.06);
+    0 12px 26px var(--az-shadow),
+    0 0 18px color-mix(in srgb, var(--az-accent) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--az-accent) 40%, transparent),
+    inset 0 -8px 18px color-mix(in srgb, var(--az-accent) 10%, transparent);
+}
+
+.glass-nav__home.is-active {
+  color: var(--az-accent);
 }
 
 .glass-nav__home:active .glass-nav__home-glass {

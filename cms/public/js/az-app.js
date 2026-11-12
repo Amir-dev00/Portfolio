@@ -313,8 +313,9 @@
       var bottom = labelBox ? Math.max(iconBox.bottom, labelBox.bottom) : iconBox.bottom;
       var contentW = right - left;
       var contentH = bottom - top;
-      var padX = Math.max(8, Math.round(contentW * 0.18));
-      var padY = Math.max(7, Math.round(contentH * 0.14));
+      /* Fully wrap icon + label with a centered translucent blue pill. */
+      var padX = Math.max(10, Math.round(contentW * 0.28));
+      var padY = Math.max(8, Math.round(contentH * 0.22));
       ovalW = Math.round(contentW + padX * 2);
       ovalH = Math.round(contentH + padY * 2);
       x = (left + right) / 2 - barBox.left - ovalW / 2;

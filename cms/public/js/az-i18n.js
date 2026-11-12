@@ -34,9 +34,9 @@
       "home.profile.aria": "Amirhossein Zamanzade, Software Engineer",
       "home.profile.name": "Amirhossein Zamanzade",
       "home.profile.role": "Software Engineer",
-      "home.arrows": "Project slides",
-      "home.prev": "Previous project",
-      "home.next": "Next project",
+      "home.arrows": "Background slides",
+      "home.prev": "Previous slide",
+      "home.next": "Next slide",
       "assistant.title": "Ask about Amirhossein",
       "assistant.prompt": "Ask about Amirhossein",
       "assistant.send": "Send question",
@@ -49,10 +49,6 @@
       "assistant.q.stack": "Which technologies does he use?",
       "assistant.error.retry": "Something went wrong. Tap to retry or ask again.",
       "assistant.error.config": "The assistant isn’t configured yet — use Contact or Book a call.",
-      "home.slide.personal-portfolio-website": "Personal Portfolio Website",
-      "home.slide.shopping-mall-desktop": "Shopping Mall Desktop",
-      "home.slide.rest-api-microservice": "REST API Microservice",
-      "home.slide.telegram-automation-bot": "Telegram Automation Bot",
       "work.aria": "Work",
       "work.eyebrow": "Selected work",
       "work.title": "Selected projects.",
@@ -153,19 +149,19 @@
       "title.base": "امیرحسین زمان‌زاده | توسعه‌دهنده",
       "title.work": "کارها — امیرحسین زمان‌زاده | توسعه‌دهنده",
       "title.about": "درباره — امیرحسین زمان‌زاده | توسعه‌دهنده",
-      "title.contact": "تماس — امیرحسین زمان‌زاده | توسعه‌دهنده",
+      "title.contact": "ارتباط — امیرحسین زمان‌زاده | توسعه‌دهنده",
       "title.project": "{name} — امیرحسین زمان‌زاده | توسعه‌دهنده",
       "nav.primary": "ناوبری اصلی",
       "nav.work": "کارها",
       "nav.about": "درباره",
       "nav.home": "خانه",
       "nav.cv": "رزومه",
-      "nav.contact": "تماس",
+      "nav.contact": "ارتباط",
       "nav.tooltip.work": "کارها",
       "nav.tooltip.about": "درباره",
       "nav.tooltip.home": "خانه",
       "nav.tooltip.cv": "دانلود رزومه",
-      "nav.tooltip.contact": "تماس",
+      "nav.tooltip.contact": "ارتباط",
       "nav.aria.cv": "دانلود رزومه",
       "lang.switcher": "زبان",
       "lang.en": "English",
@@ -175,9 +171,9 @@
       "home.profile.aria": "امیرحسین زمان‌زاده، مهندس نرم‌افزار",
       "home.profile.name": "امیرحسین زمان زاده",
       "home.profile.role": "مهندس نرم‌افزار",
-      "home.arrows": "اسلاید پروژه‌ها",
-      "home.prev": "پروژه قبلی",
-      "home.next": "پروژه بعدی",
+      "home.arrows": "اسلاید پس‌زمینه",
+      "home.prev": "اسلاید قبلی",
+      "home.next": "اسلاید بعدی",
       "assistant.title": "دربارهٔ امیرحسین بپرس",
       "assistant.prompt": "دربارهٔ امیرحسین بپرس",
       "assistant.send": "ارسال پرسش",
@@ -190,10 +186,6 @@
       "assistant.q.stack": "از چه تکنولوژی‌هایی استفاده می‌کند؟",
       "assistant.error.retry": "مشکلی پیش آمد. دوباره بپرسید یا بعداً تلاش کنید.",
       "assistant.error.config": "دستیار هنوز پیکربندی نشده — از تماس یا رزرو تماس استفاده کنید.",
-      "home.slide.personal-portfolio-website": "وب‌سایت نمونه‌کار شخصی",
-      "home.slide.shopping-mall-desktop": "اپلیکیشن دسکتاپ مرکز خرید",
-      "home.slide.rest-api-microservice": "میکروسرویس REST API",
-      "home.slide.telegram-automation-bot": "ربات اتوماسیون تلگرام",
       "work.aria": "کارها",
       "work.eyebrow": "کارهای منتخب",
       "work.title": "پروژه‌های منتخب.",
@@ -231,7 +223,7 @@
       "about.skills.languages": "زبان‌های برنامه‌نویسی",
       "about.skills.backend": "بک‌اند و پایگاه داده",
       "about.skills.other": "سایر مهارت‌ها",
-      "contact.aria": "تماس",
+      "contact.aria": "ارتباط",
       "contact.eyebrow": "بیایید در ارتباط باشیم",
       "contact.title": "بیایید همکاری کنیم",
       "contact.intro": "پروژه یا فرصت همکاری در نظر دارید؟ یک تماس رزرو کنید یا ایمیل بزنید.",
@@ -440,169 +432,6 @@
     html.classList.toggle("az-lang-en", current === "en");
   }
 
-  function homeSlideType() {
-    // Persian must stay word/line-based so letters remain joined.
-    return current === "fa" ? "lines, words" : "lines, words, chars";
-  }
-
-  var RTL_LETTER = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
-
-  // SplitText turns each word into an inline-block, which the bidi algorithm treats as a
-  // neutral: inside RTL text "REST API" would render as "API REST". Wrap runs of
-  // consecutive Latin words in one LTR inline-block so they keep their reading order.
-  function isolateLatinRuns(el) {
-    var words = el.querySelectorAll(".split-text__word");
-    var run = [];
-
-    function flush() {
-      if (run.length > 1) {
-        var first = run[0];
-        var last = run[run.length - 1];
-        var wrap = document.createElement("span");
-        wrap.className = "az-ltr-run";
-        wrap.setAttribute("dir", "ltr");
-        wrap.style.display = "inline-block";
-        wrap.style.unicodeBidi = "isolate";
-        first.parentNode.insertBefore(wrap, first);
-        var node = first;
-        while (node) {
-          var next = node.nextSibling;
-          wrap.appendChild(node);
-          if (node === last) break;
-          node = next;
-        }
-      }
-      run = [];
-    }
-
-    Array.prototype.forEach.call(words, function (word) {
-      var latin = /[A-Za-z0-9]/.test(word.textContent) && !RTL_LETTER.test(word.textContent);
-      if (!latin) {
-        flush();
-        return;
-      }
-      if (run.length) {
-        var prev = run[run.length - 1];
-        var between = prev.nextSibling;
-        while (between && between !== word && between.nodeType === 3 && !between.textContent.trim()) {
-          between = between.nextSibling;
-        }
-        if (between !== word) flush();
-      }
-      run.push(word);
-    });
-    flush();
-  }
-
-  function bridgeFaWordsAsChars(el) {
-    if (!el || current !== "fa") return;
-    el.querySelectorAll(".split-text__word").forEach(function (word) {
-      word.classList.add("split-text__char");
-    });
-    isolateLatinRuns(el);
-  }
-
-  function revealSplitHeading(el) {
-    if (!window.gsap || !el) return;
-    var nodes = el.querySelectorAll(".split-text__line, .split-text__word, .split-text__char");
-    if (!nodes.length) return;
-    // Fade swiper already hides inactive slides; keep split units visible so a
-    // mid-transition language switch cannot leave the active title stuck hidden.
-    try {
-      window.gsap.set(nodes, {
-        autoAlpha: 1,
-        x: 0,
-        y: 0,
-        xPercent: 0,
-        yPercent: 0,
-      });
-    } catch (err) {}
-  }
-
-  function resplitHomeHeading(el, title) {
-    if (window.gsap) {
-      try {
-        window.gsap.killTweensOf(
-          el.querySelectorAll(".split-text__line, .split-text__word, .split-text__char")
-        );
-      } catch (err) {}
-    }
-
-    if (el._azSplitText && typeof el._azSplitText.revert === "function") {
-      try {
-        el._azSplitText.revert();
-      } catch (err) {}
-      el._azSplitText = null;
-    }
-
-    el.textContent = title;
-    el.setAttribute("data-split-text-type", homeSlideType());
-    el.setAttribute("data-split-text-set", current === "fa" ? "words" : "chars");
-
-    var SplitText = window.SplitText;
-    if (!SplitText) {
-      el.classList.add("js-split-text");
-      return;
-    }
-
-    var split = new SplitText(el, {
-      type: homeSlideType(),
-      linesClass: "split-text__line overflow",
-      wordsClass: "split-text__word",
-      charsClass: "split-text__char",
-      reduceWhiteSpace: false,
-    });
-    el._azSplitText = split;
-    el.classList.add("split-text");
-    el.classList.remove("js-split-text");
-    bridgeFaWordsAsChars(el);
-    revealSplitHeading(el);
-  }
-
-  function applyHomeHeadings() {
-    var root = document.getElementById("view-home");
-    if (!root) return;
-
-    root.querySelectorAll(".slider__heading[data-project-slug]").forEach(function (el) {
-      var slug = el.getAttribute("data-project-slug");
-      if (!slug) return;
-      var title = t("home.slide." + slug);
-      var type = homeSlideType();
-      el.setAttribute("data-split-text-type", type);
-      el.setAttribute("data-split-text-set", current === "fa" ? "words" : "chars");
-
-      var awaitingRhye =
-        el.classList.contains("js-split-text") &&
-        !el.querySelector(".split-text__word, .split-text__char, .split-text__line");
-
-      if (awaitingRhye) {
-        el.textContent = title;
-        return;
-      }
-
-      resplitHomeHeading(el, title);
-    });
-  }
-
-  function scheduleHomeHeadingBridge() {
-    var tries = 0;
-    var timer = window.setInterval(function () {
-      tries += 1;
-      var headings = document.querySelectorAll(
-        "#view-home .slider__heading[data-project-slug]"
-      );
-      var splitReady = true;
-      headings.forEach(function (el) {
-        var hasSplit = !!el.querySelector(
-          ".split-text__word, .split-text__char, .split-text__line"
-        );
-        if (el.classList.contains("js-split-text") && !hasSplit) splitReady = false;
-        if (hasSplit) bridgeFaWordsAsChars(el);
-      });
-      if (splitReady || tries > 60) window.clearInterval(timer);
-    }, 50);
-  }
-
   function applyNode(el) {
     if (!el || el.nodeType !== 1) return;
     // Preloader stays English-only; never apply translation hooks inside it.
@@ -633,7 +462,6 @@
     var scope = root || document;
     applyDocumentShell();
     scope.querySelectorAll("[data-i18n], [data-i18n-attr]").forEach(applyNode);
-    applyHomeHeadings();
     var meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", t("meta.description"));
     document.querySelectorAll(".az-lang-switch__btn").forEach(function (btn) {
@@ -733,20 +561,10 @@
   mergeBootstrapStrings();
   applyDocumentShell();
 
-  function refreshAfterFonts() {
-    applyHomeHeadings();
-    scheduleHomeHeadingBridge();
-  }
-
   function boot() {
     mergeBootstrapStrings();
     bindSwitcher(document);
     applyAll(document);
-    scheduleHomeHeadingBridge();
-    // Re-measure split-text after Manrope/Estedad swap to avoid layout jump.
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(refreshAfterFonts).catch(function () {});
-    }
   }
 
   if (document.readyState === "loading") {

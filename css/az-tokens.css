@@ -1,0 +1,50 @@
+/* AZ portfolio color system — deep navy + ice blue.
+ * Shared tokens for page chrome, glass, type, and interactive accents.
+ */
+
+:root {
+  --az-bg: #0b1220;
+  --az-glass: #142238;
+  --az-glass-translucent: color-mix(in srgb, #142238 72%, transparent);
+  --az-glass-translucent-strong: color-mix(in srgb, #142238 86%, transparent);
+  --az-text: #f4f7ff;
+  --az-text-secondary: #a8b8cc;
+  --az-accent: #6ee7ff;
+  --az-accent-soft: color-mix(in srgb, #6ee7ff 22%, transparent);
+  --az-accent-softer: color-mix(in srgb, #6ee7ff 14%, transparent);
+  --az-accent-ink: #0b1220;
+  --az-line: color-mix(in srgb, #f4f7ff 18%, transparent);
+  --az-line-strong: color-mix(in srgb, #6ee7ff 42%, transparent);
+  --az-shadow: rgba(3, 8, 18, 0.45);
+  --az-focus-ring: var(--az-accent);
+
+  /* Back-compat aliases used by glass nav / older rules */
+  --glass-fg: var(--az-text);
+  --glass-muted: var(--az-text-secondary);
+  --glass-line: var(--az-line);
+  --glass-surface: var(--az-glass-translucent);
+  --glass-accent: var(--az-accent);
+}
+
+@supports not (background: color-mix(in srgb, #000 50%, transparent)) {
+  :root {
+    --az-glass-translucent: rgba(20, 34, 56, 0.72);
+    --az-glass-translucent-strong: rgba(20, 34, 56, 0.86);
+    --az-accent-soft: rgba(110, 231, 255, 0.22);
+    --az-accent-softer: rgba(110, 231, 255, 0.14);
+    --az-line: rgba(244, 247, 255, 0.18);
+    --az-line-strong: rgba(110, 231, 255, 0.42);
+  }
+}
+
+/* Shell defaults so non-home routes and short pages share the navy ground. */
+html,
+body {
+  background-color: var(--az-bg);
+  color: var(--az-text);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--az-accent) 40%, transparent);
+  color: var(--az-accent-ink);
+}

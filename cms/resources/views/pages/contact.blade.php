@@ -1,5 +1,5 @@
           <!-- CONTACT VIEW -->
-          <section class="az-view {{ ($viewName ?? '') === 'contact' ? 'is-active is-visible' : '' }}" id="view-contact" data-view="contact" aria-label="{{ $strings['contact.aria'] ?? 'Contact' }}" data-i18n-attr="aria-label:contact.aria" @if(($viewName ?? '') !== 'contact') hidden aria-hidden="true" @endif>
+          <section class="az-view {{ ($viewName ?? '') === 'contact' ? 'is-active is-visible' : '' }}" id="view-contact" data-view="contact" aria-label="{{ $strings['nav.contact'] ?? $strings['contact.aria'] ?? ((($locale ?? 'en') === 'fa') ? 'ارتباط' : 'Contact') }}" data-i18n-attr="aria-label:nav.contact" @if(($viewName ?? '') !== 'contact') hidden aria-hidden="true" @endif>
             <div class="az-panel az-panel_contact">
               <p class="az-contact-eyebrow" data-i18n="contact.eyebrow">{{ $strings['contact.eyebrow'] ?? 'Let’s connect' }}</p>
               <h1 class="az-panel__title" data-i18n="contact.title">{{ $strings['contact.title'] ?? ((($locale ?? 'en') === 'fa') ? 'بیایید همکاری کنیم' : 'Let’s work together') }}</h1>
@@ -34,12 +34,12 @@
               </div>
 
               <div class="az-contact-links">
-                <a class="az-contact-link" href="mailto:{{ $social['email'] }}">
+                <a class="az-contact-link az-contact-link_email" href="mailto:{{ $social['email'] }}">
                   <span class="az-contact-link__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
                   </span>
                   <span class="az-contact-link__copy">
-                    <strong class="az-ltr">{{ $social['email'] }}</strong>
+                    <strong class="az-ltr" dir="ltr">{{ $social['email'] }}</strong>
                     <small data-i18n="contact.emailMe">Email me</small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>

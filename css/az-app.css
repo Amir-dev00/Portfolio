@@ -25,7 +25,7 @@ html.az-native-scroll {
    (About) never flash the theme's default white body below #page-wrapper. */
 html[data-az-route]:not([data-az-route="home"]),
 html.az-native-scroll {
-  background-color: #111111;
+  background-color: var(--az-bg, #0b1220);
   min-height: 100%;
 }
 
@@ -34,7 +34,7 @@ html.az-native-scroll body {
   height: auto;
   min-height: 100vh;
   min-height: 100dvh;
-  background-color: #111111;
+  background-color: var(--az-bg, #0b1220);
   overflow-x: hidden;
   overflow-y: visible;
   touch-action: pan-y;
@@ -51,7 +51,7 @@ html.az-native-scroll #page-wrapper.js-smooth-scroll {
   height: auto !important;
   min-height: 100vh;
   min-height: 100dvh;
-  background-color: #111111;
+  background-color: var(--az-bg, #0b1220);
   overflow: visible !important;
 }
 
@@ -144,7 +144,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   padding:
     max(28px, env(safe-area-inset-top)) 0
     calc(110px + env(safe-area-inset-bottom));
-  color: #f4f1ea;
+  color: var(--az-text);
 }
 
 .az-panel__eyebrow {
@@ -164,7 +164,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   font-weight: 650;
   line-height: 1.15;
   letter-spacing: -0.02em;
-  color: #f7f3ea;
+  color: var(--az-text);
 }
 
 .az-panel__lead {
@@ -252,7 +252,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   font-size: clamp(22px, 3vw, 30px);
   font-weight: 500;
   line-height: 1.2;
-  color: #f7f3ea;
+  color: var(--az-text);
 }
 
 .az-work-spotlight__copy > p {
@@ -294,7 +294,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: #f4f1ea;
+  color: var(--az-text);
   text-decoration: none;
   border-bottom: 1px solid rgba(244, 241, 234, 0.28);
   padding-bottom: 2px;
@@ -305,7 +305,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 .az-work-spotlight__cover:focus-visible,
 .az-work-row:focus-visible,
 .az-work-browse:focus-visible {
-  outline: 2px solid #f4f1ea;
+  outline: 2px solid var(--az-text);
   outline-offset: 3px;
 }
 
@@ -341,7 +341,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.05);
-  color: #f4f1ea;
+  color: var(--az-text);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background-color 160ms ease, border-color 160ms ease;
@@ -427,7 +427,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 .az-work-row.is-selected {
   border-color: rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.05);
-  color: #f7f3ea;
+  color: var(--az-text);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
@@ -460,7 +460,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 #view-about.az-view.is-active {
   min-height: 100vh;
   min-height: 100dvh;
-  background-color: #111111;
+  background-color: var(--az-bg, #0b1220);
 }
 
 .az-panel_about {
@@ -570,7 +570,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   font-size: 14px;
   font-weight: 650;
   letter-spacing: -0.01em;
-  color: #f7f3ea;
+  color: var(--az-text);
 }
 
 .az-about-skills__list {
@@ -673,9 +673,9 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   min-height: 44px;
   padding: 0 18px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--az-line);
   background: transparent;
-  color: #f4f1ea;
+  color: var(--az-text);
   font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 600;
@@ -687,8 +687,8 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
 .az-contact-pill_primary {
   border-color: transparent;
-  background: rgba(244, 241, 234, 0.92);
-  color: #111;
+  background: var(--az-accent);
+  color: var(--az-accent-ink);
 }
 
 .az-contact-pill__arrow {
@@ -697,7 +697,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 }
 
 .az-contact-pill:focus-visible {
-  outline: 2px solid #f4f1ea;
+  outline: 2px solid var(--az-accent);
   outline-offset: 3px;
 }
 
@@ -734,18 +734,16 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   z-index: 0;
   inset: 4px 0;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.1);
-  background: color-mix(in srgb, #f4f1ea 12%, transparent);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: var(--az-accent-softer);
+  border: 1px solid var(--az-line-strong);
   box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -6px 12px rgba(255, 255, 255, 0.04);
+    0 6px 16px var(--az-shadow),
+    inset 0 1px 0 color-mix(in srgb, var(--az-accent) 28%, transparent);
   -webkit-backdrop-filter: blur(10px) saturate(1.2);
   backdrop-filter: blur(10px) saturate(1.2);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 160ms ease;
+  transition: opacity 160ms ease, background-color 160ms ease, border-color 160ms ease;
 }
 
 .az-contact-link > * {
@@ -758,7 +756,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   place-items: center;
   width: 28px;
   height: 28px;
-  color: rgba(244, 241, 234, 0.72);
+  color: var(--az-text-secondary);
   transition: color 160ms ease;
 }
 
@@ -774,7 +772,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: #f7f3ea;
+  color: var(--az-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -785,13 +783,13 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 500;
-  color: rgba(244, 241, 234, 0.48);
+  color: var(--az-text-secondary);
   transition: color 160ms ease;
 }
 
 .az-contact-link__arrow {
   font-size: 15px;
-  color: rgba(244, 241, 234, 0.38);
+  color: var(--az-text-secondary);
   transition: color 160ms ease;
 }
 
@@ -800,7 +798,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 }
 
 .az-contact-link:focus-visible {
-  outline: 2px solid #f4f1ea;
+  outline: 2px solid var(--az-accent);
   outline-offset: 2px;
 }
 
@@ -809,26 +807,26 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   opacity: 1;
 }
 
+/* Icon + label highlight together on keyboard focus / press. */
 .az-contact-link:focus-visible .az-contact-link__icon,
-.az-contact-link:focus-visible .az-contact-link__arrow,
+.az-contact-link:focus-visible .az-contact-link__copy strong,
 .az-contact-link:active .az-contact-link__icon,
-.az-contact-link:active .az-contact-link__arrow {
-  color: #fff;
+.az-contact-link:active .az-contact-link__copy strong {
+  color: var(--az-accent);
 }
 
-.az-contact-link:focus-visible .az-contact-link__copy strong,
-.az-contact-link:active .az-contact-link__copy strong {
-  color: #fff;
+.az-contact-link:focus-visible .az-contact-link__arrow,
+.az-contact-link:active .az-contact-link__arrow {
+  color: var(--az-accent);
 }
 
 .az-contact-link:focus-visible .az-contact-link__copy small,
 .az-contact-link:active .az-contact-link__copy small {
-  color: rgba(244, 241, 234, 0.78);
+  color: color-mix(in srgb, var(--az-accent) 70%, var(--az-text-secondary));
 }
 
 .az-contact-link:active::before {
-  background: rgba(255, 255, 255, 0.14);
-  background: color-mix(in srgb, #f4f1ea 16%, transparent);
+  background: var(--az-accent-soft);
 }
 
 .az-contact-note {
@@ -853,29 +851,28 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
 @media (hover: hover) and (pointer: fine) {
   .az-contact-pill_primary:hover {
-    background: #fff;
+    background: var(--az-accent);
+    color: var(--az-accent-ink);
   }
 
   .az-contact-pill:not(.az-contact-pill_primary):hover {
-    border-color: rgba(255, 255, 255, 0.34);
-    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--az-line-strong);
+    background: var(--az-accent-softer);
   }
 
   .az-contact-link:hover::before {
     opacity: 1;
   }
 
+  /* Icon + label highlight together on hover. */
   .az-contact-link:hover .az-contact-link__icon,
-  .az-contact-link:hover .az-contact-link__arrow {
-    color: #fff;
-  }
-
+  .az-contact-link:hover .az-contact-link__arrow,
   .az-contact-link:hover .az-contact-link__copy strong {
-    color: #fff;
+    color: var(--az-accent);
   }
 
   .az-contact-link:hover .az-contact-link__copy small {
-    color: rgba(244, 241, 234, 0.78);
+    color: color-mix(in srgb, var(--az-accent) 70%, var(--az-text-secondary));
   }
 }
 
@@ -940,7 +937,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.06);
-  color: #f4f1ea;
+  color: var(--az-text);
   font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 600;
@@ -956,7 +953,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 }
 
 .az-btn:focus-visible {
-  outline: 2px solid #f4f1ea;
+  outline: 2px solid var(--az-text);
   outline-offset: 3px;
 }
 

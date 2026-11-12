@@ -1,9 +1,26 @@
 /* Homepage slider arrows — desktop Rhye circles; mobile smoked-glass edge tabs. */
 
-.slider-fullscreen-projects__counter {
+/* Hide all Rhye text/caption/counter chrome; keep empty controllers for sync only. */
+#view-home .az-home-slider-text,
+#view-home .slider-fullscreen-projects__content,
+#view-home .slider-fullscreen-projects__footer,
+#view-home .slider-fullscreen-projects__counter,
+#view-home .slider__wrapper-counter,
+#view-home .slider__heading {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  border: 0 !important;
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
+  inset: auto !important;
+  transform: none !important;
 }
 
 .az-home-arrows {

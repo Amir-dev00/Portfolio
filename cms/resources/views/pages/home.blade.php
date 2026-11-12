@@ -6,24 +6,15 @@
               @include('components.site.profile')
               @include('components.site.assistant')
               <div class="slider slider-fullscreen-projects js-slider-fullscreen-projects js-slider">
-                <!-- slider CONTENT -->
-                <div class="slider-fullscreen-projects__content swiper-container pointer-events-none js-slider-fullscreen-projects__content">
+                <!-- Empty content slides keep Rhye Swiper controllers in sync; no titles/captions. -->
+                <div class="slider-fullscreen-projects__content swiper-container pointer-events-none js-slider-fullscreen-projects__content az-home-slider-text" aria-hidden="true">
                   <div class="swiper-wrapper">
-                    <div class="swiper-slide">
-                      <h2 class="h1 slider__heading js-split-text" data-project-slug="personal-portfolio-website" data-split-text-type="lines, words, chars">Personal Portfolio Website</h2>
-                    </div>
-                    <div class="swiper-slide">
-                      <h2 class="h1 slider__heading js-split-text" data-project-slug="shopping-mall-desktop" data-split-text-type="lines, words, chars">Shopping Mall Desktop</h2>
-                    </div>
-                    <div class="swiper-slide">
-                      <h2 class="h1 slider__heading js-split-text" data-project-slug="rest-api-microservice" data-split-text-type="lines, words, chars">REST API Microservice</h2>
-                    </div>
-                    <div class="swiper-slide">
-                      <h2 class="h1 slider__heading js-split-text" data-project-slug="telegram-automation-bot" data-split-text-type="lines, words, chars">Telegram Automation Bot</h2>
-                    </div>
+                    <div class="swiper-slide"></div>
+                    <div class="swiper-slide"></div>
+                    <div class="swiper-slide"></div>
+                    <div class="swiper-slide"></div>
                   </div>
                 </div>
-                <!-- - slider CONTENT -->
                 <!-- slider IMAGES: four authored home backgrounds (WebP preferred). First loads promptly; others defer. -->
                 <div class="slider-fullscreen-projects__images swiper-container js-slider-fullscreen-projects__images" data-mousewheel-enabled="data-mousewheel-enabled" data-direction="horizontal" data-transition-effect="distortion" data-aspect-ratio="1.5" data-transition-displacement-img="assets/img/general/bg-displacement-7.jpg" data-speed="1200" data-autoplay-enabled="true" data-autoplay-delay="6000" data-counter-style="roman">
                   <div class="swiper-wrapper">
@@ -54,8 +45,8 @@
                   <!-- - overlay -->
                 </div>
                 <!-- - slider IMAGES -->
-                <!-- slider FOOTER (kept empty for Rhye Swiper sync; CTAs removed) -->
-                <div class="slider-fullscreen-projects__footer swiper-container js-slider-fullscreen-projects__footer" aria-hidden="true">
+                <!-- Empty footer slides for Rhye sync -->
+                <div class="slider-fullscreen-projects__footer swiper-container js-slider-fullscreen-projects__footer az-home-slider-text" aria-hidden="true">
                   <div class="swiper-wrapper">
                     <div class="swiper-slide"></div>
                     <div class="swiper-slide"></div>
@@ -63,9 +54,8 @@
                     <div class="swiper-slide"></div>
                   </div>
                 </div>
-                <!-- - slider FOOTER -->
-                <!-- slider COUNTER (kept for Rhye sync; visually hidden) -->
-                <div class="slider__wrapper-counter slider-fullscreen-projects__counter" aria-hidden="true">
+                <!-- Counter kept for Rhye sync; fully hidden (no numbers on screen). -->
+                <div class="slider__wrapper-counter slider-fullscreen-projects__counter az-home-slider-text" aria-hidden="true">
                   <div class="slider__counter slider__counter_current">
                     <div class="js-slider-fullscreen-projects__counter-current swiper-container">
                       <div class="swiper-wrapper"></div>
@@ -74,10 +64,9 @@
                   <div class="slider__counter-divider slider-fullscreen__counter-divider"></div>
                   <div class="slider__counter slider__counter_total js-slider-fullscreen-projects__counter-total"></div>
                 </div>
-                <!-- - slider COUNTER -->
-                <!-- slider ARROWS (single pair; mobile on opposite slide edges) -->
-                <div class="az-home-arrows" role="group" aria-label="Project slides" data-i18n-attr="aria-label:home.arrows">
-                  <div class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev" aria-label="Previous project" data-i18n-attr="aria-label:home.prev">
+                <!-- slider ARROWS -->
+                <div class="az-home-arrows" role="group" aria-label="Background slides" data-i18n-attr="aria-label:home.arrows">
+                  <div class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev" aria-label="Previous slide" data-i18n-attr="aria-label:home.prev">
                     <div class="arrow arrow-left js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
                       <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
                         <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
@@ -92,7 +81,7 @@
                       </span>
                     </div>
                   </div>
-                  <div class="slider__arrow slider__arrow_right slider__arrow_absolute js-slider__arrow-next" aria-label="Next project" data-i18n-attr="aria-label:home.next">
+                  <div class="slider__arrow slider__arrow_right slider__arrow_absolute js-slider__arrow-next" aria-label="Next slide" data-i18n-attr="aria-label:home.next">
                     <div class="arrow arrow-right js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
                       <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
                         <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
