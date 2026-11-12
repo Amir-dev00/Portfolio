@@ -165,8 +165,11 @@ Your content, projects, media and admin users live in the **database**, `portfol
    rows/tables and never change or delete existing content, and are safe to run twice.
    For the self-hosted calendar also run **`upgrades/2026_11_10_native_booking.sql`**
    (after the earlier `upgrades/2026_11_10_booking.sql` texts if you never imported them), then
-   **`upgrades/2026_11_12_booking_owner_sms.sql`** for optional SMS.ir owner-alert columns:
+   **`upgrades/2026_11_12_booking_owner_sms.sql`** for optional SMS.ir owner-alert columns, and
+   **`upgrades/2026_11_12_contact_booking_copy.sql`** for the Contact / booking confirmation copy refresh:
    phpMyAdmin → your database → **SQL** → paste each file's contents → **Go**.
+   Then open **Admin → Site content**, confirm the Contact strings (title, intro, Book a call, LinkedIn/GitHub/Telegram
+   subtitles) and **booking.confirmed** / **booking.confirmed.email**, and click **Publish live**.
 3. Extract the new ZIP into a temporary folder (e.g. `/home/ACCOUNT/upgrade/`).
 4. Replace code, keeping your data:
    - `portfolio-app/`: replace everything **except** `.env` and `storage/app/` (your uploaded/private media).
@@ -235,6 +238,24 @@ SMSIR_OWNER_MOBILE=09xxxxxxxxx
 4. Save `.env`, then place a real test booking from `/contact`.
 5. Check **Admin → Bookings →** the booking: **Owner SMS** should show `accepted` (provider OK), `rejected` (provider refused), or `uncertain` (timeout/network — the app will **not** auto-retry that booking, to avoid duplicates). The booking row remains either way.
 6. Leave `SMSIR_ENABLED=false` (or blank keys) to keep calendar + email-only behavior.
+
+### Contact page copy (CMS)
+
+Locale JS defaults ship the new Contact wording. For databases that already store Site content rows, run
+`upgrades/2026_11_12_contact_booking_copy.sql`, then in **Admin → Site content** edit/publish:
+
+| Key | EN | FA |
+| --- | --- | --- |
+| `contact.title` | Let’s work together | بیایید همکاری کنیم |
+| `contact.intro` | Have a project or role in mind? Book a call or send me an email. | پروژه یا فرصت همکاری در نظر دارید؟ یک تماس رزرو کنید یا ایمیل بزنید. |
+| `contact.bookCall` | Book a call | رزرو تماس |
+| `contact.linkedin.sub` | Professional profile | ارتباط حرفه‌ای |
+| `contact.github.sub` | Projects and code | پروژه‌ها و کد |
+| `contact.telegram.sub` | Send a message | ارسال پیام |
+| `booking.confirmed` | Call confirmed + calendar download (no email promise) | … |
+| `booking.confirmed.email` | Same, plus email only when SMTP delivery is verified | … |
+
+Unrelated content keys are not modified by the upgrade SQL.
 
 ## Things only your host can confirm
 

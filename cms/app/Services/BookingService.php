@@ -14,10 +14,18 @@ use Throwable;
 
 final class BookingService
 {
+    /** Whether the last create() successfully handed a visitor email to a deliverable mailer. */
+    private bool $visitorEmailSent = false;
+
     public function __construct(
         private AvailabilityService $availability,
         private SmsIrClient $smsir,
     ) {}
+
+    public function visitorEmailSent(): bool
+    {
+        return $this->visitorEmailSent;
+    }
 
     /**
      * Atomically reserve a slot. Throws ValidationException on conflict.
@@ -26,6 +34,7 @@ final class BookingService
      */
     public function create(array $input, ?string $ip = null): Booking
     {
+        $this->visitorEmailSent = false;
         $settings = BookingSettings::get();
         if (! ($settings['enabled'] ?? true)) {
             throw ValidationException::withMessages([
@@ -162,7 +171,7 @@ final class BookingService
                     }
                 );
             }
-            if ($settings['visitor_notify'] ?? true) {
+            if (($settings['visitor_notify'] ?? true) && $this->visitorMailDeliveryVerified()) {
                 Mail::raw(
                     "Your call is confirmed.\nReference: {$booking->reference}\n"
                     .CarbonImmutable::parse($booking->starts_at)->timezone($booking->timezone)->toDayDateTimeString()
@@ -171,10 +180,26 @@ final class BookingService
                         $message->to($booking->visitor_email)->subject('Booking confirmed · '.$booking->reference);
                     }
                 );
+                $this->visitorEmailSent = true;
             }
         } catch (Throwable $e) {
+            $this->visitorEmailSent = false;
             Log::warning('booking.mail_failed', ['reference' => $booking->reference, 'error' => $e->getMessage()]);
         }
+    }
+
+    /** True only when mail is configured for real delivery (not log/array). */
+    protected function visitorMailDeliveryVerified(): bool
+    {
+        $mailer = (string) config('mail.default');
+        if (in_array($mailer, ['log', 'array', 'null', ''], true)) {
+            return false;
+        }
+        if ($mailer === 'smtp') {
+            return filled(config('mail.mailers.smtp.host'));
+        }
+
+        return true;
     }
 
     /**

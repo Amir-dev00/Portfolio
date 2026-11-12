@@ -24,6 +24,7 @@
     bootstrapPromise: null,
     bootstrapKey: "",
     prefetchBound: false,
+    formDraft: null,
   };
 
   var ICONS = {
@@ -65,6 +66,92 @@
 
   function digits(v) {
     return window.AZ_jalali ? window.AZ_jalali.digits(v, lang()) : String(v);
+  }
+
+  function isFa() {
+    return lang() === "fa";
+  }
+
+  function syncDialogLocale() {
+    ensureRoot();
+    var l = isFa() ? "fa" : "en";
+    var dir = l === "fa" ? "rtl" : "ltr";
+    state.root.setAttribute("lang", l);
+    state.root.setAttribute("dir", dir);
+    if (state.dialog) {
+      state.dialog.setAttribute("lang", l);
+      state.dialog.setAttribute("dir", dir);
+    }
+  }
+
+  function ltrSpan(text) {
+    return '<span class="az-booking__ltr">' + escapeHtml(text) + "</span>";
+  }
+
+  /** Root-absolute media URLs so /fa/* pages do not resolve relative CMS paths under /fa/. */
+  function resolveAssetUrl(url) {
+    var raw = String(url || "").trim();
+    if (!raw) return "/assets/img/amir/profile.jpg";
+    if (/^(https?:)?\/\//i.test(raw) || raw.charAt(0) === "/" || raw.charAt(0) === "data:") return raw;
+    return "/" + raw.replace(/^\.\//, "");
+  }
+
+  function formatDateLabel(isoYmd) {
+    if (!isoYmd) return "";
+    var parts = String(isoYmd).split("-");
+    if (parts.length !== 3) return digits(isoYmd);
+    var gy = +parts[0];
+    var gm = +parts[1];
+    var gd = +parts[2];
+    if (isFa() && window.AZ_jalali) {
+      var j = window.AZ_jalali.toJalali(gy, gm, gd);
+      var month = window.AZ_jalali.monthName ? window.AZ_jalali.monthName(j[1], "fa") : String(j[1]);
+      return digits(String(j[2])) + " " + month + " " + digits(String(j[0]));
+    }
+    try {
+      return new Date(isoYmd + "T12:00:00").toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch (e) {
+      return isoYmd;
+    }
+  }
+
+  function formatTimeLabel(hhmm) {
+    return digits(hhmm || "");
+  }
+
+  function formatSelectedSummary() {
+    var dateLabel = formatDateLabel(state.selectedDate);
+    var timeLabel = state.selectedSlot ? formatTimeLabel(state.selectedSlot.label) : "";
+    if (!timeLabel) return dateLabel;
+    return dateLabel + " · " + timeLabel;
+  }
+
+  function captureFormDraft() {
+    var form = state.root && state.root.querySelector(".az-booking__form");
+    if (!form) return;
+    state.formDraft = {
+      name: form.name ? form.name.value : "",
+      email: form.email ? form.email.value : "",
+      phone: form.phone ? form.phone.value : "",
+      topic: form.topic ? form.topic.value : "",
+      message: form.message ? form.message.value : "",
+    };
+  }
+
+  function restoreFormDraft() {
+    var form = state.root && state.root.querySelector(".az-booking__form");
+    var d = state.formDraft;
+    if (!form || !d) return;
+    if (form.name) form.name.value = d.name || "";
+    if (form.email) form.email.value = d.email || "";
+    if (form.phone) form.phone.value = d.phone || "";
+    if (form.topic) form.topic.value = d.topic || "";
+    if (form.message) form.message.value = d.message || "";
   }
 
   function resolveApi(trigger) {
@@ -127,9 +214,23 @@
 
   function renderAside(trigger) {
     var cfg = state.config || {};
-    var photo = (trigger && trigger.getAttribute("data-booking-photo")) || (cfg.profile && cfg.profile.photo) || "assets/img/amir/profile.jpg";
-    var name = (trigger && trigger.getAttribute("data-booking-name")) || (cfg.profile && cfg.profile.name) || "Amirhossein Zamanzade";
+    var photo = resolveAssetUrl(
+      (cfg.profile && cfg.profile.photo) ||
+        (trigger && trigger.getAttribute("data-booking-photo")) ||
+        "/assets/img/amir/profile.jpg"
+    );
+    // Prefer localized API/CMS name; never let the English trigger attribute beat FA.
+    var name = isFa()
+      ? (cfg.profile && (cfg.profile.name_fa || cfg.profile.name)) ||
+        (trigger && trigger.getAttribute("data-booking-name-fa")) ||
+        (trigger && trigger.getAttribute("data-booking-name")) ||
+        "امیرحسین زمان زاده"
+      : (cfg.profile && (cfg.profile.name_en || cfg.profile.name)) ||
+        (trigger && trigger.getAttribute("data-booking-name")) ||
+        "Amirhossein Zamanzade";
     var duration = (cfg.duration || (trigger && trigger.getAttribute("data-booking-duration")) || 30) + "";
+    var tz = visitorTz();
+    var tzChip = t("booking.timezone", { tz: "__TZ__" }).replace("__TZ__", ltrSpan(tz));
     var aside = state.root.querySelector(".az-booking__aside");
     aside.innerHTML =
       '<img class="az-booking__avatar" src="' + escapeAttr(photo) + '" alt="" width="72" height="72"/>' +
@@ -139,8 +240,8 @@
       '<h3 class="az-booking__title" id="az-booking-title" data-i18n="booking.title"></h3>' +
       '<p class="az-booking__intro" data-i18n="booking.intro"></p>' +
       '<ul class="az-booking__meta">' +
-      '  <li class="az-booking__chip">' + ICONS.clock + "<span>" + escapeHtml(t("booking.duration", { min: duration })) + "</span></li>" +
-      '  <li class="az-booking__chip"><span>' + escapeHtml(t("booking.timezone", { tz: visitorTz() })) + "</span></li>" +
+      '  <li class="az-booking__chip">' + ICONS.clock + "<span>" + escapeHtml(t("booking.duration", { min: digits(duration) })) + "</span></li>" +
+      '  <li class="az-booking__chip"><span>' + tzChip + "</span></li>" +
       "</ul>";
     applyI18n(aside);
   }
@@ -230,13 +331,17 @@
     });
     stage.innerHTML =
       '<div class="az-booking__cal-nav">' +
-      '  <button type="button" class="az-booking__icon-btn" data-nav="-1" aria-label="Previous">' +
+      '  <button type="button" class="az-booking__icon-btn" data-nav="-1" aria-label="' +
+      escapeAttr(t("booking.prev")) +
+      '">' +
       ICONS.chevL +
       "</button>" +
       '  <h3 class="az-booking__month">' +
       escapeHtml(data.month_label) +
       "</h3>" +
-      '  <button type="button" class="az-booking__icon-btn" data-nav="1" aria-label="Next">' +
+      '  <button type="button" class="az-booking__icon-btn" data-nav="1" aria-label="' +
+      escapeAttr(t("booking.next")) +
+      '">' +
       ICONS.chevR +
       "</button>" +
       "</div>" +
@@ -265,31 +370,6 @@
     });
   }
 
-  function formatSelectedSummary() {
-    var dateLabel = state.selectedDate || "";
-    var timeLabel = state.selectedSlot ? state.selectedSlot.label : "";
-    if (dateLabel && window.AZ_jalali && lang() === "fa") {
-      var parts = dateLabel.split("-");
-      if (parts.length === 3) {
-        var j = window.AZ_jalali.toJalali(+parts[0], +parts[1], +parts[2]);
-        var month = window.AZ_jalali.monthName ? window.AZ_jalali.monthName(j[1], "fa") : String(j[1]);
-        dateLabel = digits(String(j[2])) + " " + month + " " + digits(String(j[0]));
-      }
-    } else if (dateLabel) {
-      try {
-        var d = new Date(dateLabel + "T12:00:00");
-        dateLabel = d.toLocaleDateString(lang() === "fa" ? "fa-IR" : "en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        });
-      } catch (e) {}
-    }
-    if (!timeLabel) return dateLabel;
-    return dateLabel + " · " + digits(timeLabel);
-  }
-
   function renderTimes(stage) {
     var list =
       state.slots.length === 0
@@ -304,7 +384,7 @@
                 '" data-start="' +
                 escapeAttr(s.start_utc) +
                 '">' +
-                escapeHtml(digits(s.label)) +
+                escapeHtml(formatTimeLabel(s.label)) +
                 "</button>"
               );
             })
@@ -328,8 +408,8 @@
       '<form class="az-booking__form" novalidate>' +
       '  <input type="text" name="company_website" class="az-booking__hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>' +
       '  <label><span data-i18n="booking.name"></span><input name="name" required autocomplete="name"/></label>' +
-      '  <label><span data-i18n="booking.email"></span><input name="email" type="email" required autocomplete="email"/></label>' +
-      '  <label><span data-i18n="booking.phone"></span><input name="phone" type="tel" autocomplete="tel"/></label>' +
+      '  <label><span data-i18n="booking.email"></span><input class="az-booking__ltr" name="email" type="email" required autocomplete="email" dir="ltr"/></label>' +
+      '  <label><span data-i18n="booking.phone"></span><input class="az-booking__ltr" name="phone" type="tel" autocomplete="tel" dir="ltr"/></label>' +
       '  <label><span data-i18n="booking.topic"></span><input name="topic" maxlength="160"/></label>' +
       '  <label><span data-i18n="booking.message"></span><textarea name="message" rows="3" maxlength="2000"></textarea></label>' +
       '  <p class="az-booking__privacy" data-i18n="booking.privacy"></p>' +
@@ -338,6 +418,7 @@
       "</form>";
     applyI18n(stage);
     stage.querySelector("form").addEventListener("submit", onSubmit);
+    restoreFormDraft();
     var nameInput = stage.querySelector('input[name="name"]');
     if (nameInput) {
       window.requestAnimationFrame(function () {
@@ -352,15 +433,19 @@
 
   function renderDone(stage) {
     var b = state.confirmed || {};
+    var dateIso = b.owner_date || b.local_date || "";
+    var timeLabel = formatTimeLabel(b.owner_time || b.local_time || "");
+    var confirmKey = b.email_notified ? "booking.confirmed.email" : "booking.confirmed";
     stage.innerHTML =
       '<div class="az-booking__success">' +
       '  <div class="az-booking__success-icon">' + ICONS.check + "</div>" +
       '  <h3 data-i18n="booking.step.done"></h3>' +
-      '  <p data-i18n="booking.confirmed"></p>' +
+      '  <p data-i18n="' + confirmKey + '"></p>' +
       '  <ul class="az-booking__summary">' +
-      "    <li><strong data-i18n=\"booking.reference\"></strong> <span>" + escapeHtml(b.reference || "") + "</span></li>" +
-      "    <li><strong>" + escapeHtml(b.local_date || "") + "</strong> · " + escapeHtml(digits(b.local_time || "")) + "</li>" +
-      "    <li>" + escapeHtml(t("booking.duration", { min: b.duration || "" })) + " · " + escapeHtml(b.timezone || "") + "</li>" +
+      '    <li><strong data-i18n="booking.reference"></strong> ' + ltrSpan(b.reference || "") + "</li>" +
+      "    <li><strong>" + escapeHtml(formatDateLabel(dateIso)) + "</strong> · " + escapeHtml(timeLabel) + "</li>" +
+      "    <li>" + escapeHtml(t("booking.duration", { min: digits(String(b.duration || "")) })) +
+      " · " + ltrSpan(b.timezone || "") + "</li>" +
       "  </ul>" +
       (b.ics_url
         ? '<a class="az-contact-pill" href="' + escapeAttr(b.ics_url) + '"><span data-i18n="booking.downloadIcs"></span></a>'
@@ -387,6 +472,7 @@
   function onSubmit(event) {
     event.preventDefault();
     var form = event.currentTarget;
+    captureFormDraft();
     var err = form.querySelector(".az-booking__form-error");
     err.hidden = true;
     var payload = {
@@ -555,12 +641,14 @@
   function open(trigger) {
     if (state.open) return;
     ensureRoot();
+    syncDialogLocale();
     state.api = resolveApi(trigger);
     state.open = true;
     state.step = "date";
     state.selectedDate = null;
     state.selectedSlot = null;
     state.confirmed = null;
+    state.formDraft = null;
     state.monthToken += 1;
     var openToken = state.monthToken;
     trigger.setAttribute("aria-expanded", "true");
@@ -699,23 +787,68 @@
   window.addEventListener("az:langchange", function () {
     state.bootstrapPromise = null;
     state.bootstrapKey = "";
-    if (state.open && state.step === "date") {
-      var token = ++state.monthToken;
-      var stage = state.root.querySelector(".az-booking__stage");
-      renderCalendarSkeleton(stage);
-      fetchBootstrap(true)
-        .then(function (data) {
-          if (!state.open || token !== state.monthToken) return;
-          applyBootstrapPayload(data);
-          renderAside(state.trigger);
-          setStep("date");
-        })
-        .catch(function (err) {
-          if (!state.open || token !== state.monthToken) return;
-          showBootstrapError(stage, state.trigger, err);
-        });
-    } else {
+    if (!state.open) {
       schedulePrefetch();
+      return;
+    }
+    syncDialogLocale();
+    if (state.step === "details") captureFormDraft();
+    var keepStep = state.step;
+    var keepDate = state.selectedDate;
+    var keepSlot = state.selectedSlot;
+    var keepConfirmed = state.confirmed;
+    var token = ++state.monthToken;
+    var stage = state.root.querySelector(".az-booking__stage");
+
+    function afterLocale(data) {
+      if (!state.open || token !== state.monthToken) return;
+      if (data) applyBootstrapPayload(data);
+      else state.calendar = isFa() ? "jalali" : "gregorian";
+      renderAside(state.trigger);
+      renderSteps();
+      state.selectedDate = keepDate;
+      state.selectedSlot = keepSlot;
+      state.confirmed = keepConfirmed;
+      if (keepStep === "date") {
+        setStep("date");
+        return;
+      }
+      if (keepStep === "time" && keepDate) {
+        state.slotsToken += 1;
+        loadSlots().then(function () {
+          if (token !== state.monthToken || !state.open) return;
+          if (keepSlot) {
+            state.selectedSlot =
+              state.slots.find(function (s) {
+                return s.start_utc === keepSlot.start_utc;
+              }) || keepSlot;
+          }
+          setStep("time");
+        });
+        return;
+      }
+      if (keepStep === "details" && keepSlot) {
+        setStep("details");
+        return;
+      }
+      if (keepStep === "done") {
+        setStep("done");
+        return;
+      }
+      setStep("date");
+    }
+
+    if (keepStep === "date" || !state.config) {
+      renderCalendarSkeleton(stage);
+      fetchBootstrap(true).then(afterLocale).catch(function (err) {
+        if (!state.open || token !== state.monthToken) return;
+        showBootstrapError(stage, state.trigger, err);
+      });
+    } else {
+      // Calendar type flips with locale; refresh month metadata when leaving the date step.
+      fetchBootstrap(true).then(afterLocale).catch(function () {
+        afterLocale(null);
+      });
     }
   });
 

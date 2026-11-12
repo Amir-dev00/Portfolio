@@ -103,6 +103,7 @@ class BookingController extends Controller
 
         $settings = BookingSettings::get();
         $local = CarbonImmutable::parse($booking->starts_at)->timezone($booking->timezone);
+        $ownerLocal = CarbonImmutable::parse($booking->starts_at)->timezone($settings['timezone'] ?: 'Asia/Tehran');
 
         return response()->json([
             'ok' => true,
@@ -114,6 +115,9 @@ class BookingController extends Controller
                 'duration' => (int) $settings['duration'],
                 'local_date' => $local->toDateString(),
                 'local_time' => $local->format('H:i'),
+                'owner_date' => $ownerLocal->toDateString(),
+                'owner_time' => $ownerLocal->format('H:i'),
+                'email_notified' => $this->bookings->visitorEmailSent(),
                 'ics_url' => url('/api/booking/'.$booking->reference.'/ics'),
             ],
         ], 201);

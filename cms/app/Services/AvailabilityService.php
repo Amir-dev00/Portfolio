@@ -55,9 +55,12 @@ final class AvailabilityService
                 'calendar' => $calendar,
                 'profile' => [
                     'name' => $locale === 'fa'
-                        ? ($profile['name_fa'] ?? $profile['name'] ?? 'امیرحسین زمان زاده')
+                        ? ($profile['name_fa'] ?? 'امیرحسین زمان زاده')
                         : ($profile['name'] ?? 'Amirhossein Zamanzade'),
-                    'photo' => $profile['photo'] ?? asset('assets/img/amir/profile.jpg'),
+                    'name_en' => $profile['name'] ?? 'Amirhossein Zamanzade',
+                    'name_fa' => $profile['name_fa'] ?? 'امیرحسین زمان زاده',
+                    // Root-absolute URL so /fa/* pages do not resolve relative CMS paths under /fa/.
+                    'photo' => $this->publicAssetUrl($profile['photo'] ?? null, 'assets/img/amir/profile.jpg'),
                     'email' => $social['email'] ?? null,
                 ],
                 'now' => CarbonImmutable::now('UTC')->toIso8601String(),
@@ -338,5 +341,18 @@ final class AvailabilityService
         $b = Carbon::create($gy30, $gm30, $d30);
 
         return $a->equalTo($b) ? 30 : 29;
+    }
+
+    protected function publicAssetUrl(?string $path, string $fallback): string
+    {
+        $path = trim((string) $path);
+        if ($path === '') {
+            return asset($fallback);
+        }
+        if (preg_match('#^https?://#i', $path) || str_starts_with($path, '//')) {
+            return $path;
+        }
+
+        return asset(ltrim($path, '/'));
     }
 }

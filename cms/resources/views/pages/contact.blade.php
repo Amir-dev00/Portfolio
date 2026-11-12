@@ -2,8 +2,8 @@
           <section class="az-view {{ ($viewName ?? '') === 'contact' ? 'is-active is-visible' : '' }}" id="view-contact" data-view="contact" aria-label="{{ $strings['contact.aria'] ?? 'Contact' }}" data-i18n-attr="aria-label:contact.aria" @if(($viewName ?? '') !== 'contact') hidden aria-hidden="true" @endif>
             <div class="az-panel az-panel_contact">
               <p class="az-contact-eyebrow" data-i18n="contact.eyebrow">{{ $strings['contact.eyebrow'] ?? 'Let’s connect' }}</p>
-              <h1 class="az-panel__title" data-i18n="contact.title">{{ $strings['contact.title'] ?? 'Let’s talk.' }}</h1>
-              <p class="az-panel__lead az-contact-intro" data-i18n="contact.intro">{{ $strings['contact.intro'] ?? 'Have a project or a role in mind? Let’s talk.' }}</p>
+              <h1 class="az-panel__title" data-i18n="contact.title">{{ $strings['contact.title'] ?? ((($locale ?? 'en') === 'fa') ? 'بیایید همکاری کنیم' : 'Let’s work together') }}</h1>
+              <p class="az-panel__lead az-contact-intro" data-i18n="contact.intro">{{ $strings['contact.intro'] ?? ((($locale ?? 'en') === 'fa') ? 'پروژه یا فرصت همکاری در نظر دارید؟ یک تماس رزرو کنید یا ایمیل بزنید.' : 'Have a project or role in mind? Book a call or send me an email.') }}</p>
 
               <div class="az-contact-actions">
                 @if ($booking['enabled'] ?? true)
@@ -14,11 +14,12 @@
                     data-booking-timezone="{{ $booking['timezone'] ?? 'Asia/Tehran' }}"
                     data-booking-email="{{ $social['email'] }}"
                     data-booking-name="{{ $profile['name'] ?? 'Amirhossein Zamanzade' }}"
+                    data-booking-name-fa="{{ $profile['name_fa'] ?? 'امیرحسین زمان زاده' }}"
                     data-booking-photo="{{ $profilePhoto ?? asset('assets/img/amir/profile.jpg') }}"
                     @if ($bookingAdmin ?? false) data-booking-admin="1" @endif
                     aria-haspopup="dialog" aria-expanded="false">
                     <svg class="az-contact-pill__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
-                    <span data-i18n="contact.bookCall">{{ $strings['contact.bookCall'] ?? (($locale ?? 'en') === 'fa' ? 'رزرو جلسه' : 'Book a Call') }}</span>
+                    <span data-i18n="contact.bookCall">{{ $strings['contact.bookCall'] ?? ((($locale ?? 'en') === 'fa') ? 'رزرو تماس' : 'Book a call') }}</span>
                     <span class="az-contact-pill__arrow" aria-hidden="true">↗</span>
                   </button>
                 @else
@@ -49,7 +50,7 @@
                   </span>
                   <span class="az-contact-link__copy">
                     <strong data-i18n="contact.linkedin">LinkedIn</strong>
-                    <small data-i18n="contact.linkedin.sub">Start a conversation</small>
+                    <small data-i18n="contact.linkedin.sub">{{ $strings['contact.linkedin.sub'] ?? 'Professional profile' }}</small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>
@@ -59,7 +60,7 @@
                   </span>
                   <span class="az-contact-link__copy">
                     <strong data-i18n="contact.github">GitHub</strong>
-                    <small data-i18n="contact.github.sub">Code &amp; repositories</small>
+                    <small data-i18n="contact.github.sub">{{ $strings['contact.github.sub'] ?? 'Projects and code' }}</small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>
@@ -69,7 +70,7 @@
                   </span>
                   <span class="az-contact-link__copy">
                     <strong data-i18n="contact.telegram">Telegram</strong>
-                    <small data-i18n="contact.telegram.sub">Quick chat · @Amir_dev00</small>
+                    <small data-i18n="contact.telegram.sub">{{ $strings['contact.telegram.sub'] ?? 'Send a message' }}</small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>

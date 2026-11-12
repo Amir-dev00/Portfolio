@@ -64,6 +64,14 @@ html.az-booking-open body {
     rgba(18, 19, 24, 0.88);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   color: #f4f1ea;
+  text-align: start;
+}
+
+.az-booking__ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+  text-align: start;
 }
 
 .az-booking__close {
@@ -97,6 +105,7 @@ html.az-booking-open body {
   padding: 28px 24px;
   border-inline-end: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent);
+  text-align: start;
 }
 
 .az-booking__avatar {
@@ -306,6 +315,7 @@ html.az-booking-open body {
   gap: 6px;
   font-size: 0.85rem;
   color: rgba(247, 243, 234, 0.78);
+  text-align: start;
 }
 
 .az-booking__form input,
@@ -465,6 +475,12 @@ html.az-booking-open body {
   display: flex;
   justify-content: flex-end;
   margin-top: 8px;
+}
+
+/* Mirror nav chevrons when the dialog itself is RTL (Saturday-first calendar). */
+.az-booking[dir="rtl"] .az-booking__back svg,
+.az-booking[dir="rtl"] .az-booking__cal-nav .az-booking__icon-btn svg {
+  transform: scaleX(-1);
 }
 
 html[dir="rtl"] .az-booking__back svg {
