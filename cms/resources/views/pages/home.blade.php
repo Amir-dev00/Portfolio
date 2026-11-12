@@ -3,8 +3,13 @@
           <!-- section PROJECTS SLIDER FULLSCREEN -->
           <section id="selected-work" class="section section-fullheight section-projects section-projects-slider bg-dark-1 overflow" data-arts-theme-text="light" data-arts-os-animation>
             <div class="section-fullheight__inner section-fullheight__inner_mobile text-center">
-              {{-- Mobile-only static hero; desktop keeps the WebGL slideshow (sources stripped on mobile before vendor.js). --}}
-              <div class="az-home-mobile-bg" aria-hidden="true"></div>
+              {{-- Mobile-only photographic slideshow (desktop keeps the WebGL textures, stripped before vendor.js). --}}
+              <div class="az-home-mobile-bg" aria-hidden="true" data-az-home-mobile-bg>
+                <span class="az-home-mobile-bg__slide is-active" style="background-image: url('{{ asset('assets/img/amir/home/home-mobile-bg-01.webp') }}')"></span>
+                <span class="az-home-mobile-bg__slide" style="background-image: url('{{ asset('assets/img/amir/home/home-mobile-bg-02.webp') }}')"></span>
+                <span class="az-home-mobile-bg__slide" style="background-image: url('{{ asset('assets/img/amir/home/home-mobile-bg-03.webp') }}')"></span>
+                <span class="az-home-mobile-bg__slide" style="background-image: url('{{ asset('assets/img/amir/home/home-mobile-bg-04.webp') }}')"></span>
+              </div>
               @include('components.site.profile')
               @include('components.site.assistant')
               <div class="slider slider-fullscreen-projects js-slider-fullscreen-projects js-slider">

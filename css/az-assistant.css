@@ -443,7 +443,7 @@ html.az-preloader-open .az-assistant {
   background-size: cover !important;
 }
 
-/* Mobile homepage: single WebP plane; desktop slideshow stays off the network. */
+/* Mobile homepage: photographic crossfade plane; desktop keeps WebGL textures off this path. */
 .az-home-mobile-bg {
   display: none;
 }
@@ -458,19 +458,39 @@ html.az-preloader-open .az-assistant {
     position: absolute;
     inset: 0;
     z-index: 0;
+    overflow: hidden;
     pointer-events: none;
     background-color: var(--az-bg, #0b1c2c);
-    background-image: url("../assets/img/amir/home/home-mobile-bg.webp");
+  }
+
+  .az-home-mobile-bg__slide {
+    position: absolute;
+    inset: 0;
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
+    opacity: 0;
+    transform: scale(1.04);
+    transition:
+      opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 6.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .az-home-mobile-bg__slide.is-active {
+    opacity: 1;
+    transform: scale(1);
+    z-index: 1;
   }
 
   .az-home-mobile-bg::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(11, 28, 44, 0.35) 0%, rgba(11, 28, 44, 0.55) 100%);
+    z-index: 2;
+    /* Soft vignette for UI contrast — keep the photographic plane visible. */
+    background:
+      radial-gradient(ellipse at 50% 22%, rgba(8, 18, 32, 0.08) 0%, rgba(8, 18, 32, 0.22) 58%, rgba(5, 12, 22, 0.4) 100%),
+      linear-gradient(180deg, rgba(8, 18, 32, 0.1) 0%, rgba(8, 18, 32, 0.22) 100%);
     pointer-events: none;
   }
 
@@ -482,17 +502,40 @@ html.az-preloader-open .az-assistant {
   }
 }
 
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .az-home-mobile-bg__slide {
+    transition: opacity 0.01ms linear;
+    transform: none;
+  }
+
+  .az-home-mobile-bg__slide.is-active {
+    transform: none;
+  }
+}
+
 @media (max-width: 760px) {
-  /* Center the collapsed composer in the free band between profile intro and dock.
-     Extra bottom inset biases the flex mid-point up so the composer lands near mid-hero. */
+  /* Homepage only: center the composer on the visible viewport, independent of Selected Work. */
   .az-assistant--home {
-    top: 0;
-    bottom: 0;
+    top: var(--az-home-vv-top, 0px);
+    bottom: auto;
+    height: 100vh;
+    height: 100dvh;
+    height: var(--az-home-vv-height, 100svh);
     padding-inline: 12px;
-    padding-top: max(156px, calc(env(safe-area-inset-top, 0px) + 136px));
-    padding-bottom: calc(220px + env(safe-area-inset-bottom, 0px));
-    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    justify-items: center;
+    align-items: stretch;
     box-sizing: border-box;
+  }
+
+  .az-assistant--home .az-assistant__panel {
+    grid-row: 2;
+    align-self: center;
+    width: min(440px, 100%);
   }
 
   .az-assistant__composer {
@@ -506,139 +549,12 @@ html.az-preloader-open .az-assistant {
 }
 
 @media (max-width: 760px) and (max-height: 700px) {
+  /* Short viewports: keep equal flexible rows but reserve room for profile + dock. */
   .az-assistant--home {
-    padding-top: max(128px, calc(env(safe-area-inset-top, 0px) + 108px));
-    padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px));
-  }
-
-}
-
-/* Mobile homepage: Selected work strip under the collapsed composer. */
-.az-selected-work {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: min(440px, 100%);
-  margin: 24px 0 0;
-  padding: 0;
-  pointer-events: auto;
-  text-align: center;
-  color: var(--az-asst-muted);
-}
-
-.az-selected-work__label {
-  margin: 0;
-  font-family: "Manrope", system-ui, sans-serif;
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: none;
-  color: rgba(168, 184, 204, 0.72);
-  line-height: 1.2;
-}
-
-html.az-lang-fa .az-selected-work__label {
-  font-family: "Estedad", "Manrope", sans-serif;
-  letter-spacing: 0;
-  font-size: 0.72rem;
-}
-
-.az-selected-work__links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 4px 18px;
-  max-width: 100%;
-}
-
-.az-selected-work__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 44px;
-  padding: 10px 2px;
-  margin: 0;
-  font-family: "Manrope", system-ui, sans-serif;
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-  color: rgba(196, 210, 226, 0.88);
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: color 180ms ease;
-}
-
-html.az-lang-fa .az-selected-work__link {
-  font-family: "Estedad", "Manrope", sans-serif;
-  letter-spacing: 0;
-  font-size: 0.8rem;
-}
-
-.az-selected-work__name {
-  max-width: 11.5rem;
-  overflow-wrap: anywhere;
-}
-
-.az-selected-work__arrow {
-  flex: 0 0 auto;
-  width: 11px;
-  height: 11px;
-  opacity: 0.72;
-  transition: opacity 180ms ease, transform 220ms var(--az-asst-ease, cubic-bezier(0.22, 1, 0.36, 1));
-}
-
-.az-selected-work__link:hover,
-.az-selected-work__link:focus-visible,
-.az-selected-work__link:active {
-  color: var(--az-asst-accent);
-}
-
-.az-selected-work__link:hover .az-selected-work__arrow,
-.az-selected-work__link:focus-visible .az-selected-work__arrow,
-.az-selected-work__link:active .az-selected-work__arrow {
-  opacity: 1;
-  transform: translate(1px, -1px);
-}
-
-.az-selected-work__link:focus-visible {
-  outline: 2px solid var(--az-asst-accent);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-@keyframes az-selected-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@media (max-width: 760px) {
-  .az-assistant--home {
-    flex-direction: column;
-  }
-
-  .az-assistant--home .az-selected-work:not([hidden]) {
-    display: flex;
-    animation: az-selected-in 420ms var(--az-asst-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
-  }
-}
-
-@media (max-width: 360px) {
-  .az-selected-work__links {
-    gap: 2px 14px;
-  }
-
-  .az-selected-work__name {
-    max-width: 9.5rem;
+    grid-template-rows:
+      minmax(calc(96px + env(safe-area-inset-top, 0px)), 1fr)
+      auto
+      minmax(calc(88px + env(safe-area-inset-bottom, 0px)), 1fr);
   }
 }
 
@@ -646,17 +562,8 @@ html.az-lang-fa .az-selected-work__link {
   .az-assistant__avatar *,
   html[data-az-route="ask"] #glass-nav .az-assistant-nav-hint,
   .az-assistant__send,
-  .az-assistant__typing i,
-  .az-selected-work__link,
-  .az-selected-work__arrow,
-  .az-selected-work {
+  .az-assistant__typing i {
     transition: none !important;
     animation: none !important;
-  }
-
-  .az-selected-work__link:hover .az-selected-work__arrow,
-  .az-selected-work__link:focus-visible .az-selected-work__arrow,
-  .az-selected-work__link:active .az-selected-work__arrow {
-    transform: none;
   }
 }

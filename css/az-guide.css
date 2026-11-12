@@ -79,6 +79,7 @@ html.az-preloader-open .az-guide-companion {
   flex: 0 0 48px;
   width: 48px;
   height: 48px;
+  --az-guide-atlas: url("../assets/img/amir/az-companion-atlas.webp");
   background-image: var(--az-guide-atlas);
   background-repeat: no-repeat;
   background-size: 400% 400%;

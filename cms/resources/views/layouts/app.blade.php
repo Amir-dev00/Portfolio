@@ -69,7 +69,7 @@
     {{-- Material Icons are not needed for the loader / first view; load after paint. --}}
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Material+Icons&amp;display=swap" media="print" onload="this.media='all'"/>
     @if(($viewName ?? 'home') === 'home')
-      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg.webp') }}" type="image/webp" media="(max-width: 767px)"/>
+      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg-01.webp') }}" type="image/webp" media="(max-width: 767px)"/>
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp" media="(min-width: 768px)"/>
     @endif
     <link rel="preload" href="{{ $azLogoSrc }}" as="image" type="image/webp"/>

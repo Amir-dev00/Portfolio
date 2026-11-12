@@ -172,7 +172,7 @@ html.cursor-disabled button {
   direction: ltr;
 }
 
-/* CV stays desktop-only; Contact page keeps Download CV for phones.
+/* CV is not in the dock; Contact keeps Download CV, chatbot opens the PDF.
    Must beat `.glass-nav__action { display: flex }`. */
 .glass-nav__action.glass-nav__cv {
   display: none;
@@ -526,16 +526,12 @@ html.cursor-disabled button {
 @media (min-width: 768px) {
   .glass-nav {
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-    width: min(454px, calc(100% - 28px));
-  }
-
-  .glass-nav__action.glass-nav__cv {
-    display: flex;
+    width: min(400px, calc(100% - 28px));
   }
 
   .glass-nav__bar {
-    /* Desktop keeps CV: Work, About, Home, CV, Ask, Contact */
-    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(56px, auto) repeat(3, minmax(0, 1fr));
+    /* Same five slots as mobile: Work, About, Home, Ask, Contact */
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(56px, auto) repeat(2, minmax(0, 1fr));
     min-height: 70px;
     padding: 10px 8px;
     border-radius: 32px;
