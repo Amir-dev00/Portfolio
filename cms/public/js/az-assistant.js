@@ -181,6 +181,16 @@
     return document.querySelector('#glass-nav a[data-nav="' + id + '"]');
   }
 
+  function isDockTargetVisible(link) {
+    if (!link || !link.isConnected) return false;
+    var style = window.getComputedStyle(link);
+    if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) {
+      return false;
+    }
+    var box = link.getBoundingClientRect();
+    return box.width > 0 && box.height > 0;
+  }
+
   function resumeHref(value) {
     if (!value) return "";
     try {
@@ -199,14 +209,20 @@
     var link = destinationLink(destination);
     var url = detail.url;
     if (destination === "cv") {
-      url = resumeHref(url);
+      url = resumeHref(url) || resumeHref(link && link.getAttribute("href")) ||
+        resumeHref(window.AZ_BOOTSTRAP && window.AZ_BOOTSTRAP.cvUrl);
       if (!url) return Promise.resolve(false);
     }
 
-    react("point", destination);
-    return flyTo(link).then(function (landed) {
+    // Flight only for visible Work / About / Contact dock targets.
+    // Hidden CV (mobile) opens the published PDF directly.
+    var canFly = destination !== "cv" && isDockTargetVisible(link);
+    react("point", canFly ? destination : null);
+
+    var flight = canFly ? flyTo(link) : Promise.resolve(false);
+    return flight.then(function (landed) {
       if (window.location.href !== fromUrl) return false;
-      if (landed) {
+      if (landed && link) {
         link.classList.add("az-avatar-landing");
         window.setTimeout(function () { link.classList.remove("az-avatar-landing"); }, 320);
       }

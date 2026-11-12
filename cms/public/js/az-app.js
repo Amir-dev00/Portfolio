@@ -286,7 +286,7 @@
     var target =
       nav.querySelector('[data-nav="' + navKey + '"]') ||
       (navKey === "work" ? nav.querySelector('[data-nav="portfolio"]') : null);
-    if (!target || navKey === "cv") {
+    if (!target || navKey === "cv" || target.offsetParent === null) {
       indicator.classList.remove("is-on", "is-home");
       return;
     }
@@ -301,7 +301,8 @@
       target;
     var label = target.querySelector(".glass-nav__name");
 
-    // Neutralize hover/tap transforms so the capsule stays centered on stable layout.
+    // Neutralize magnet/press transforms and measure layout sizes (offset*),
+    // so pressed icons or avatar landings cannot shift the active oval.
     var prevMagX = target.style.getPropertyValue("--mag-x");
     var prevMagY = target.style.getPropertyValue("--mag-y");
     var prevTransform = target.style.transform;
@@ -309,9 +310,18 @@
     target.style.setProperty("--mag-y", "0px");
     target.style.transform = "none";
 
-    var barBox = bar.getBoundingClientRect();
-    var iconBox = icon.getBoundingClientRect();
-    var labelBox = label ? label.getBoundingClientRect() : null;
+    var slotW = target.offsetWidth;
+    var slotH = target.offsetHeight;
+    var slotLeft = target.offsetLeft;
+    var slotTop = target.offsetTop;
+    var iconLeft = icon.offsetLeft;
+    var iconTop = icon.offsetTop;
+    var iconW = icon.offsetWidth;
+    var iconH = icon.offsetHeight;
+    var labelLeft = label ? label.offsetLeft : iconLeft;
+    var labelTop = label ? label.offsetTop : iconTop;
+    var labelW = label ? label.offsetWidth : iconW;
+    var labelH = label ? label.offsetHeight : iconH;
 
     target.style.setProperty("--mag-x", prevMagX || "0px");
     target.style.setProperty("--mag-y", prevMagY || "0px");
@@ -323,24 +333,28 @@
     var y;
 
     if (isHome) {
-      ovalW = Math.round(iconBox.width);
-      ovalH = Math.round(iconBox.height);
-      x = iconBox.left + iconBox.width / 2 - barBox.left - ovalW / 2;
-      y = iconBox.top + iconBox.height / 2 - barBox.top - ovalH / 2;
+      ovalW = Math.round(iconW);
+      ovalH = Math.round(iconH);
+      x = slotLeft + iconLeft + iconW / 2 - ovalW / 2;
+      y = slotTop + iconTop + iconH / 2 - ovalH / 2;
     } else {
-      var left = labelBox ? Math.min(iconBox.left, labelBox.left) : iconBox.left;
-      var right = labelBox ? Math.max(iconBox.right, labelBox.right) : iconBox.right;
-      var top = labelBox ? Math.min(iconBox.top, labelBox.top) : iconBox.top;
-      var bottom = labelBox ? Math.max(iconBox.bottom, labelBox.bottom) : iconBox.bottom;
-      var contentW = right - left;
-      var contentH = bottom - top;
-      /* Fully wrap icon + label with a centered translucent blue pill. */
-      var padX = Math.max(10, Math.round(contentW * 0.28));
-      var padY = Math.max(8, Math.round(contentH * 0.22));
-      ovalW = Math.round(contentW + padX * 2);
-      ovalH = Math.round(contentH + padY * 2);
-      x = (left + right) / 2 - barBox.left - ovalW / 2;
-      y = (top + bottom) / 2 - barBox.top - ovalH / 2;
+      var contentLeft = Math.min(iconLeft, labelLeft);
+      var contentRight = Math.max(iconLeft + iconW, labelLeft + labelW);
+      var contentTop = Math.min(iconTop, labelTop);
+      var contentBottom = Math.max(iconTop + iconH, labelTop + labelH);
+      var contentW = contentRight - contentLeft;
+      var contentH = contentBottom - contentTop;
+      var padX = 8;
+      var padY = 6;
+      var maxW = Math.max(24, slotW - 4);
+      var maxH = Math.max(24, slotH - 2);
+      ovalW = Math.min(maxW, Math.round(contentW + padX * 2));
+      ovalH = Math.min(maxH, Math.round(contentH + padY * 2));
+      // Center the oval on icon+label, then clamp inside the slot.
+      x = slotLeft + contentLeft + contentW / 2 - ovalW / 2;
+      y = slotTop + contentTop + contentH / 2 - ovalH / 2;
+      x = Math.min(Math.max(slotLeft + 1, x), slotLeft + slotW - ovalW - 1);
+      y = Math.min(Math.max(slotTop + 1, y), slotTop + slotH - ovalH - 1);
     }
 
     indicator.classList.toggle("is-home", isHome);

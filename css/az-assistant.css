@@ -40,7 +40,8 @@
   height: var(--az-ask-height, 100dvh);
   min-height: 260px;
   margin-inline: auto;
-  padding-block: calc(62px + env(safe-area-inset-top, 0px)) calc(80px + env(safe-area-inset-bottom, 0px));
+  /* Leave room for the fixed dock (~56px) + dock offset + safe-area. */
+  padding-block: calc(62px + env(safe-area-inset-top, 0px)) calc(96px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
   color: var(--az-asst-text);
 }

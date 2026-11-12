@@ -134,25 +134,27 @@ html.cursor-disabled button {
   z-index: 80;
   left: 0;
   right: 0;
-  bottom: calc(10px + env(safe-area-inset-bottom));
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   /* Use % (layout viewport), not 100vw, so classic scrollbar gutters
      do not widen the dock past the visible area or shift its center. */
-  width: min(332px, calc(100% - 20px));
+  width: min(340px, calc(100% - 16px));
   margin-inline: auto;
   color: var(--glass-fg);
   pointer-events: none;
+  /* Physical dock order stays LTR even when the document is RTL. */
+  direction: ltr;
 }
 
 .glass-nav__bar {
   position: relative;
   display: grid;
-  /* Two wider slots balance three narrower ones around the center Home button. */
-  grid-template-columns: repeat(2, minmax(0, 1.5fr)) minmax(44px, 1fr) repeat(3, minmax(0, 1fr));
+  /* Mobile: five equal slots — Work, About, Home, Ask, Contact (CV hidden). */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
   justify-items: center;
   gap: 0;
-  min-height: 48px;
-  padding: 5px 4px;
+  min-height: 56px;
+  padding: 6px 4px;
   overflow: visible;
   pointer-events: auto;
   border-radius: 22px;
@@ -167,6 +169,13 @@ html.cursor-disabled button {
   opacity: 0;
   filter: blur(8px);
   transition: background-color 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
+  direction: ltr;
+}
+
+/* CV stays desktop-only; Contact page keeps Download CV for phones.
+   Must beat `.glass-nav__action { display: flex }`. */
+.glass-nav__action.glass-nav__cv {
+  display: none;
 }
 
 .glass-nav.is-ready .glass-nav__bar {
@@ -264,10 +273,12 @@ html.cursor-disabled button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
+  box-sizing: border-box;
   width: 100%;
-  min-height: 38px;
-  padding: 2px 1px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 2px;
   border-radius: 0;
   background: transparent;
   transform: translateY(var(--mag-y, 0)) translateX(var(--mag-x, 0));
@@ -286,8 +297,8 @@ html.cursor-disabled button {
   color: var(--az-accent);
 }
 
-.glass-nav__tab:active {
-  transform: scale(0.96);
+.glass-nav__tab:active .glass-nav__icon {
+  transform: scale(0.92);
 }
 
 .glass-nav__tab:focus,
@@ -299,37 +310,48 @@ html.cursor-disabled button {
 .glass-nav__icon {
   display: grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
   transition: transform 200ms var(--ease-out);
 }
 
 .glass-nav__icon svg,
 .glass-nav__home-icon svg,
 .glass-nav__action-icon svg {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   display: block;
 }
 
 .glass-nav__name {
   font-family: var(--font-ui);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.03em;
-  line-height: 1;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
   text-transform: uppercase;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  color: inherit;
+  /* Keep physical dock order; let each label follow its script. */
+  unicode-bidi: plaintext;
 }
 
 /* Centerpiece Home — column 3 of 5 equal tracks = true mathematical center */
 .glass-nav__home {
   display: grid;
   place-items: center;
+  box-sizing: border-box;
   width: 44px;
   height: 44px;
-  margin-top: -6px;
-  margin-bottom: -6px;
+  min-width: 44px;
+  min-height: 44px;
+  margin-top: -4px;
+  margin-bottom: -4px;
   border-radius: 50%;
   color: var(--glass-fg);
   transform: translateY(var(--mag-y, 0)) translateX(var(--mag-x, 0));
@@ -390,10 +412,12 @@ html.cursor-disabled button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
+  box-sizing: border-box;
   width: 100%;
-  min-height: 38px;
-  padding: 2px 1px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 2px;
   color: var(--glass-muted);
   transform: translateY(var(--mag-y, 0)) translateX(var(--mag-x, 0));
   transition:
@@ -406,13 +430,14 @@ html.cursor-disabled button {
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
   transition: transform 200ms var(--ease-out);
 }
 
-.glass-nav__action:active {
-  transform: scale(0.94);
+.glass-nav__action:active .glass-nav__action-icon {
+  transform: scale(0.92);
 }
 
 .glass-nav__tab[data-tooltip]::after,
@@ -500,11 +525,17 @@ html.cursor-disabled button {
 
 @media (min-width: 768px) {
   .glass-nav {
-    bottom: calc(20px + env(safe-area-inset-bottom));
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     width: min(454px, calc(100% - 28px));
   }
 
+  .glass-nav__action.glass-nav__cv {
+    display: flex;
+  }
+
   .glass-nav__bar {
+    /* Desktop keeps CV: Work, About, Home, CV, Ask, Contact */
+    grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(56px, auto) repeat(3, minmax(0, 1fr));
     min-height: 70px;
     padding: 10px 8px;
     border-radius: 32px;
@@ -513,6 +544,7 @@ html.cursor-disabled button {
   .glass-nav__tab {
     min-height: 52px;
     gap: 4px;
+    padding: 4px 2px;
   }
 
   .glass-nav__icon {
@@ -533,6 +565,10 @@ html.cursor-disabled button {
   .glass-nav__home {
     width: 56px;
     height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+    margin-top: -6px;
+    margin-bottom: -6px;
   }
 
   .glass-nav__home-icon svg {
@@ -543,6 +579,7 @@ html.cursor-disabled button {
   .glass-nav__action {
     min-height: 52px;
     gap: 4px;
+    padding: 4px 2px;
   }
 
   .glass-nav__action-icon {
@@ -558,17 +595,12 @@ html.cursor-disabled button {
 
 @media (max-width: 360px) {
   .glass-nav {
-    width: min(300px, calc(100% - 24px));
+    width: min(304px, calc(100% - 16px));
   }
 
   .glass-nav__name {
-    font-size: 11px;
+    font-size: 9.5px;
     letter-spacing: 0;
-  }
-
-  .glass-nav__home {
-    width: 42px;
-    height: 42px;
   }
 }
 
