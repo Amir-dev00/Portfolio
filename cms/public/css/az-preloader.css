@@ -138,6 +138,7 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 }
 #js-preloader.az-preloader--ring .az-preloader__image {
   display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+  background: transparent; box-shadow: none;
   transform: scale(1.17); transform-origin: center;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring {

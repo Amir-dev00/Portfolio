@@ -57,14 +57,14 @@
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-profile.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-app.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-i18n.css') }}"/>
+    {{-- Guide CSS is small and needed for the idle homepage sprite. --}}
+    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-guide.css') }}"/>
     {{-- Noncritical feature CSS: fetch without blocking first paint. --}}
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-home-arrows.css') }}" media="print" onload="this.media='all'"/>
-    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-guide.css') }}" media="print" onload="this.media='all'"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-booking.css') }}" media="print" onload="this.media='all'"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-assistant.css') }}" media="print" onload="this.media='all'"/>
     <noscript>
       <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-home-arrows.css') }}"/>
-      <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-guide.css') }}"/>
       <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-booking.css') }}"/>
       <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-assistant.css') }}"/>
     </noscript>
@@ -73,6 +73,11 @@
     @if(($viewName ?? 'home') === 'home')
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg.webp') }}" type="image/webp" media="(max-width: 767px)"/>
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp" media="(min-width: 768px)"/>
+      @php
+        $atlasFile = public_path('assets/img/amir/az-companion-atlas.webp');
+        $atlasSrc = asset('assets/img/amir/az-companion-atlas.webp').(is_file($atlasFile) ? '?v='.filemtime($atlasFile) : '');
+      @endphp
+      <link rel="preload" as="image" href="{{ $atlasSrc }}" type="image/webp"/>
     @endif
     <link rel="preload" href="{{ $azLogoSrc }}" as="image" type="image/webp"/>
     <link rel="preload" href="{{ $profilePhoto ?? asset('assets/img/amir/profile.webp') }}" as="image" type="image/webp"/>

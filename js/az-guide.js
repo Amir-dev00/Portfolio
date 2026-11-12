@@ -1,4 +1,4 @@
-/* Homepage bilingual guided tour — invitation + 3 spotlight steps + astronaut. */
+/* Homepage bilingual guided tour — WebP sprite companion (no GLB / WebGL). */
 (function () {
   "use strict";
 
@@ -26,14 +26,25 @@
     },
   ];
 
+  // 4×4 atlas, 144px cells, zero-based LTR / top-to-bottom.
+  var FRAMES = {
+    idle: [0, 1, 2],
+    wink: [3],
+    wave: [4, 5, 6, 7],
+    point_left: [8, 9, 10, 11],
+    point_right: [12, 13, 14, 15],
+    point_left_hold: 9,
+    point_right_hold: 13,
+  };
+
   var root = document.querySelector("[data-az-guide]");
   var launch = document.querySelector("[data-az-guide-launch]");
-  if (!root || !launch) return;
+  var companion = document.querySelector("[data-az-guide-companion]");
+  var sprite = document.querySelector("[data-az-guide-sprite]");
+  if (!root || !launch || !companion || !sprite) return;
 
   var scrim = root.querySelector("[data-az-guide-scrim]");
   var spot = root.querySelector("[data-az-guide-spotlight]");
-  var canvas = root.querySelector("[data-az-guide-canvas]");
-  var fallback = root.querySelector("[data-az-guide-fallback]");
   var invite = root.querySelector("[data-az-guide-invite]");
   var callout = root.querySelector("[data-az-guide-callout]");
   var stepEl = root.querySelector("[data-az-guide-step]");
@@ -48,12 +59,14 @@
     open: false,
     touring: false,
     step: -1,
-    viewer: null,
-    viewerFailed: false,
-    loadingViewer: null,
     lastFocused: null,
     activeTarget: null,
-    mascotSize: 120,
+    size: 48,
+    poseTimer: 0,
+    idleTimer: 0,
+    moveTimer: 0,
+    x: -80,
+    y: 0,
   };
 
   var reducedMotion = false;
@@ -81,6 +94,118 @@
 
   function clamp(n, lo, hi) {
     return Math.max(lo, Math.min(hi, n));
+  }
+
+  function framePosition(index) {
+    var i = clamp(index | 0, 0, 15);
+    var col = i % 4;
+    var row = (i / 4) | 0;
+    return col * (100 / 3) + "% " + row * (100 / 3) + "%";
+  }
+
+  function setFrame(index) {
+    sprite.style.backgroundPosition = framePosition(index);
+    sprite.setAttribute("data-pose", String(index));
+  }
+
+  function clearPoseTimer() {
+    if (state.poseTimer) {
+      window.clearTimeout(state.poseTimer);
+      state.poseTimer = 0;
+    }
+  }
+
+  function clearIdleTimer() {
+    if (state.idleTimer) {
+      window.clearTimeout(state.idleTimer);
+      state.idleTimer = 0;
+    }
+  }
+
+  function playSequence(frames, opts) {
+    opts = opts || {};
+    clearPoseTimer();
+    clearIdleTimer();
+    var hold = opts.hold;
+    var fps = opts.fps || 7;
+    var loop = !!opts.loop;
+    var onDone = typeof opts.onDone === "function" ? opts.onDone : null;
+
+    if (reducedMotion || !frames || !frames.length) {
+      var staticFrame =
+        hold != null ? hold : frames && frames.length ? frames[Math.min(1, frames.length - 1)] : 0;
+      setFrame(staticFrame);
+      if (onDone) onDone();
+      return Promise.resolve();
+    }
+
+    return new Promise(function (resolve) {
+      var i = 0;
+      var stepMs = Math.max(70, Math.round(1000 / fps));
+
+      function tick() {
+        setFrame(frames[i]);
+        i += 1;
+        if (i < frames.length) {
+          state.poseTimer = window.setTimeout(tick, stepMs);
+          return;
+        }
+        if (hold != null) setFrame(hold);
+        if (loop) {
+          i = 0;
+          state.poseTimer = window.setTimeout(tick, stepMs + 180);
+          return;
+        }
+        state.poseTimer = 0;
+        if (onDone) onDone();
+        resolve();
+      }
+
+      tick();
+    });
+  }
+
+  function startIdle() {
+    clearPoseTimer();
+    clearIdleTimer();
+    if (reducedMotion) {
+      setFrame(FRAMES.idle[0]);
+      return;
+    }
+    var i = 0;
+    function beat() {
+      setFrame(FRAMES.idle[i % FRAMES.idle.length]);
+      i += 1;
+      state.idleTimer = window.setTimeout(beat, 520);
+    }
+    beat();
+  }
+
+  function playGesture(name) {
+    if (name === "wave") {
+      return playSequence(FRAMES.wave, { fps: 8, hold: FRAMES.idle[0] }).then(function () {
+        if (!state.touring) startIdle();
+      });
+    }
+    if (name === "wink") {
+      return playSequence(FRAMES.wink, { fps: 5, hold: FRAMES.idle[0] }).then(function () {
+        if (!state.touring) startIdle();
+      });
+    }
+    if (name === "point_left") {
+      return playSequence(FRAMES.point_left, {
+        fps: 8,
+        hold: FRAMES.point_left_hold,
+      });
+    }
+    if (name === "point_right") {
+      return playSequence(FRAMES.point_right, {
+        fps: 8,
+        hold: FRAMES.point_right_hold,
+      });
+    }
+    startIdle();
+    return Promise.resolve();
   }
 
   function resolveTarget(step) {
@@ -119,83 +244,75 @@
   function setTouring(on) {
     state.touring = !!on;
     root.classList.toggle("is-touring", state.touring);
+    companion.classList.toggle("is-touring", state.touring);
   }
 
-  function mascotBox() {
-    var node = canvas && !canvas.hidden ? canvas : fallback;
-    return node;
+  function launcherRect() {
+    return launch.getBoundingClientRect();
+  }
+
+  function placeCompanionAt(x, y, instant) {
+    state.x = x;
+    state.y = y;
+    if (instant || reducedMotion) {
+      companion.style.transition = "opacity 200ms ease";
+      companion.style.transform = "translate3d(" + Math.round(x) + "px," + Math.round(y) + "px,0)";
+      return;
+    }
+    companion.style.transition = "opacity 200ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1)";
+    companion.style.transform = "translate3d(" + Math.round(x) + "px," + Math.round(y) + "px,0)";
+  }
+
+  function parkOnLauncher(instant) {
+    var r = launcherRect();
+    var x = r.left + r.width / 2 - state.size / 2;
+    var y = r.top + r.height / 2 - state.size / 2;
+    placeCompanionAt(x, y, instant);
   }
 
   function placeMascotNear(targetRect) {
-    var size = state.mascotSize;
+    var size = state.size;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
     var safeL = 8;
     var safeR = 8;
     var safeT = 8;
     var safeB = 12;
-    try {
-      // Approximate safe areas from CSS env if present via body padding — keep simple insets.
-      safeB = Math.max(12, (window.visualViewport && window.visualViewport.height < vh ? 12 : 12));
-    } catch (err) {}
 
     var preferLeft = targetRect.left + targetRect.width / 2 > vw * 0.55;
-    var gap = 14;
+    var gap = 12;
     var x;
     var y;
 
-    // Default: beside the target on the roomier side, vertically centered to the target.
-    if (preferLeft) {
-      x = targetRect.left - gap - size;
-    } else {
-      x = targetRect.right + gap;
-    }
+    if (preferLeft) x = targetRect.left - gap - size;
+    else x = targetRect.right + gap;
     y = targetRect.top + targetRect.height / 2 - size / 2;
 
-    // Mobile / short targets: if stacked above/below, nudge sideways so the gesture still reads.
-    var stacked =
-      targetRect.top < size + 24 ||
-      targetRect.bottom > vh - size - 24 ||
-      Math.abs(targetRect.left + targetRect.width / 2 - vw / 2) < vw * 0.18;
-
-    if (vw <= 767 || stacked) {
-      // Prefer below-left or below-right of header targets; above dock for the nav.
-      var isDockish = targetRect.bottom > vh * 0.72;
+    var isDockish = targetRect.bottom > vh * 0.72;
+    if (vw <= 767) {
       if (isDockish) {
         y = targetRect.top - gap - size;
         x = preferLeft ? targetRect.left - size * 0.15 : targetRect.right - size * 0.85;
       } else if (targetRect.top < vh * 0.28) {
         y = targetRect.bottom + gap;
-        x = preferLeft ? targetRect.left - size * 0.35 : targetRect.right - size * 0.65;
+        x = preferLeft ? targetRect.left - size * 0.25 : targetRect.right - size * 0.75;
       }
     }
 
     x = clamp(x, safeL, vw - size - safeR);
     y = clamp(y, safeT, vh - size - safeB);
-
-    var node = mascotBox();
-    if (!node) return { x: x, y: y, cx: x + size / 2, cy: y + size / 2 };
-    node.style.left = Math.round(x) + "px";
-    node.style.top = Math.round(y) + "px";
-    node.style.width = size + "px";
-    node.style.height = size + "px";
+    placeCompanionAt(x, y, false);
     return { x: x, y: y, cx: x + size / 2, cy: y + size / 2 };
   }
 
   function placeInvite() {
     if (!invite) return;
-    var vw = window.innerWidth;
     var vh = window.innerHeight;
     invite.style.left = "50%";
-    invite.style.top = "50%";
+    invite.style.top = vh < 640 ? "42%" : "50%";
     invite.style.right = "auto";
     invite.style.bottom = "auto";
     invite.style.transform = "translate(-50%, -50%)";
-    // Keep clear of dock on short phones.
-    if (vh < 640) {
-      invite.style.top = "42%";
-    }
-    void vw;
   }
 
   function placeCallout(targetRect, mascot) {
@@ -212,7 +329,7 @@
       { left: targetRect.left, top: targetRect.bottom + gap },
       { left: targetRect.right - cw, top: targetRect.bottom + gap },
       { left: targetRect.left, top: targetRect.top - ch - gap },
-      { left: mascot.cx - cw / 2, top: mascot.y + state.mascotSize + gap },
+      { left: mascot.cx - cw / 2, top: mascot.y + state.size + gap },
       { left: mascot.cx - cw / 2, top: mascot.y - ch - gap },
     ];
 
@@ -230,7 +347,6 @@
       if (!overlapsTarget) score += 40;
       if (top + ch < vh - dockClear) score += 20;
       if (top > 8) score += 5;
-      // Prefer near mascot.
       score -= Math.abs(left + cw / 2 - mascot.cx) * 0.02;
       score -= Math.abs(top + ch / 2 - mascot.cy) * 0.02;
       if (score > bestScore) {
@@ -269,31 +385,19 @@
 
   function choosePointClip(mascot, targetRect) {
     var targetCx = targetRect.left + targetRect.width / 2;
-    // If the target is left of the astronaut, point left; otherwise point right.
     return targetCx < mascot.cx ? "point_left" : "point_right";
   }
 
-  function syncMascotSize() {
-    var vw = window.innerWidth;
-    if (vw <= 320) state.mascotSize = 84;
-    else if (vw <= 390) state.mascotSize = 96;
-    else if (vw <= 767) state.mascotSize = 108;
-    else state.mascotSize = 128;
-  }
-
   function layoutStep() {
-    if (!state.touring || state.step < 0) return;
+    if (!state.touring || state.step < 0) return null;
     var conf = STEPS[state.step];
     var el = resolveTarget(conf);
-    if (!el) return;
+    if (!el) return null;
     var rect = paddedRect(el, conf.pad || 10);
     setTargetLive(el);
     updateSpotlight(rect, conf.radius || 14);
     var mascot = placeMascotNear(rect);
     placeCallout(rect, mascot);
-    if (state.viewer) {
-      state.viewer.resize(state.mascotSize);
-    }
     return { rect: rect, mascot: mascot, conf: conf };
   }
 
@@ -311,62 +415,6 @@
     applyI18n(callout);
   }
 
-  function ensureViewer() {
-    if (state.viewer || state.viewerFailed) return Promise.resolve(state.viewer);
-    if (state.loadingViewer) return state.loadingViewer;
-    if (reducedMotion) {
-      state.viewerFailed = true;
-      return Promise.resolve(null);
-    }
-
-    var viewerUrl = root.getAttribute("data-viewer-url");
-    var modelUrl = root.getAttribute("data-model-url");
-    if (!viewerUrl || !modelUrl || !canvas) {
-      state.viewerFailed = true;
-      return Promise.resolve(null);
-    }
-
-    state.loadingViewer = import(viewerUrl)
-      .then(function (mod) {
-        if (!mod || typeof mod.createGuideViewer !== "function") {
-          throw new Error("viewer missing");
-        }
-        return mod.createGuideViewer(canvas, modelUrl);
-      })
-      .then(function (viewer) {
-        state.loadingViewer = null;
-        if (!viewer) {
-          state.viewerFailed = true;
-          return null;
-        }
-        state.viewer = viewer;
-        showEl(canvas, true);
-        showEl(fallback, false);
-        viewer.resize(state.mascotSize);
-        viewer.start();
-        return viewer;
-      })
-      .catch(function () {
-        state.loadingViewer = null;
-        state.viewerFailed = true;
-        showEl(canvas, false);
-        showEl(fallback, true);
-        return null;
-      });
-
-    return state.loadingViewer;
-  }
-
-  function useFallbackMascot() {
-    showEl(canvas, false);
-    showEl(fallback, true);
-  }
-
-  function playGesture(name) {
-    if (!state.viewer || reducedMotion) return Promise.resolve();
-    return state.viewer.playOnce(name).catch(function () {});
-  }
-
   function openInvite() {
     if (!isHome()) return;
     state.lastFocused = document.activeElement;
@@ -377,32 +425,17 @@
     showEl(invite, true);
     showEl(callout, false);
     if (spot) spot.style.opacity = "0";
-    syncMascotSize();
     placeInvite();
-
-    // Park mascot near the launcher / language cluster for the wave.
-    var cluster = document.querySelector(".az-header-end") || launch;
-    var r = paddedRect(cluster, 4);
-    placeMascotNear(r);
-    showEl(fallback, true);
-    showEl(canvas, false);
-
+    parkOnLauncher(false);
     applyI18n(invite);
     if (btnStart) btnStart.focus({ preventScroll: true });
+    playGesture("wave");
+  }
 
-    ensureViewer().then(function (viewer) {
-      if (!state.open) return;
-      if (viewer) {
-        showEl(canvas, true);
-        showEl(fallback, false);
-        viewer.resize(state.mascotSize);
-        placeMascotNear(r);
-        playGesture("wave");
-      } else {
-        useFallbackMascot();
-        placeMascotNear(r);
-      }
-    });
+  function returnToLauncher() {
+    setTouring(false);
+    parkOnLauncher(false);
+    startIdle();
   }
 
   function closeGuide() {
@@ -412,12 +445,7 @@
     showEl(invite, false);
     showEl(callout, false);
     setOpen(false);
-
-    if (state.viewer) {
-      try {
-        state.viewer.stop();
-      } catch (e) {}
-    }
+    returnToLauncher();
 
     var restore = state.lastFocused && document.contains(state.lastFocused) ? state.lastFocused : launch;
     state.lastFocused = null;
@@ -434,26 +462,11 @@
     showEl(invite, false);
     showEl(callout, true);
     fillCallout();
-    syncMascotSize();
 
     var laid = layoutStep();
     if (btnNext) btnNext.focus({ preventScroll: true });
-
     if (!laid) return;
-    var clip = choosePointClip(laid.mascot, laid.rect);
-    ensureViewer().then(function (viewer) {
-      if (!state.open || !state.touring) return;
-      if (viewer) {
-        showEl(canvas, true);
-        showEl(fallback, false);
-        viewer.resize(state.mascotSize);
-        layoutStep();
-        playGesture(clip);
-      } else {
-        useFallbackMascot();
-        layoutStep();
-      }
-    });
+    playGesture(choosePointClip(laid.mascot, laid.rect));
   }
 
   function nextStep() {
@@ -475,14 +488,8 @@
       closed = true;
       closeGuide();
     };
-    ensureViewer().then(function (viewer) {
-      if (viewer && !reducedMotion) {
-        playGesture("wink").then(done, done);
-        window.setTimeout(done, 1800);
-      } else {
-        done();
-      }
-    });
+    playGesture("wink").then(done, done);
+    window.setTimeout(done, reducedMotion ? 120 : 900);
   }
 
   function onKeydown(e) {
@@ -493,27 +500,58 @@
       return;
     }
     if (!state.touring) return;
-    if (e.key === "Enter" && document.activeElement === btnNext) return;
-    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-      // Don't invert for RTL — Next is always forward through the tour.
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        nextStep();
-      }
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      nextStep();
     }
   }
 
   function onResize() {
-    if (!state.open) return;
-    syncMascotSize();
+    if (!isHome()) return;
     if (state.touring) layoutStep();
-    else placeInvite();
-    if (state.viewer) state.viewer.resize(state.mascotSize);
+    else {
+      placeInvite();
+      parkOnLauncher(true);
+    }
   }
 
   function onRouteWatch() {
     if (state.open && !isHome()) closeGuide();
     launch.hidden = !isHome();
+    companion.hidden = !isHome();
+    if (isHome()) {
+      companion.classList.add("is-ready");
+      parkOnLauncher(true);
+      if (!state.open) startIdle();
+    } else {
+      companion.classList.remove("is-ready");
+    }
+  }
+
+  function markReadyWhenAtlasLoads() {
+    var url = "";
+    try {
+      var raw = getComputedStyle(sprite).backgroundImage || "";
+      var m = /url\(["']?([^"')]+)["']?\)/.exec(raw);
+      url = m ? m[1] : "";
+    } catch (err) {}
+
+    var show = function () {
+      parkOnLauncher(true);
+      companion.classList.add("is-ready");
+      startIdle();
+    };
+
+    if (!url || reducedMotion) {
+      show();
+      return;
+    }
+
+    var img = new Image();
+    img.onload = show;
+    img.onerror = show;
+    img.src = url;
+    if (img.complete) show();
   }
 
   launch.addEventListener("click", function () {
@@ -544,7 +582,6 @@
   }
   if (scrim) {
     scrim.addEventListener("click", function (e) {
-      // Clicks on the dimmed page dismiss only from the invitation, not mid-tour.
       if (!state.touring) closeGuide();
       e.preventDefault();
     });
@@ -559,17 +596,37 @@
   }
 
   window.addEventListener("az:langchange", function () {
-    if (!state.open) return;
+    if (!state.open) {
+      parkOnLauncher(true);
+      return;
+    }
     applyI18n(root);
     if (state.touring) fillCallout();
+    onResize();
   });
 
-  var routeObs = new MutationObserver(onRouteWatch);
+  window.addEventListener("arts/preloader/end", function () {
+    if (!isHome()) return;
+    parkOnLauncher(true);
+    companion.classList.add("is-ready");
+    if (!state.open) startIdle();
+  });
+
+  var routeObs = new MutationObserver(function () {
+    onRouteWatch();
+    // Preloader just closed — snap the idle sprite onto the launcher.
+    if (isHome() && !document.documentElement.classList.contains("az-preloader-open")) {
+      parkOnLauncher(true);
+    }
+  });
   routeObs.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ["data-az-route", "class"],
   });
+
+  // Reveal as soon as the homepage header is in play (preloader may still be open — CSS hides then).
   onRouteWatch();
+  markReadyWhenAtlasLoads();
 
   window.AZ_guide = {
     open: openInvite,

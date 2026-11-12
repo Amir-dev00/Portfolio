@@ -1,40 +1,35 @@
-/* Homepage astronaut guide — launcher + spotlight tour. */
+/* Homepage WebP sprite guide — launcher + floating companion + spotlight tour. */
 
 .az-guide-launch {
   appearance: none;
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--az-line, rgba(244, 247, 255, 0.18));
+  border: 0;
   border-radius: 50%;
-  background: var(--az-glass-translucent, rgba(20, 34, 56, 0.72));
+  background: transparent;
   color: var(--az-text, #f4f7ff);
-  box-shadow: 0 8px 20px var(--az-shadow, rgba(3, 8, 18, 0.45));
-  -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  backdrop-filter: blur(12px) saturate(1.2);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-.az-guide-launch__orb {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-.az-guide-launch__icon {
+.az-guide-launch__hit {
   display: block;
-  color: var(--az-accent, #6ee7ff);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
 }
 
 .az-guide-launch:hover {
-  border-color: var(--az-line-strong, rgba(110, 231, 255, 0.42));
+  background: color-mix(in srgb, var(--az-accent, #6ee7ff) 12%, transparent);
 }
 
 .az-guide-launch:focus {
@@ -48,9 +43,51 @@
 
 /* Homepage only — keep AZ logo + profile clear on narrow phones. */
 html[data-az-route]:not([data-az-route="home"]) .az-guide-launch,
-html.az-preloader-open .az-guide-launch {
+html[data-az-route]:not([data-az-route="home"]) .az-guide-companion,
+html.az-preloader-open .az-guide-launch,
+html.az-preloader-open .az-guide-companion {
   visibility: hidden !important;
   pointer-events: none !important;
+}
+
+/* Floating companion — parks on the launcher; tour moves it with transforms. */
+.az-guide-companion {
+  --az-guide-size: 48px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 104;
+  width: var(--az-guide-size);
+  height: var(--az-guide-size);
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+  contain: layout style;
+  transform: translate3d(-80px, 0, 0);
+  transition: opacity 200ms ease;
+}
+
+.az-guide-companion.is-ready {
+  opacity: 1;
+  z-index: 123;
+}
+
+.az-guide-companion.is-touring {
+  z-index: 123;
+}
+
+.az-guide-companion__sprite {
+  display: block;
+  width: var(--az-guide-size);
+  height: var(--az-guide-size);
+  background-image: var(--az-guide-atlas);
+  background-repeat: no-repeat;
+  background-size: 400% 400%;
+  background-position: 0% 0%;
+  transform-origin: 50% 80%;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.28));
 }
 
 .az-guide[hidden] {
@@ -92,37 +129,6 @@ html.az-preloader-open .az-guide-launch {
 
 .az-guide.is-touring .az-guide__spotlight {
   opacity: 1;
-}
-
-.az-guide__canvas,
-.az-guide__fallback {
-  position: fixed;
-  z-index: 3;
-  width: 120px;
-  height: 120px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 200ms ease, transform 220ms ease;
-}
-
-.az-guide.is-open .az-guide__canvas:not([hidden]),
-.az-guide.is-open .az-guide__fallback:not([hidden]) {
-  opacity: 1;
-}
-
-.az-guide__fallback {
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--az-glass-translucent-strong, rgba(20, 34, 56, 0.86));
-  border: 1px solid var(--az-line, rgba(244, 247, 255, 0.18));
-  box-shadow: 0 12px 28px var(--az-shadow, rgba(3, 8, 18, 0.45));
-}
-
-.az-guide__fallback-glyph {
-  font-size: 42px;
-  line-height: 1;
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--az-accent, #6ee7ff) 40%, transparent));
 }
 
 .az-guide__invite,
@@ -238,14 +244,10 @@ html.az-lang-fa .az-guide__btn {
 
 @media (max-width: 390px) {
   .az-guide-launch {
-    width: 34px;
-    height: 34px;
-  }
-
-  .az-guide__canvas,
-  .az-guide__fallback {
-    width: 96px;
-    height: 96px;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
   }
 
   .az-guide__invite,
@@ -257,21 +259,20 @@ html.az-lang-fa .az-guide__btn {
 
 @media (max-width: 320px) {
   .az-guide-launch {
-    width: 32px;
-    height: 32px;
-  }
-
-  .az-guide__canvas,
-  .az-guide__fallback {
-    width: 84px;
-    height: 84px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .az-guide__spotlight,
-  .az-guide__canvas,
-  .az-guide__fallback {
+  .az-guide-companion {
     transition: none !important;
+  }
+
+  .az-guide-companion__sprite {
+    animation: none !important;
   }
 }

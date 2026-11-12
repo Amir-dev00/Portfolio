@@ -29,7 +29,7 @@
       color: var(--az-ink); font-family: var(--font-body); text-align: center;
     }
     main { max-width: 560px; animation: az-rise .7s cubic-bezier(.2,.7,.2,1) both; }
-    img { width: 72px; height: auto; opacity: .9; }
+    img { width: 72px; height: auto; opacity: .9; background: transparent; box-shadow: none; }
     .code { font-family: var(--font-display); font-size: clamp(64px, 18vw, 140px); letter-spacing: .04em; margin: 12px 0 0; line-height: 1; font-weight: 650; }
     h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(20px, 4vw, 28px); letter-spacing: .08em; text-transform: uppercase; margin: 12px 0 8px; }
     html[dir="rtl"] h1 { letter-spacing: 0; text-transform: none; }

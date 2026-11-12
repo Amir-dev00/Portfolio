@@ -1,19 +1,21 @@
-{{-- Homepage bilingual guided tour shell. Model loads only after the visitor opens the guide. --}}
+{{-- Homepage guided tour — WebP sprite companion (no GLB / WebGL). --}}
+@php
+  $atlasFile = public_path('assets/img/amir/az-companion-atlas.webp');
+  $atlasSrc = asset('assets/img/amir/az-companion-atlas.webp').(is_file($atlasFile) ? '?v='.filemtime($atlasFile) : '');
+@endphp
+{{-- Floating sprite layer: parks on the launcher, walks to tour targets. --}}
 <div
-  class="az-guide"
-  id="az-guide"
-  data-az-guide
-  data-model-url="{{ asset('assets/models/az-astronaut-guide.glb') }}{{ is_file(public_path('assets/models/az-astronaut-guide.glb')) ? '?v='.filemtime(public_path('assets/models/az-astronaut-guide.glb')) : '' }}"
-  data-viewer-url="{{ asset('js/az-guide-viewer.mjs') }}{{ is_file(public_path('js/az-guide-viewer.mjs')) ? '?v='.filemtime(public_path('js/az-guide-viewer.mjs')) : '' }}"
-  hidden
+  class="az-guide-companion"
+  data-az-guide-companion
+  aria-hidden="true"
+  style="--az-guide-atlas: url('{{ $atlasSrc }}')"
 >
+  <span class="az-guide-companion__sprite is-idle" data-az-guide-sprite data-pose="0"></span>
+</div>
+
+<div class="az-guide" id="az-guide" data-az-guide hidden>
   <div class="az-guide__scrim" data-az-guide-scrim aria-hidden="true"></div>
   <div class="az-guide__spotlight" data-az-guide-spotlight aria-hidden="true"></div>
-
-  <canvas class="az-guide__canvas" data-az-guide-canvas width="160" height="160" aria-hidden="true" hidden></canvas>
-  <div class="az-guide__fallback" data-az-guide-fallback aria-hidden="true" hidden>
-    <span class="az-guide__fallback-glyph" aria-hidden="true">🚀</span>
-  </div>
 
   <div
     class="az-guide__invite"
