@@ -14,7 +14,7 @@
               <stop offset="100%" stop-color="var(--az-text)"/>
             </linearGradient>
           </defs>
-          <circle class="az-preloader__ring-track" cx="180" cy="180" r="162"/>
+          {{-- Single progress stroke only — no separate track circle (that read as a duplicate ring). --}}
           <circle class="az-preloader__ring-fill" cx="180" cy="180" r="162" pathLength="100"/>
         </svg>
         <span class="az-preloader__ring-head" aria-hidden="true"></span>
