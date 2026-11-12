@@ -47,7 +47,7 @@
     <script src="{{ $assetV('js/components.js') }}" defer onload="AZ_bootMark('components', 58)" onerror="AZ_bootFail('UI components failed to load.')"></script>
     <script src="{{ $assetV('js/az-profile.js') }}" defer onload="AZ_bootMark('profile', 64)"></script>
     <script src="{{ $assetV('js/az-projects.js') }}" defer onload="AZ_bootMark('projects', 68)"></script>
-    <script src="{{ $assetV('js/az-app.js') }}" defer onload="AZ_bootMark('app', 76); if (window.AZ_preloader) AZ_preloader.ready();" onerror="AZ_bootFail('App shell failed to load.')"></script>
+    <script src="{{ $assetV('js/az-app.js') }}" defer onload="AZ_bootMark('app', 76)" onerror="AZ_bootFail('App shell failed to load.')"></script>
     {{-- Noncritical features: after first view path; still deferred so order stays after az-app. --}}
     <script src="{{ $assetV('js/az-jalali.js') }}" defer></script>
     <script src="{{ $assetV('js/az-booking.js') }}" defer></script>

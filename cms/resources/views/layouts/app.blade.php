@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ $locale }}" dir="{{ $dir }}" class="az-preloader-open az-lang-{{ $locale }}" data-az-lang="{{ $locale }}">
+<html lang="{{ $locale }}" dir="{{ $dir }}" class="az-preloader-open az-lang-{{ $locale }}" data-az-lang="{{ $locale }}" data-az-route="{{ ($viewName ?? 'home') === 'project' ? 'work' : ($viewName ?? 'home') }}">
   
 <!-- Mirrored from https://artemsemkin.com/rhye/html/index.html by HTTrack Website Copier/3.x [XR&CO], Mon, 09 Nov 2026 08:30:04 GMT -->
 <head>
@@ -13,6 +13,7 @@
           };
       }
       $azLogoSrc = $assetV('assets/img/amir/az-monogram-blue.webp');
+      $atlasSrc = $assetV('assets/img/amir/az-companion-atlas.webp');
     @endphp
     <meta charset="utf-8"/>
     <meta http-equiv="x-ua-compatible" content="ie=edge"/>
@@ -73,15 +74,12 @@
     @if(($viewName ?? 'home') === 'home')
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg.webp') }}" type="image/webp" media="(max-width: 767px)"/>
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp" media="(min-width: 768px)"/>
-      @php
-        $atlasFile = public_path('assets/img/amir/az-companion-atlas.webp');
-        $atlasSrc = asset('assets/img/amir/az-companion-atlas.webp').(is_file($atlasFile) ? '?v='.filemtime($atlasFile) : '');
-      @endphp
       <link rel="preload" as="image" href="{{ $atlasSrc }}" type="image/webp"/>
     @endif
     <link rel="preload" href="{{ $azLogoSrc }}" as="image" type="image/webp"/>
     <link rel="preload" href="{{ $profilePhoto ?? asset('assets/img/amir/profile.webp') }}" as="image" type="image/webp"/>
     <style>
+      :root{--az-guide-atlas:url("{{ $atlasSrc }}")}
       /* While open, beat Rhye's early inline display:none on cached reloads. */
       html.az-preloader-open #js-preloader.az-preloader--ring{
         position:fixed!important;inset:0!important;z-index:99999!important;
@@ -99,14 +97,9 @@
       html.az-loading:not(.az-preloader-js) #js-preloader .az-preloader__ring-fill{
         animation:az-boot-wait-sweep 2.4s cubic-bezier(.45,.05,.55,.95) infinite;
       }
-      html.az-loading:not(.az-preloader-js) #js-preloader .az-preloader__ring-head{
-        opacity:1;animation:az-boot-wait-spin 2.4s linear infinite;
-      }
       @keyframes az-boot-wait-sweep{0%{stroke-dashoffset:92}50%{stroke-dashoffset:74}100%{stroke-dashoffset:92}}
-      @keyframes az-boot-wait-spin{to{transform:rotate(360deg)}}
       @media (prefers-reduced-motion:reduce){
-        html.az-loading:not(.az-preloader-js) #js-preloader .az-preloader__ring-fill,
-        html.az-loading:not(.az-preloader-js) #js-preloader .az-preloader__ring-head{animation:none!important}
+        html.az-loading:not(.az-preloader-js) #js-preloader .az-preloader__ring-fill{animation:none!important}
       }
       .logo-wordmark{display:inline-block;font-family:var(--font-en),"Manrope",sans-serif;font-size:15px;font-weight:700;letter-spacing:.1em;line-height:20px;white-space:nowrap}
       .logo__img-primary.logo-wordmark{color:#111}
@@ -135,8 +128,8 @@
   <body>
     <div data-barba="wrapper">
       @include('components.site.preloader')
-      {{-- Take over the ring ASAP so milestones start before vendor.js (~1.2MB) downloads. --}}
-      <script src="{{ $assetV('js/az-preloader.js') }}"></script>
+      {{-- Start the ring before the vendor scripts without blocking the page markup. --}}
+      <script src="{{ $assetV('js/az-preloader.js') }}" defer></script>
       @include('components.site.language-switcher')
       @include('components.site.guide')
       @include('components.site.chrome')

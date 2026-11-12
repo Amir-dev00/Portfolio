@@ -21,11 +21,8 @@
   touch-action: manipulation;
 }
 
-.az-guide-launch__hit {
-  display: block;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+.az-guide-launch.has-live-companion .az-guide-launch__sprite {
+  visibility: hidden;
 }
 
 .az-guide-launch:hover {
@@ -52,13 +49,12 @@ html.az-preloader-open .az-guide-companion {
 
 /* Floating companion — parks on the launcher; tour moves it with transforms. */
 .az-guide-companion {
-  --az-guide-size: 48px;
   position: fixed;
   left: 0;
   top: 0;
   z-index: 104;
-  width: var(--az-guide-size);
-  height: var(--az-guide-size);
+  width: 48px;
+  height: 48px;
   margin: 0;
   padding: 0;
   pointer-events: none;
@@ -66,7 +62,6 @@ html.az-preloader-open .az-guide-companion {
   will-change: transform;
   contain: layout style;
   transform: translate3d(-80px, 0, 0);
-  transition: opacity 200ms ease;
 }
 
 .az-guide-companion.is-ready {
@@ -78,10 +73,12 @@ html.az-preloader-open .az-guide-companion {
   z-index: 123;
 }
 
+.az-guide-launch__sprite,
 .az-guide-companion__sprite {
   display: block;
-  width: var(--az-guide-size);
-  height: var(--az-guide-size);
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
   background-image: var(--az-guide-atlas);
   background-repeat: no-repeat;
   background-size: 400% 400%;

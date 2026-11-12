@@ -1,14 +1,9 @@
 {{-- Homepage guided tour — WebP sprite companion (no GLB / WebGL). --}}
-@php
-  $atlasFile = public_path('assets/img/amir/az-companion-atlas.webp');
-  $atlasSrc = asset('assets/img/amir/az-companion-atlas.webp').(is_file($atlasFile) ? '?v='.filemtime($atlasFile) : '');
-@endphp
 {{-- Floating sprite layer: parks on the launcher, walks to tour targets. --}}
 <div
   class="az-guide-companion"
   data-az-guide-companion
   aria-hidden="true"
-  style="--az-guide-atlas: url('{{ $atlasSrc }}')"
 >
   <span class="az-guide-companion__sprite is-idle" data-az-guide-sprite data-pose="0"></span>
 </div>

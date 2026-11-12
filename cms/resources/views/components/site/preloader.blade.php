@@ -21,9 +21,16 @@
       </div>
 
       <span class="az-preloader__load-label">LOADING EXPERIENCE</span>
-      <div class="preloader__counter az-preloader__percentage" aria-label="Loading progress">
+      <div class="az-preloader__percentage" data-az-preloader-meter role="progressbar"
+           aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <span data-az-preloader-value>0</span>
+        <span class="az-preloader__counter-sep" aria-hidden="true">/</span>
+        <span class="az-preloader__counter-total" aria-hidden="true">100</span>
+      </div>
+      {{-- Rhye still receives its original counter hooks. Its writes stay offscreen. --}}
+      <div class="preloader__counter az-preloader__native-counter" aria-hidden="true" hidden>
         <span class="preloader__counter-number preloader__counter-current">0</span>
-        <span class="preloader__counter-divider az-preloader__counter-sep" aria-hidden="true">/</span>
+        <span class="preloader__counter-divider">/</span>
         <span class="preloader__counter-number preloader__counter-total">100</span>
       </div>
       <div class="az-preloader__identity">

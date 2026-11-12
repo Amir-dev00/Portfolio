@@ -1,5 +1,5 @@
 /* AZ / 02 — Circular metallic monogram preloader. Styled only inside #js-preloader.
-   The Rhye template still controls the counter's value and the loader's dismissal.
+   Rhye's offscreen counter feeds the AZ progress controller.
    Colors come from az-tokens.css (navy + ice). */
 
 /* Hide Rhye's cursor SVG ring while AZ owns the loading visuals (cursor stays in DOM for Rhye). */
@@ -158,14 +158,6 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   transition: none;
   will-change: stroke-dashoffset;
 }
-/* Blade-first waiting motion: runs before large scripts finish downloading. */
-html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-preloader__ring-fill {
-  animation: az-ring-wait-sweep 2.4s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-}
-html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-preloader__ring-head {
-  opacity: 1;
-  animation: az-ring-wait-spin 2.4s linear infinite;
-}
 #js-preloader.az-preloader--ring .az-preloader__ring-head {
   position: absolute; z-index: 4; inset: 0; display: block; pointer-events: none;
   transform: rotate(0deg);
@@ -179,7 +171,6 @@ html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-prelo
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head.is-complete,
 #js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-head,
-#js-preloader.az-preloader--ring.az-preloader--recovered .az-preloader__ring-head,
 #js-preloader.az-preloader--ring.az-preloader--retry .az-preloader__ring-head {
   opacity: 0;
 }
@@ -196,7 +187,7 @@ html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-prelo
   letter-spacing: .28em; padding-left: .28em; font-weight: 600;
   animation: az-ring-fade-up 900ms 550ms both;
 }
-#js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage {
+#js-preloader.az-preloader--ring .az-preloader__percentage {
   position: relative; display: flex; align-items: baseline; justify-content: center;
   gap: 0.28em; margin: 8px 0 0; padding: 0;
   font-family: var(--font-en);
@@ -204,21 +195,24 @@ html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-prelo
   letter-spacing: -.04em; white-space: nowrap;
   font-variant-numeric: lining-nums tabular-nums;
   opacity: 1;
-  animation: az-ring-fade-up 700ms 220ms both;
 }
-/* No fixed ch reservations — the whole 0 / 100 group stays centered on the logo axis. */
-#js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-current {
-  width: auto;
-  color: var(--az-text); font: inherit; font-variant-numeric: tabular-nums;
+#js-preloader.az-preloader--ring .az-preloader__native-counter,
+#js-preloader.az-preloader--ring[hidden] {
+  display: none !important;
 }
+
 #js-preloader.az-preloader--ring .az-preloader__counter-sep,
-#js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-total {
-  width: auto; color: var(--az-text-secondary);
-  font: inherit; font-variant-numeric: tabular-nums;
-  letter-spacing: -.02em;
+#js-preloader.az-preloader--ring .az-preloader__counter-total {
+  color: var(--az-text-secondary);
 }
-#js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-total {
-  width: auto;
+
+#js-preloader.az-preloader--ring.az-preloader--waiting .az-preloader__ring-head.is-active::after {
+  animation: az-waiting-dot 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes az-waiting-dot {
+  from { opacity: 0.45; }
+  to { opacity: 1; }
 }
 #js-preloader.az-preloader--ring .az-preloader__identity {
   margin-top: clamp(18px, 2.4vw, 27px); padding-top: clamp(18px, 2.4vw, 27px);
@@ -262,7 +256,7 @@ html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-prelo
   display: flex;
   animation: az-ring-fade-up 500ms both;
 }
-#js-preloader.az-preloader--ring.az-preloader--retry .preloader__counter.az-preloader__percentage {
+#js-preloader.az-preloader--ring.az-preloader--retry .az-preloader__percentage {
   opacity: 0.55;
 }
 #js-preloader.az-preloader--ring .az-preloader__retry-msg {
@@ -304,16 +298,6 @@ html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-prelo
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-/* Early waiting: partial arc breathes before JS owns progress. */
-@keyframes az-ring-wait-sweep {
-  0% { stroke-dashoffset: 92; }
-  50% { stroke-dashoffset: 74; }
-  100% { stroke-dashoffset: 92; }
-}
-@keyframes az-ring-wait-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 @media (max-width: 600px) {
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: clamp(222px, 70vw, 290px); margin-bottom: 21px; }
   #js-preloader.az-preloader--ring .preloader__heading.az-preloader__name { font-size: 14px; letter-spacing: .12em; padding-left: .12em; }
@@ -322,23 +306,17 @@ html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-prelo
 @media (max-height: 670px) {
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: clamp(164px, 35vh, 244px); margin-bottom: 9px; }
   #js-preloader.az-preloader--ring .az-preloader__center.preloader__header { padding: 7px 0; }
-  #js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage { font-size: 42px; margin-top: 1px; }
+  #js-preloader.az-preloader--ring .az-preloader__percentage { font-size: 42px; margin-top: 1px; }
   #js-preloader.az-preloader--ring .az-preloader__identity { margin-top: 10px; padding-top: 14px; }
   #js-preloader.az-preloader--ring .az-preloader__load-label { font-size: 11px; letter-spacing: .2em; padding-left: .2em; }
 }
 @media (max-height: 460px) {
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: min(44vh,180px); }
   #js-preloader.az-preloader--ring .az-preloader__identity { margin-top: 5px; padding-top: 9px; }
-  #js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage { font-size: 34px; }
+  #js-preloader.az-preloader--ring .az-preloader__percentage { font-size: 34px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #js-preloader.az-preloader--ring *,
   #js-preloader.az-preloader--ring *::before,
   #js-preloader.az-preloader--ring *::after { animation: none !important; transition: none !important; }
-  html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-preloader__ring-fill {
-    stroke-dashoffset: 88;
-  }
-  html.az-loading:not(.az-preloader-js) #js-preloader.az-preloader--ring .az-preloader__ring-head {
-    opacity: 0;
-  }
 }

@@ -57,6 +57,7 @@
 
   var state = {
     open: false,
+    atlasReady: false,
     touring: false,
     step: -1,
     lastFocused: null,
@@ -255,11 +256,11 @@
     state.x = x;
     state.y = y;
     if (instant || reducedMotion) {
-      companion.style.transition = "opacity 200ms ease";
+      companion.style.transition = "none";
       companion.style.transform = "translate3d(" + Math.round(x) + "px," + Math.round(y) + "px,0)";
       return;
     }
-    companion.style.transition = "opacity 200ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1)";
+    companion.style.transition = "transform 320ms cubic-bezier(0.22, 1, 0.36, 1)";
     companion.style.transform = "translate3d(" + Math.round(x) + "px," + Math.round(y) + "px,0)";
   }
 
@@ -515,43 +516,42 @@
     }
   }
 
+  function showLiveCompanion() {
+    if (!isHome() || !state.atlasReady) return;
+    if (state.touring) layoutStep();
+    else parkOnLauncher(true);
+    companion.classList.add("is-ready");
+    launch.classList.add("has-live-companion");
+    if (!state.open) startIdle();
+  }
+
   function onRouteWatch() {
     if (state.open && !isHome()) closeGuide();
     launch.hidden = !isHome();
     companion.hidden = !isHome();
     if (isHome()) {
-      companion.classList.add("is-ready");
-      parkOnLauncher(true);
-      if (!state.open) startIdle();
+      showLiveCompanion();
     } else {
+      clearIdleTimer();
+      clearPoseTimer();
       companion.classList.remove("is-ready");
+      launch.classList.remove("has-live-companion");
     }
   }
 
   function markReadyWhenAtlasLoads() {
-    var url = "";
-    try {
-      var raw = getComputedStyle(sprite).backgroundImage || "";
-      var m = /url\(["']?([^"')]+)["']?\)/.exec(raw);
-      url = m ? m[1] : "";
-    } catch (err) {}
-
-    var show = function () {
-      parkOnLauncher(true);
-      companion.classList.add("is-ready");
-      startIdle();
-    };
-
-    if (!url || reducedMotion) {
-      show();
-      return;
-    }
+    var raw = getComputedStyle(sprite).backgroundImage;
+    var url = /^url\(["']?(.*?)["']?\)$/.exec(raw);
+    if (!url) return;
 
     var img = new Image();
-    img.onload = show;
-    img.onerror = show;
-    img.src = url;
-    if (img.complete) show();
+    img.onload = function () {
+      if (state.atlasReady) return;
+      state.atlasReady = true;
+      showLiveCompanion();
+    };
+    img.src = url[1];
+    if (img.complete && img.naturalWidth) img.onload();
   }
 
   launch.addEventListener("click", function () {
@@ -605,26 +605,13 @@
     onResize();
   });
 
-  window.addEventListener("arts/preloader/end", function () {
-    if (!isHome()) return;
-    parkOnLauncher(true);
-    companion.classList.add("is-ready");
-    if (!state.open) startIdle();
-  });
-
-  var routeObs = new MutationObserver(function () {
-    onRouteWatch();
-    // Preloader just closed — snap the idle sprite onto the launcher.
-    if (isHome() && !document.documentElement.classList.contains("az-preloader-open")) {
-      parkOnLauncher(true);
-    }
-  });
+  var routeObs = new MutationObserver(onRouteWatch);
   routeObs.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ["data-az-route", "class"],
+    attributeFilter: ["data-az-route"],
   });
 
-  // Reveal as soon as the homepage header is in play (preloader may still be open — CSS hides then).
+  // Hand off the rendered launcher sprite when the animated companion is ready.
   onRouteWatch();
   markReadyWhenAtlasLoads();
 

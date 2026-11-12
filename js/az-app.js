@@ -1005,6 +1005,7 @@
     history.replaceState(null, "", hashForRoute(resolveRouteFromLocation()));
   }
 
-  document.documentElement.classList.add("az-app-ready");
   applyFromLocation(true);
+  document.documentElement.classList.add("az-app-ready");
+  if (window.AZ_preloader) window.AZ_preloader.ready();
 })();
