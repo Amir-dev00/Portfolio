@@ -137,7 +137,7 @@ html.cursor-disabled button {
   bottom: calc(10px + env(safe-area-inset-bottom));
   /* Use % (layout viewport), not 100vw, so classic scrollbar gutters
      do not widen the dock past the visible area or shift its center. */
-  width: min(280px, calc(100% - 48px));
+  width: min(332px, calc(100% - 20px));
   margin-inline: auto;
   color: var(--glass-fg);
   pointer-events: none;
@@ -146,7 +146,8 @@ html.cursor-disabled button {
 .glass-nav__bar {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* Two wider slots balance three narrower ones around the center Home button. */
+  grid-template-columns: repeat(2, minmax(0, 1.5fr)) minmax(44px, 1fr) repeat(3, minmax(0, 1fr));
   align-items: center;
   justify-items: center;
   gap: 0;
@@ -500,7 +501,7 @@ html.cursor-disabled button {
 @media (min-width: 768px) {
   .glass-nav {
     bottom: calc(20px + env(safe-area-inset-bottom));
-    width: min(420px, calc(100% - 28px));
+    width: min(454px, calc(100% - 28px));
   }
 
   .glass-nav__bar {

@@ -7,6 +7,7 @@
             $navHome = ($activeView ?? 'home') === 'home';
             $navWork = in_array($activeView ?? '', ['work', 'project'], true);
             $navAbout = ($activeView ?? '') === 'about';
+            $navAsk = ($activeView ?? '') === 'ask';
             $navContact = ($activeView ?? '') === 'contact';
           @endphp
           <a class="glass-nav__tab {{ $navWork ? 'is-active' : '' }}" role="listitem" href="{{ $navPaths['work'] ?? '/work' }}" data-nav="work" data-tooltip="Work" data-i18n-attr="data-tooltip:nav.tooltip.work" @if($navWork) aria-current="page" @endif>
@@ -35,6 +36,13 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></svg>
             </span>
             <span class="glass-nav__name" data-i18n="nav.cv">{{ $strings['nav.cv'] ?? 'CV' }}</span>
+          </a>
+
+          <a class="glass-nav__tab {{ $navAsk ? 'is-active' : '' }}" role="listitem" href="{{ $navPaths['ask'] ?? '/ask' }}" data-nav="ask" data-tooltip="Ask" data-i18n-attr="data-tooltip:nav.ask" @if($navAsk) aria-current="page" @endif>
+            <span class="glass-nav__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.4-4.2A8.5 8.5 0 1 1 21 11.5Z"/><path d="M9 12h.01m3.5 0h.01m3.5 0h.01"/></svg>
+            </span>
+            <span class="glass-nav__name" data-i18n="nav.ask">{{ $strings['nav.ask'] ?? ($locale === 'fa' ? 'گفتگو' : 'Ask') }}</span>
           </a>
 
           <a class="glass-nav__action glass-nav__contact {{ $navContact ? 'is-active' : '' }}" role="listitem" href="{{ $navPaths['contact'] ?? '/contact' }}" aria-label="Contact" data-tooltip="Contact" data-nav="contact" data-i18n-attr="aria-label:nav.contact;data-tooltip:nav.tooltip.contact" @if($navContact) aria-current="page" @endif>

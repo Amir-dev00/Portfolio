@@ -1,4 +1,4 @@
-/* Homepage AI assistant — frosted composer that expands into a conversation. */
+/* Home composer and dedicated Ask conversation. */
 
 .az-assistant {
   --az-asst-navy: var(--az-glass-translucent, rgba(20, 34, 56, 0.72));
@@ -8,6 +8,9 @@
   --az-asst-accent: var(--az-accent, #6ee7ff);
   --az-asst-ink: var(--az-accent-ink, #0b1220);
   --az-asst-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.az-assistant--home {
   position: absolute;
   z-index: 30;
   left: 0;
@@ -23,123 +26,109 @@
   display: none !important;
 }
 
-.az-assistant.is-ready {
-  display: flex;
-}
-
 .az-assistant__panel {
   width: min(440px, 100%);
   pointer-events: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+}
+
+.az-ask {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: min(720px, calc(100% - 32px));
+  height: 100vh;
+  height: var(--az-ask-height, 100dvh);
+  min-height: 260px;
+  margin-inline: auto;
+  padding-block: calc(62px + env(safe-area-inset-top, 0px)) calc(80px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
   color: var(--az-asst-text);
-  text-align: start;
-  transform-origin: center top;
-  transition:
-    max-height 480ms var(--az-asst-ease),
-    opacity 320ms ease,
-    transform 480ms var(--az-asst-ease);
-  max-height: none;
 }
 
-.az-assistant.is-open .az-assistant__panel {
-  max-height: min(52vh, 420px);
-}
-
-.az-assistant__chrome {
-  display: none;
+.az-ask__header {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 0;
+  min-height: 44px;
+  padding-block: 4px;
+  border-block-end: 1px solid var(--az-asst-edge);
 }
 
-.az-assistant.is-open .az-assistant__chrome {
-  display: flex;
-}
-
-.az-assistant__title {
+.az-ask__title {
   margin: 0;
-  font-family: "Manrope", system-ui, sans-serif;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--az-asst-muted);
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  outline: none;
 }
 
-html.az-lang-fa .az-assistant__title {
-  font-family: "Estedad", "Manrope", sans-serif;
-  letter-spacing: 0;
-}
-
-.az-assistant__actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.az-assistant__text-btn,
-.az-assistant__icon-btn {
+.az-assistant__text-btn {
   appearance: none;
+  min-height: 36px;
+  padding: 5px 10px;
   border: 0;
+  border-radius: 999px;
   background: transparent;
   color: var(--az-asst-muted);
   cursor: pointer;
-  border-radius: 999px;
-  padding: 6px 10px;
   font: inherit;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
 }
 
-.az-assistant__icon-btn {
-  display: inline-grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
+.az-assistant__text-btn[hidden] {
+  display: none;
 }
 
-.az-assistant__text-btn:hover,
-.az-assistant__icon-btn:hover {
+.az-assistant__text-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.az-assistant__text-btn:hover {
   color: var(--az-asst-text);
   background: rgba(255, 255, 255, 0.06);
 }
 
 .az-assistant__text-btn:focus-visible,
-.az-assistant__icon-btn:focus-visible,
 .az-assistant__send:focus-visible,
-.az-assistant__input:focus-visible {
+.az-assistant__input:focus-visible,
+.az-assistant__transcript:focus-visible {
   outline: 2px solid var(--az-asst-accent);
   outline-offset: 2px;
 }
 
-.az-assistant__transcript {
-  display: none;
-  flex: 1 1 auto;
+.az-ask__conversation {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   min-height: 0;
-  max-height: min(34vh, 260px);
+}
+
+.az-assistant__transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 4px 2px 8px;
+  padding: 14px 3px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
 
-.az-assistant.is-open .az-assistant__transcript {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.az-ask__status {
+  margin-block: 4px 8px;
+  color: var(--az-asst-muted);
+  font-size: 0.8rem;
+}
+
+@media (min-width: 768px) {
+  .az-ask {
+    padding-block: calc(70px + env(safe-area-inset-top, 0px)) calc(112px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .az-assistant__bubble {
+  flex: 0 0 auto;
   max-width: 92%;
   padding: 10px 12px;
   border-radius: 16px;
@@ -158,8 +147,7 @@ html.az-lang-fa .az-assistant__title {
 
 .az-assistant__bubble--assistant {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding-inline: 2px;
   color: var(--az-asst-text);
 }
 
@@ -292,7 +280,7 @@ html[dir="rtl"] .az-assistant__composer {
   background: #f8bd9a;
 }
 
-html[data-az-route="home"] #glass-nav .az-assistant-nav-hint {
+html[data-az-route="ask"] #glass-nav .az-assistant-nav-hint {
   color: var(--az-accent, #6ee7ff);
   filter: drop-shadow(0 0 5px #6ee7ff80);
   animation: az-avatar-nav-hint 700ms ease-in-out 2;
@@ -360,17 +348,6 @@ html[dir="rtl"] .az-assistant__send svg {
   transform: none;
 }
 
-.az-assistant__status {
-  display: none !important;
-  margin: 0;
-  min-height: 0;
-  height: 0;
-  overflow: hidden;
-  font-size: 0.78rem;
-  color: #ffb4b4;
-  text-align: center;
-}
-
 .az-assistant__sr {
   position: absolute;
   width: 1px;
@@ -406,8 +383,8 @@ html[dir="rtl"] .az-assistant__send svg {
   40% { opacity: 1; transform: translateY(-2px); }
 }
 
-/* Keep chat independent of slide transitions; hide off-home. */
-html[data-az-route]:not([data-az-route="home"]) .az-assistant {
+/* Keep the home composer independent of the slide transitions. */
+html[data-az-route]:not([data-az-route="home"]) .az-assistant--home {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -467,7 +444,7 @@ html.az-preloader-open .az-assistant {
 @media (max-width: 760px) {
   /* Center the collapsed composer in the free band between profile intro and dock.
      Extra bottom inset biases the flex mid-point up so the composer lands near mid-hero. */
-  .az-assistant {
+  .az-assistant--home {
     top: 0;
     bottom: 0;
     padding-inline: 12px;
@@ -475,21 +452,6 @@ html.az-preloader-open .az-assistant {
     padding-bottom: calc(220px + env(safe-area-inset-bottom, 0px));
     align-items: center;
     box-sizing: border-box;
-  }
-
-  /* Expanded: sit above the dock so the keyboard leaves the transcript usable. */
-  .az-assistant.is-open {
-    align-items: flex-end;
-    padding-top: max(72px, calc(env(safe-area-inset-top, 0px) + 56px));
-    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-  }
-
-  .az-assistant.is-open .az-assistant__panel {
-    max-height: min(48dvh, 360px);
-  }
-
-  .az-assistant.is-open .az-assistant__transcript {
-    max-height: min(28dvh, 200px);
   }
 
   .az-assistant__composer {
@@ -503,28 +465,11 @@ html.az-preloader-open .az-assistant {
 }
 
 @media (max-width: 760px) and (max-height: 700px) {
-  .az-assistant {
+  .az-assistant--home {
     padding-top: max(128px, calc(env(safe-area-inset-top, 0px) + 108px));
     padding-bottom: calc(168px + env(safe-area-inset-bottom, 0px));
   }
 
-  .az-assistant.is-open {
-    padding-top: max(56px, calc(env(safe-area-inset-top, 0px) + 40px));
-  }
-
-  .az-assistant.is-open .az-assistant__panel {
-    max-height: min(40dvh, 280px);
-  }
-
-  .az-assistant.is-open .az-assistant__transcript {
-    max-height: min(22dvh, 160px);
-  }
-}
-
-@media (max-width: 420px) {
-  .az-assistant.is-open .az-assistant__panel {
-    max-height: min(42dvh, 320px);
-  }
 }
 
 /* Mobile homepage: Selected work strip under the collapsed composer. */
@@ -636,18 +581,13 @@ html.az-lang-fa .az-selected-work__link {
 }
 
 @media (max-width: 760px) {
-  .az-assistant {
+  .az-assistant--home {
     flex-direction: column;
   }
 
-  .az-assistant.is-ready .az-selected-work:not([hidden]) {
+  .az-assistant--home .az-selected-work:not([hidden]) {
     display: flex;
     animation: az-selected-in 420ms var(--az-asst-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
-  }
-
-  /* Expanded chat: drop the strip and reclaim the 24px + link row. */
-  .az-assistant.is-open .az-selected-work {
-    display: none !important;
   }
 }
 
@@ -663,8 +603,7 @@ html.az-lang-fa .az-selected-work__link {
 
 @media (prefers-reduced-motion: reduce) {
   .az-assistant__avatar *,
-  html[data-az-route="home"] #glass-nav .az-assistant-nav-hint,
-  .az-assistant__panel,
+  html[data-az-route="ask"] #glass-nav .az-assistant-nav-hint,
   .az-assistant__send,
   .az-assistant__typing i,
   .az-selected-work__link,

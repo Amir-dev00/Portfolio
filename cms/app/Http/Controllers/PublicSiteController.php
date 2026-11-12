@@ -26,6 +26,11 @@ class PublicSiteController extends Controller
         return $this->page($request, $locale, 'about');
     }
 
+    public function ask(Request $request, string $locale = 'en'): View
+    {
+        return $this->page($request, $locale, 'ask');
+    }
+
     public function contact(Request $request, string $locale = 'en'): View
     {
         return $this->page($request, $locale, 'contact');
@@ -90,6 +95,12 @@ class PublicSiteController extends Controller
         $strings = $this->content->strings($locale, $preview);
         $projects = $this->content->projectsFor($locale, $preview);
         $seo = $this->content->seo($locale, $view === 'project' ? 'project' : 'page', $view === 'project' ? $slug : $view, $preview);
+
+        if ($view === 'ask') {
+            $seo['title'] = $strings['title.ask'] ?? ($locale === 'fa'
+                ? 'گفتگو — امیرحسین زمان‌زاده'
+                : 'Ask — Amirhossein Zamanzade');
+        }
 
         $project = null;
         if ($view === 'project') {
@@ -187,6 +198,7 @@ class PublicSiteController extends Controller
         return match ($view) {
             'work' => url($prefix.'/work'),
             'about' => url($prefix.'/about'),
+            'ask' => url($prefix.'/ask'),
             'contact' => url($prefix.'/contact'),
             'project' => url($prefix.'/work/'.$slug),
             default => url($prefix ?: '/'),

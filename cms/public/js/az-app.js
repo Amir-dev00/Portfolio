@@ -69,6 +69,7 @@
     if (raw === "/" || raw === "") return { name: "home" };
     if (raw === "/work") return { name: "work" };
     if (raw === "/about") return { name: "about" };
+    if (raw === "/ask") return { name: "ask" };
     if (raw === "/contact") return { name: "contact" };
     var match = raw.match(/^\/work\/([^/]+)$/);
     if (match) {
@@ -84,7 +85,7 @@
   function isPortfolioHash(raw) {
     var hash = String(raw || "").replace(/^#/, "").replace(/^\/+/, "");
     if (!hash || hash === "selected-work" || hash === "/") return true;
-    if (hash === "home" || hash === "work" || hash === "about" || hash === "contact") return true;
+    if (hash === "home" || hash === "work" || hash === "about" || hash === "contact" || hash === "ask" || hash === "chat") return true;
     return hash.indexOf("work/") === 0;
   }
 
@@ -92,6 +93,7 @@
     home: document.getElementById("view-home"),
     work: document.getElementById("view-work"),
     about: document.getElementById("view-about"),
+    ask: document.getElementById("view-ask"),
     contact: document.getElementById("view-contact"),
     project: document.getElementById("view-project"),
   };
@@ -120,6 +122,7 @@
     if (hash === "home") return { name: "home" };
     if (hash === "work") return { name: "work" };
     if (hash === "about") return { name: "about" };
+    if (hash === "ask" || hash === "chat") return { name: "ask" };
     if (hash === "contact") return { name: "contact" };
     if (hash.indexOf("work/") === 0) {
       return { name: "project", slug: decodeURIComponent(hash.slice(5)) };
@@ -138,6 +141,7 @@
   function setDocumentTitle(route) {
     if (route.name === "work") document.title = tt("title.work");
     else if (route.name === "about") document.title = tt("title.about");
+    else if (route.name === "ask") document.title = tt("title.ask");
     else if (route.name === "contact") document.title = tt("title.contact");
     else if (route.name === "project") {
       var project = window.AZ_getProjectBySlug && window.AZ_getProjectBySlug(route.slug);
@@ -349,7 +353,7 @@
   function setDockActive(route) {
     if (!nav) return;
     var navKey = route.name === "project" ? "work" : route.name;
-    var map = { home: "home", work: "work", about: "about", contact: "contact" };
+    var map = { home: "home", work: "work", about: "about", contact: "contact", ask: "ask" };
     var activeKey = map[navKey] || "home";
     nav.querySelectorAll("[data-nav]").forEach(function (item) {
       var key = item.getAttribute("data-nav");
@@ -779,6 +783,10 @@
     setNativePageScroll(!isHome);
     setHomeSliderLive(isHome);
     window.scrollTo(0, 0);
+    if (route.name === "ask" && document.documentElement.classList.contains("az-app-ready")) {
+      var title = document.getElementById("az-ask-title");
+      if (title) title.focus({ preventScroll: true });
+    }
     window.requestAnimationFrame(function () {
       applyPageScrollMode();
       if (!isHome) window.scrollTo(0, 0);
@@ -887,6 +895,7 @@
       home: prefix || "/",
       work: prefix + "/work",
       about: prefix + "/about",
+      ask: prefix + "/ask",
       contact: prefix + "/contact",
     };
     document.querySelectorAll("a[data-nav]").forEach(function (link) {
@@ -976,6 +985,9 @@
   }
 
   document.addEventListener("click", onNavClick);
+  window.addEventListener("az:ask", function () {
+    navigateClient({ name: "ask" }, false);
+  });
   window.addEventListener("hashchange", function () {
     if (serverRouted) {
       canonicalizeLegacyUrl();

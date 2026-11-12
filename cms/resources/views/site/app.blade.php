@@ -1,5 +1,5 @@
 {{--
-  Public site entry view. Every URL (/, /work, /about, /contact, /work/{slug}, /fa/*)
+  Public site entry view. Every URL (/, /work, /about, /ask, /contact, /work/{slug}, /fa/*)
   renders the same SPA shell so client-side transitions keep working; the server marks
   the active view and fills it with published CMS content for direct loads and SEO.
 --}}
@@ -27,6 +27,7 @@
       'home' => $localePrefix !== '' ? $localePrefix : '/',
       'work' => $localePrefix.'/work',
       'about' => $localePrefix.'/about',
+      'ask' => $localePrefix.'/ask',
       'contact' => $localePrefix.'/contact',
   ];
 
@@ -49,6 +50,8 @@
           @include('pages.project')
 
           @include('pages.about')
+
+          @include('pages.ask')
 
           @include('pages.contact')
 @endsection

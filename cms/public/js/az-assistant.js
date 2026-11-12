@@ -5,7 +5,7 @@
   var state = {
     root: null,
     sending: false,
-    open: false,
+    home: null,
     messages: [],
     configured: true,
     reactionTimer: 0,
@@ -89,31 +89,18 @@
     );
   }
 
-  /** Under-composer status is unused; keep the node empty so idle UI has no reserved text. */
-  function clearStatus() {
+  function showStatus(message) {
     var el = qs("[data-az-assistant-status]");
     if (!el) return;
-    el.hidden = true;
-    el.textContent = "";
-    el.removeAttribute("data-tone");
-  }
-
-  function setOpen(open) {
-    state.open = !!open;
-    if (!state.root) return;
-    state.root.classList.toggle("is-open", state.open);
-    var reset = qs("[data-az-assistant-reset]");
-    var collapse = qs("[data-az-assistant-collapse]");
-    var transcript = qs("[data-az-assistant-transcript]");
-    if (reset) reset.hidden = !state.open;
-    if (collapse) collapse.hidden = !state.open;
-    if (transcript) transcript.hidden = !state.open;
+    el.textContent = message;
+    el.hidden = !message;
   }
 
   function renderTranscript() {
     var el = qs("[data-az-assistant-transcript]");
     if (!el) return;
-    state.root.classList.toggle("has-messages", state.messages.length > 0);
+    var reset = qs("[data-az-assistant-reset]");
+    if (reset) reset.hidden = !state.messages.length;
     el.innerHTML = state.messages
       .map(function (m) {
         var cls = m.role === "user" ? "az-assistant__bubble--user" : "az-assistant__bubble--assistant";
@@ -123,18 +110,20 @@
               escapeHtml(t("assistant.thinking")) +
               '"><i></i><i></i><i></i></span>'
             : formatText(m.content);
-        return '<div class="az-assistant__bubble ' + cls + '" data-role="' + m.role + '">' + body + "</div>";
+        return '<div class="az-assistant__bubble ' + cls + '" data-role="' + m.role + '" dir="auto">' + body + "</div>";
       })
       .join("");
     el.scrollTop = el.scrollHeight;
   }
 
   function syncDirection() {
-    if (!state.root) return;
     var l = lang();
-    state.root.setAttribute("lang", l);
-    state.root.setAttribute("dir", l === "fa" ? "rtl" : "ltr");
-    applyI18n(state.root);
+    [state.root, state.home].forEach(function (root) {
+      if (!root) return;
+      root.setAttribute("lang", l);
+      root.setAttribute("dir", l === "fa" ? "rtl" : "ltr");
+      applyI18n(root);
+    });
   }
 
   function projectHref(slug) {
@@ -187,9 +176,9 @@
   }
 
   function renderSelectedWork() {
-    if (!state.root) return;
-    var nav = qs("[data-az-selected-work]");
-    var linksHost = qs("[data-az-selected-work-links]");
+    if (!state.home) return;
+    var nav = state.home.querySelector("[data-az-selected-work]");
+    var linksHost = state.home.querySelector("[data-az-selected-work-links]");
     if (!nav || !linksHost) return;
 
     var picks = pickSelectedProjects();
@@ -244,11 +233,8 @@
   function send(text) {
     var message = String(text || "").trim();
     if (!message || state.sending) return;
-    var input = qs("#az-assistant-input");
-    if (input) input.value = "";
-
-    setOpen(true);
-    clearStatus();
+    window.dispatchEvent(new Event("az:ask"));
+    showStatus("");
     state.messages.push({ role: "user", content: message });
 
     if (!state.configured) {
@@ -261,7 +247,6 @@
     state.messages.push({ role: "assistant", content: "", pending: true });
     renderTranscript();
 
-    state.sending = true;
     setBusy(true);
     react("thinking");
 
@@ -294,61 +279,80 @@
         react("error");
       })
       .finally(function () {
-        state.sending = false;
         setBusy(false);
       });
   }
 
   function setBusy(busy) {
-    var input = qs("#az-assistant-input");
-    var sendBtn = qs("[data-az-assistant-send]");
-    if (input) input.disabled = !!busy;
-    if (sendBtn) sendBtn.disabled = !!busy;
+    state.sending = busy;
+    [state.root, state.home].forEach(function (root) {
+      if (!root) return;
+      var button = root.querySelector("[data-az-assistant-send]");
+      if (button) button.disabled = busy;
+    });
+    var reset = qs("[data-az-assistant-reset]");
+    if (reset) reset.disabled = busy;
   }
 
   function resetChat() {
     if (state.sending) return;
-    react("idle");
-    postChat({ reset: true, locale: lang() }).catch(function () {});
-    state.messages = [];
-    setOpen(false);
-    clearStatus();
-    renderTranscript();
-    var input = qs("#az-assistant-input");
-    if (input) {
-      input.focus({ preventScroll: true });
-    }
+    setBusy(true);
+    showStatus("");
+    postChat({ reset: true, locale: lang() })
+      .then(function (res) {
+        if (!res.ok || !res.data.ok) throw new Error("reset");
+        state.messages = [];
+        react("idle");
+        renderTranscript();
+        var input = qs("[data-az-assistant-input]");
+        if (input) {
+          input.value = "";
+          input.focus({ preventScroll: true });
+        }
+      })
+      .catch(function () {
+        showStatus(t("assistant.error.retry"));
+      })
+      .finally(function () {
+        setBusy(false);
+      });
   }
 
   function onSubmit(e) {
     e.preventDefault();
-    var input = qs("#az-assistant-input");
-    send(input && input.value);
+    var input = e.currentTarget.querySelector("[data-az-assistant-input]");
+    if (!input || !input.value.trim() || state.sending) return;
+    var message = input.value;
+    input.value = "";
+    send(message);
   }
 
   function bind() {
     state.root = document.querySelector(ROOT);
     if (!state.root) return;
-
-    state.root.hidden = false;
-    state.root.classList.add("is-ready");
+    state.home = document.querySelector("[data-az-assistant-home]");
+    if (state.home) state.home.hidden = false;
     syncDirection();
     renderTranscript();
 
-    var form = qs("[data-az-assistant-form]");
-    if (form) form.addEventListener("submit", onSubmit);
-
+    document.querySelectorAll("[data-az-assistant-form]").forEach(function (form) {
+      form.addEventListener("submit", onSubmit);
+    });
     var reset = qs("[data-az-assistant-reset]");
     if (reset) reset.addEventListener("click", resetChat);
+    setBusy(false);
 
-    var collapse = qs("[data-az-assistant-collapse]");
-    if (collapse) {
-      collapse.addEventListener("click", function () {
-        setOpen(false);
-      });
+    var viewport = window.visualViewport;
+    if (viewport) {
+      var resizeChat = function () {
+        if (viewport.scale === 1) {
+          state.root.style.setProperty("--az-ask-height", Math.floor(viewport.height) + "px");
+        }
+      };
+      viewport.addEventListener("resize", resizeChat);
+      resizeChat();
     }
 
-    clearStatus();
     renderSelectedWork();
 
     // Soft status probe — store readiness only; never show setup text under the composer.
@@ -407,7 +411,7 @@
     send: send,
     reset: resetChat,
     open: function () {
-      setOpen(true);
+      window.dispatchEvent(new Event("az:ask"));
     },
   };
 })();

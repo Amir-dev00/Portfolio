@@ -38,12 +38,14 @@ Route::prefix('api/booking')->name('api.booking.')->group(function () {
 Route::get('/', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->home($r, 'en'))->name('home');
 Route::get('/work', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->work($r, 'en'))->name('work');
 Route::get('/about', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->about($r, 'en'))->name('about');
+Route::get('/ask', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->ask($r, 'en'))->name('ask');
 Route::get('/contact', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->contact($r, 'en'))->name('contact');
 Route::get('/work/{slug}', fn (\Illuminate\Http\Request $r, string $slug) => app(PublicSiteController::class)->project($r, 'en', $slug))->name('project');
 
 Route::get('/fa', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->home($r, 'fa'))->name('fa.home');
 Route::get('/fa/work', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->work($r, 'fa'))->name('fa.work');
 Route::get('/fa/about', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->about($r, 'fa'))->name('fa.about');
+Route::get('/fa/ask', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->ask($r, 'fa'))->name('fa.ask');
 Route::get('/fa/contact', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->contact($r, 'fa'))->name('fa.contact');
 Route::get('/fa/work/{slug}', fn (\Illuminate\Http\Request $r, string $slug) => app(PublicSiteController::class)->project($r, 'fa', $slug))->name('fa.project');
 
