@@ -171,11 +171,11 @@ html.az-lang-fa .az-assistant__title {
 
 .az-assistant__composer {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   min-height: 52px;
-  padding: 6px 6px 6px 16px;
+  padding: 6px 6px 6px 9px;
   border-radius: 999px;
   background: var(--az-glass-translucent-strong, rgba(20, 34, 56, 0.86));
   border: 1px solid var(--az-asst-edge);
@@ -183,7 +183,132 @@ html.az-lang-fa .az-assistant__title {
 }
 
 html[dir="rtl"] .az-assistant__composer {
-  padding: 6px 16px 6px 6px;
+  padding: 6px 9px 6px 6px;
+}
+
+.az-assistant__avatar {
+  --az-avatar-gaze: 2px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  perspective: 90px;
+  pointer-events: none;
+}
+
+.az-assistant[dir="rtl"] .az-assistant__avatar {
+  --az-avatar-gaze: -2px;
+}
+
+.az-assistant__avatar-shell {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 31px;
+  border: 1px solid #8db9de;
+  border-radius: 42% 42% 46% 46%;
+  background:
+    radial-gradient(ellipse at 32% 8%, #def5ff 0%, transparent 42%),
+    linear-gradient(155deg, #9dc5e0 8%, #39577d 49%, #101a32 81%, #4f79ac 100%);
+  box-shadow: inset 0 -2px 2px #0c132b, 0 3px 8px #02081399;
+  transition: transform 240ms var(--az-asst-ease);
+}
+
+.az-assistant__avatar-face {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 25px;
+  height: 18px;
+  border-radius: 42% 42% 46% 46%;
+  background: linear-gradient(160deg, #162848, #050d20 76%);
+  box-shadow: inset 0 1px 3px #030917, 0 1px 0 #9fcae87d;
+  transition: transform 220ms var(--az-asst-ease);
+}
+
+.az-assistant__avatar-eye {
+  width: 4px;
+  height: 6px;
+  margin-top: -2px;
+  border-radius: 99px;
+  background: #abedff;
+  box-shadow: 0 0 4px #72cffe80;
+  transition: height 160ms ease, background-color 160ms ease;
+}
+
+.az-assistant__avatar-mouth {
+  position: absolute;
+  bottom: 3px;
+  width: 5px;
+  height: 1px;
+  border-radius: 0 0 50% 50%;
+  background: #a5ddff;
+  opacity: 0.65;
+  transition: height 180ms ease;
+}
+
+.az-assistant__composer:focus-within [data-az-assistant-avatar="idle"] .az-assistant__avatar-face {
+  transform: translateX(var(--az-avatar-gaze));
+}
+
+[data-az-assistant-avatar="thinking"] .az-assistant__avatar-shell {
+  transform: rotateZ(-9deg) rotateY(14deg);
+}
+
+[data-az-assistant-avatar="thinking"] .az-assistant__avatar-face {
+  transform: translateY(-2px);
+}
+
+[data-az-assistant-avatar="thinking"] .az-assistant__avatar-eye {
+  animation: az-avatar-thinking 1.35s ease-in-out infinite;
+}
+
+[data-az-assistant-avatar="thinking"] .az-assistant__avatar-eye:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+[data-az-assistant-avatar="reply"] .az-assistant__avatar-shell {
+  animation: az-avatar-acknowledge 600ms var(--az-asst-ease) both;
+}
+
+[data-az-assistant-avatar="reply"] .az-assistant__avatar-mouth,
+[data-az-assistant-avatar="point"] .az-assistant__avatar-mouth {
+  height: 3px;
+}
+
+[data-az-assistant-avatar="point"] .az-assistant__avatar-shell {
+  transform: rotateX(-14deg);
+  animation: az-avatar-acknowledge 600ms var(--az-asst-ease) both;
+}
+
+[data-az-assistant-avatar="point"] .az-assistant__avatar-face {
+  transform: translateY(3px);
+}
+
+[data-az-assistant-avatar="error"] .az-assistant__avatar-eye {
+  height: 3px;
+  background: #f8bd9a;
+}
+
+html[data-az-route="home"] #glass-nav .az-assistant-nav-hint {
+  color: var(--az-accent, #6ee7ff);
+  filter: drop-shadow(0 0 5px #6ee7ff80);
+  animation: az-avatar-nav-hint 700ms ease-in-out 2;
+}
+
+@keyframes az-avatar-thinking {
+  50% { transform: scaleY(0.55); opacity: 0.6; }
+}
+
+@keyframes az-avatar-acknowledge {
+  40% { translate: 0 -4px; }
+  72% { translate: 0 1px; }
+}
+
+@keyframes az-avatar-nav-hint {
+  50% { filter: drop-shadow(0 0 10px #6ee7ffcc); }
 }
 
 .az-assistant__input {
@@ -537,6 +662,8 @@ html.az-lang-fa .az-selected-work__link {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .az-assistant__avatar *,
+  html[data-az-route="home"] #glass-nav .az-assistant-nav-hint,
   .az-assistant__panel,
   .az-assistant__send,
   .az-assistant__typing i,

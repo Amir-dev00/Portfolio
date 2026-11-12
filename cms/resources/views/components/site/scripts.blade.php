@@ -52,6 +52,5 @@
     <script src="{{ $assetV('js/az-jalali.js') }}" defer></script>
     <script src="{{ $assetV('js/az-booking.js') }}" defer></script>
     <script src="{{ $assetV('js/az-assistant.js') }}" defer></script>
-    <script src="{{ $assetV('js/az-guide.js') }}" defer></script>
     <script src="{{ $assetV('js/az-home-arrows.js') }}" defer></script>
     <!-- - COMPONENTS -->

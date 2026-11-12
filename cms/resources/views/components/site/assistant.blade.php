@@ -19,6 +19,15 @@
                   <div class="az-assistant__transcript" data-az-assistant-transcript hidden tabindex="0" aria-live="polite" aria-relevant="additions" aria-label="Conversation" data-i18n-attr="aria-label:assistant.transcript"></div>
 
                   <form class="az-assistant__composer" data-az-assistant-form>
+                    <span class="az-assistant__avatar" data-az-assistant-avatar="idle" aria-hidden="true">
+                      <span class="az-assistant__avatar-shell">
+                        <span class="az-assistant__avatar-face">
+                          <i class="az-assistant__avatar-eye"></i>
+                          <i class="az-assistant__avatar-eye"></i>
+                          <i class="az-assistant__avatar-mouth"></i>
+                        </span>
+                      </span>
+                    </span>
                     <label class="az-assistant__sr" for="az-assistant-input" data-i18n="assistant.prompt">Ask about Amirhossein</label>
                     <input
                       id="az-assistant-input"

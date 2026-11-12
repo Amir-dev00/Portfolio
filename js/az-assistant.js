@@ -8,6 +8,8 @@
     open: false,
     messages: [],
     configured: true,
+    reactionTimer: 0,
+    navHint: null,
   };
 
   function lang() {
@@ -42,6 +44,30 @@
 
   function qs(sel) {
     return state.root ? state.root.querySelector(sel) : null;
+  }
+
+  function react(pose, reply) {
+    var avatar = qs("[data-az-assistant-avatar]");
+    if (!avatar) return;
+
+    window.clearTimeout(state.reactionTimer);
+    if (state.navHint) state.navHint.classList.remove("az-assistant-nav-hint");
+    state.navHint = null;
+
+    // Highlight a known dock item only when the AI reply includes a local site path.
+    var destination = reply && /(?:^|[\s(\[`])\/(?:fa\/)?(work|about|contact)(?=$|[\s/?)\]`.,!،؟])/i.exec(reply);
+    if (destination) {
+      state.navHint = document.querySelector('#glass-nav [data-nav="' + destination[1].toLowerCase() + '"]');
+      if (state.navHint) {
+        state.navHint.classList.add("az-assistant-nav-hint");
+        pose = "point";
+      }
+    }
+
+    avatar.setAttribute("data-az-assistant-avatar", pose);
+    if (pose === "reply" || pose === "point" || pose === "error") {
+      state.reactionTimer = window.setTimeout(function () { react("idle"); }, 1600);
+    }
   }
 
   function escapeHtml(str) {
@@ -228,6 +254,7 @@
     if (!state.configured) {
       state.messages.push({ role: "assistant", content: t("assistant.error.config") });
       renderTranscript();
+      react("error");
       return;
     }
 
@@ -236,6 +263,7 @@
 
     state.sending = true;
     setBusy(true);
+    react("thinking");
 
     postChat({ message: message, locale: lang() })
       .then(function (res) {
@@ -249,10 +277,13 @@
             t("assistant.error.retry");
           state.messages.push({ role: "assistant", content: err });
           renderTranscript();
+          react("error");
           return;
         }
-        state.messages.push({ role: "assistant", content: String(res.data.reply || "") });
+        var reply = String(res.data.reply || "");
+        state.messages.push({ role: "assistant", content: reply });
         renderTranscript();
+        react("reply", reply);
       })
       .catch(function () {
         if (state.messages.length && state.messages[state.messages.length - 1].pending) {
@@ -260,6 +291,7 @@
         }
         state.messages.push({ role: "assistant", content: t("assistant.error.retry") });
         renderTranscript();
+        react("error");
       })
       .finally(function () {
         state.sending = false;
@@ -276,6 +308,7 @@
 
   function resetChat() {
     if (state.sending) return;
+    react("idle");
     postChat({ reset: true, locale: lang() }).catch(function () {});
     state.messages = [];
     setOpen(false);
