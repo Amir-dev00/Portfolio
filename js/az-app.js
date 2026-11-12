@@ -9,6 +9,10 @@
   var nav = document.getElementById("glass-nav");
   if (!app) return;
 
+  // The SPA owns navigation. Disable Rhye's Barba setup before window.load
+  // so clean route URLs and browser history use the in-page view transition.
+  if (window.theme && window.theme.ajax) window.theme.ajax.enabled = false;
+
   var boot = window.AZ_BOOTSTRAP || null;
   var serverRouted = !!(boot && boot.canonical);
 
