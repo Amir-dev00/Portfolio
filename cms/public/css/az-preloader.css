@@ -1,5 +1,5 @@
 /* AZ / 02 — Circular metallic monogram preloader. Styled only inside #js-preloader.
-   Rhye's offscreen counter feeds the AZ progress controller.
+   The Rhye template still controls the counter's value and the loader's dismissal.
    Colors come from az-tokens.css (navy + ice). */
 
 /* Hide Rhye's cursor SVG ring while AZ owns the loading visuals (cursor stays in DOM for Rhye). */
@@ -64,17 +64,7 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 }
 #js-preloader.az-preloader--ring *, #js-preloader.az-preloader--ring *::before,
 #js-preloader.az-preloader--ring *::after { box-sizing: border-box; }
-/* Rhye's legacy full-viewport circle — opacity:0 was not enough; it still read as the big ring. */
-#js-preloader.az-preloader--ring .preloader__circle {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
+#js-preloader.az-preloader--ring .preloader__circle { display: none !important; }
 #js-preloader.az-preloader--ring .preloader__content.az-preloader__layout {
   position: relative !important;
   inset: auto !important;
@@ -110,70 +100,72 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   margin: 0 auto clamp(18px, 2.4vw, 28px);
   opacity: 1;
   visibility: visible;
-  /* No filter here — filtering the disc re-rasterizes the animating ring every tick. */
+  filter: drop-shadow(0 12px 34px color-mix(in srgb, var(--az-accent) 10%, transparent));
   animation: az-ring-arrive 1100ms cubic-bezier(.16,1,.3,1) both;
 }
 #js-preloader.az-preloader--ring .az-preloader__disc::before {
-  content: none;
-  display: none;
+  content: '';
+  position: absolute; inset: -19%; border-radius: 50%; z-index: -1; pointer-events: none;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--az-accent) 16%, transparent) 0%,
+    color-mix(in srgb, var(--az-accent) 5%, transparent) 40%,
+    transparent 68%
+  );
+  transition: opacity .6s ease;
 }
-/* Image host only — no filled circular plate (that read as a second ring inside the SVG). */
 #js-preloader.az-preloader--ring .az-preloader__image-shell {
-  position: absolute; inset: 10.5%; overflow: visible;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-#js-preloader.az-preloader--ring .az-preloader__image-shell::after {
-  content: none;
+  position: absolute; inset: 8.25%; overflow: hidden; border-radius: 50%;
 }
 #js-preloader.az-preloader--ring .az-preloader__image {
-  display: block; width: 100%; height: 100%; object-fit: contain;
-  background: transparent; box-shadow: none; border-radius: 0;
-  transform: none; transform-origin: center;
+  display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+  transform: scale(1.17); transform-origin: center;
+  filter: saturate(1.02) contrast(1.08);
 }
 #js-preloader.az-preloader--ring .az-preloader__ring {
   position: absolute; inset: 0; display: block; width: 100%; height: 100%;
   overflow: visible; z-index: 3; transform: rotate(-90deg);
 }
+#js-preloader.az-preloader--ring .az-preloader__ring-track,
 #js-preloader.az-preloader--ring .az-preloader__ring-fill {
-  fill: none; stroke-width: 3.5; stroke-linecap: round;
-  stroke: url(#az-ring-ice); stroke-dasharray: 100 100; stroke-dashoffset: 100;
-  /* Progress geometry is rAF-driven once JS owns the ring. */
-  transition: none;
-  will-change: stroke-dashoffset;
+  fill: none; stroke-width: 3.25; stroke-linecap: round;
+}
+#js-preloader.az-preloader--ring .az-preloader__ring-track {
+  stroke: color-mix(in srgb, var(--az-text) 16%, transparent);
+}
+#js-preloader.az-preloader--ring .az-preloader__ring-fill {
+  stroke: url(#az-ring-ice); stroke-width: 4; stroke-dasharray: 100 100; stroke-dashoffset: 100;
+  transition: stroke-dashoffset .19s linear; will-change: stroke-dashoffset;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--az-accent) 55%, transparent));
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head {
   position: absolute; z-index: 4; inset: 0; display: block; pointer-events: none;
-  transform: rotate(0deg);
+  transform: rotate(calc(var(--az-progress, 0) * 3.6deg));
   opacity: 0;
-  /* Dot angle matches the arc via JS; only fade uses CSS. */
-  transition: opacity 260ms ease;
-  will-change: transform, opacity;
+  transition:
+    transform .19s linear,
+    opacity 260ms ease;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head.is-active {
   opacity: 1;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head.is-complete,
-#js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-head,
-#js-preloader.az-preloader--ring.az-preloader--retry .az-preloader__ring-head {
+#js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-head {
   opacity: 0;
 }
 #js-preloader.az-preloader--ring .az-preloader__ring-head::after {
   content: ''; position: absolute; top: 4.5%; left: calc(50% - 3px);
   width: 6px; height: 6px; background: var(--az-accent); border-radius: 50%;
-  /* Glow stays on the tiny moving dot — cheap vs filtering the whole ring path. */
   box-shadow:
-    0 0 8px 2px rgba(110, 231, 255, 0.55),
-    0 0 18px rgba(110, 231, 255, 0.28);
+    0 0 8px 2px color-mix(in srgb, var(--az-accent) 55%, transparent),
+    0 0 22px color-mix(in srgb, var(--az-accent) 28%, transparent);
 }
 #js-preloader.az-preloader--ring .az-preloader__load-label {
   display: block; color: var(--az-text-secondary); font-size: 11px; line-height: 1.5;
   letter-spacing: .28em; padding-left: .28em; font-weight: 600;
   animation: az-ring-fade-up 900ms 550ms both;
 }
-#js-preloader.az-preloader--ring .az-preloader__percentage {
+#js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage {
   position: relative; display: flex; align-items: baseline; justify-content: center;
   gap: 0.28em; margin: 8px 0 0; padding: 0;
   font-family: var(--font-en);
@@ -181,24 +173,20 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   letter-spacing: -.04em; white-space: nowrap;
   font-variant-numeric: lining-nums tabular-nums;
   opacity: 1;
+  animation: az-ring-fade-up 700ms 220ms both;
 }
-#js-preloader.az-preloader--ring .az-preloader__native-counter,
-#js-preloader.az-preloader--ring[hidden] {
-  display: none !important;
+#js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-current {
+  width: auto; min-width: 3ch; text-align: right;
+  color: var(--az-text); font: inherit; font-variant-numeric: tabular-nums;
 }
-
 #js-preloader.az-preloader--ring .az-preloader__counter-sep,
-#js-preloader.az-preloader--ring .az-preloader__counter-total {
-  color: var(--az-text-secondary);
+#js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-total {
+  width: auto; color: var(--az-text-secondary);
+  font: inherit; font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
 }
-
-#js-preloader.az-preloader--ring.az-preloader--waiting .az-preloader__ring-head.is-active::after {
-  animation: az-waiting-dot 1.2s ease-in-out infinite alternate;
-}
-
-@keyframes az-waiting-dot {
-  from { opacity: 0.45; }
-  to { opacity: 1; }
+#js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-total {
+  min-width: 3ch; text-align: left;
 }
 #js-preloader.az-preloader--ring .az-preloader__identity {
   margin-top: clamp(18px, 2.4vw, 27px); padding-top: clamp(18px, 2.4vw, 27px);
@@ -223,56 +211,9 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   font-family: var(--font-en); font-size: 11px; font-weight: 500;
   letter-spacing: .36em; padding-left: .36em; line-height: 1.6;
 }
+#js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__disc::before { opacity: 1; }
 #js-preloader.az-preloader--ring.az-preloader--complete .az-preloader__ring-fill {
-  /* Static finish glow via stroke width only — no filter at exit. */
-  stroke-width: 4.25;
-  animation: none;
-}
-#js-preloader.az-preloader--ring .az-preloader__retry {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  margin-top: 18px;
-  max-width: 22rem;
-  text-align: center;
-}
-#js-preloader.az-preloader--ring.az-preloader--retry .az-preloader__retry {
-  display: flex;
-  animation: az-ring-fade-up 500ms both;
-}
-#js-preloader.az-preloader--ring.az-preloader--retry .az-preloader__percentage {
-  opacity: 0.55;
-}
-#js-preloader.az-preloader--ring .az-preloader__retry-msg {
-  margin: 0;
-  color: var(--az-text-secondary);
-  font-family: var(--font-en);
-  font-size: 0.82rem;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-}
-#js-preloader.az-preloader--ring .az-preloader__retry-btn {
-  appearance: none;
-  border: 1px solid var(--az-line);
-  background: color-mix(in srgb, var(--az-glass) 80%, transparent);
-  color: var(--az-text);
-  font-family: var(--font-en);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 12px 22px;
-  min-height: 44px;
-  border-radius: 999px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-#js-preloader.az-preloader--ring .az-preloader__retry-btn:hover,
-#js-preloader.az-preloader--ring .az-preloader__retry-btn:focus-visible {
-  border-color: var(--az-accent);
-  color: var(--az-accent);
-  outline: none;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--az-accent) 70%, transparent));
 }
 @keyframes az-ring-arrive {
   /* No filter here — animating filter overrides the metallic drop-shadow and looks matte. */
@@ -291,14 +232,14 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
 @media (max-height: 670px) {
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: clamp(164px, 35vh, 244px); margin-bottom: 9px; }
   #js-preloader.az-preloader--ring .az-preloader__center.preloader__header { padding: 7px 0; }
-  #js-preloader.az-preloader--ring .az-preloader__percentage { font-size: 42px; margin-top: 1px; }
+  #js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage { font-size: 42px; margin-top: 1px; }
   #js-preloader.az-preloader--ring .az-preloader__identity { margin-top: 10px; padding-top: 14px; }
   #js-preloader.az-preloader--ring .az-preloader__load-label { font-size: 11px; letter-spacing: .2em; padding-left: .2em; }
 }
 @media (max-height: 460px) {
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: min(44vh,180px); }
   #js-preloader.az-preloader--ring .az-preloader__identity { margin-top: 5px; padding-top: 9px; }
-  #js-preloader.az-preloader--ring .az-preloader__percentage { font-size: 34px; }
+  #js-preloader.az-preloader--ring .preloader__counter.az-preloader__percentage { font-size: 34px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #js-preloader.az-preloader--ring *,

@@ -88,14 +88,6 @@
         transform:none!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
         display:flex!important;flex-direction:column!important;opacity:1!important;visibility:visible!important;
       }
-      /* Blade-first waiting motion if az-preloader.css is still in flight. */
-      html.az-loading:not(.az-preloader-js) #js-preloader .az-preloader__ring-fill{
-        animation:az-boot-wait-sweep 2.4s cubic-bezier(.45,.05,.55,.95) infinite;
-      }
-      @keyframes az-boot-wait-sweep{0%{stroke-dashoffset:92}50%{stroke-dashoffset:74}100%{stroke-dashoffset:92}}
-      @media (prefers-reduced-motion:reduce){
-        html.az-loading:not(.az-preloader-js) #js-preloader .az-preloader__ring-fill{animation:none!important}
-      }
       .logo-wordmark{display:inline-block;font-family:var(--font-en),"Manrope",sans-serif;font-size:15px;font-weight:700;letter-spacing:.1em;line-height:20px;white-space:nowrap}
       .logo__img-primary.logo-wordmark{color:#111}
       .logo__img-secondary.logo-wordmark{color:#fff}

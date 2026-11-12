@@ -1007,5 +1007,4 @@
 
   applyFromLocation(true);
   document.documentElement.classList.add("az-app-ready");
-  if (window.AZ_preloader) window.AZ_preloader.ready();
 })();
