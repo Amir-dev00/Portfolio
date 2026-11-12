@@ -273,11 +273,17 @@
 
   function syncDirection() {
     var l = lang();
+    var dir = l === "fa" ? "rtl" : "ltr";
     [state.root, state.home].forEach(function (root) {
       if (!root) return;
       root.setAttribute("lang", l);
-      root.setAttribute("dir", l === "fa" ? "rtl" : "ltr");
+      root.setAttribute("dir", dir);
       applyI18n(root);
+    });
+    // Keep placeholder/typed text RTL in Persian without mirroring avatar|input|send.
+    document.querySelectorAll("[data-az-assistant-input]").forEach(function (input) {
+      input.setAttribute("dir", dir);
+      input.setAttribute("lang", l);
     });
   }
 

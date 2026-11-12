@@ -17,6 +17,8 @@
     maxlength="500"
     autocomplete="off"
     enterkeyhint="send"
+    dir="{{ ($locale ?? 'en') === 'fa' ? 'rtl' : 'ltr' }}"
+    lang="{{ ($locale ?? 'en') === 'fa' ? 'fa' : 'en' }}"
     data-i18n-attr="placeholder:assistant.prompt"
     placeholder="{{ $strings['assistant.prompt'] ?? ($locale === 'fa' ? 'دربارهٔ امیرحسین بپرس' : 'Ask about Amirhossein') }}"
   />
