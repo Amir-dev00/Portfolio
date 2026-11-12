@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AssistantChatTest extends TestCase
@@ -45,12 +46,35 @@ class AssistantChatTest extends TestCase
         ]);
 
         $this->postJson('/api/assistant/chat', [
-            'message' => 'What is his stack?',
+            'message' => 'Hello! What is his stack?',
             'locale' => 'en',
         ])
             ->assertOk()
             ->assertJsonPath('ok', true)
             ->assertJsonPath('reply', 'He builds web apps and APIs with Laravel and React.');
+
+        Http::assertSentCount(1);
+    }
+
+    #[DataProvider('greetings')]
+    public function test_simple_greeting_is_answered_without_a_provider_request(string $message, string $locale, string $reply): void
+    {
+        Http::fake();
+
+        $this->postJson('/api/assistant/chat', ['message' => $message, 'locale' => $locale])
+            ->assertOk()
+            ->assertJsonPath('reply', $reply)
+            ->assertJsonPath('turns', 0);
+
+        Http::assertNothingSent();
+    }
+
+    public static function greetings(): array
+    {
+        return [
+            'English' => ['Hello!', 'en', 'Hey! What would you like to know about Amirhossein?'],
+            'Persian' => ['سلام!', 'fa', 'سلام! دوست داری دربارهٔ امیرحسین چی بدونی؟'],
+        ];
     }
 
     public function test_chat_rejects_empty_message(): void
@@ -92,7 +116,9 @@ class AssistantChatTest extends TestCase
             'api.openai.com/*' => Http::response(['output_text' => 'Noted.'], 200),
         ]);
 
-        $this->postJson('/api/assistant/chat', ['message' => 'Hi', 'locale' => 'en'])->assertOk();
+        $this->postJson('/api/assistant/chat', ['message' => 'What is his stack?', 'locale' => 'en'])
+            ->assertOk()
+            ->assertJsonPath('turns', 2);
 
         $this->postJson('/api/assistant/chat', ['reset' => true, 'locale' => 'en'])
             ->assertOk()
@@ -105,7 +131,7 @@ class AssistantChatTest extends TestCase
             'api.openai.com/*' => Http::response(['error' => ['message' => 'down']], 500),
         ]);
 
-        $this->postJson('/api/assistant/chat', ['message' => 'Hi', 'locale' => 'en'])
+        $this->postJson('/api/assistant/chat', ['message' => 'What is his stack?', 'locale' => 'en'])
             ->assertStatus(502)
             ->assertJsonPath('code', 'provider_error');
     }
