@@ -1132,3 +1132,92 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 @media (prefers-reduced-motion: reduce) {
   .az-home-photo .az-home-mobile-bg__slide { transition: none; }
 }
+
+.az-work-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-end: 24px;
+}
+.az-work-sections a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 16px;
+  border: 1px solid var(--az-line);
+  border-radius: 999px;
+  background: var(--az-glass-translucent);
+  color: var(--az-text);
+  font-size: .83rem;
+  transition: border-color .2s ease, background-color .2s ease;
+}
+.az-work-sections a:hover { background: var(--az-accent-soft); border-color: var(--az-line-strong); }
+.az-work-sections a:focus-visible { outline: 2px solid var(--az-accent); outline-offset: 2px; }
+
+#work-projects,
+.az-experience { scroll-margin-block-start: 84px; }
+
+.az-experience {
+  margin-block-start: clamp(38px, 7vw, 76px);
+  padding-block-start: clamp(24px, 4vw, 42px);
+  border-block-start: 1px solid var(--az-line);
+}
+.az-experience__card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(12px, 3vw, 22px);
+  margin-block-start: 14px;
+  padding: clamp(14px, 3vw, 22px);
+  border: 1px solid var(--az-line);
+  border-radius: 20px;
+  background: var(--az-glass-translucent);
+}
+.az-experience__logo {
+  display: grid;
+  place-items: center;
+  width: clamp(42px, 10vw, 58px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--az-accent-soft);
+  color: var(--az-accent);
+  font-weight: 700;
+}
+.az-experience__logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
+}
+.az-experience__copy { overflow-wrap: anywhere; }
+.az-experience__copy h3 {
+  margin: 0;
+  color: var(--az-text);
+  font-size: clamp(1rem, 2.4vw, 1.25rem);
+}
+.az-experience__copy p {
+  margin: 4px 0 0;
+  color: var(--az-text-secondary);
+}
+.az-experience__copy a { color: var(--az-accent); }
+.az-experience__copy a:hover { text-decoration: underline; }
+.az-experience__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-block-start: 10px;
+  color: var(--az-text-secondary);
+  font-size: .8rem;
+}
+.az-experience__type {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--az-accent-soft);
+  color: var(--az-accent);
+}
+.az-experience__copy .az-experience__description {
+  margin-block-start: 12px;
+  white-space: pre-wrap;
+}

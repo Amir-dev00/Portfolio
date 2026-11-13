@@ -14,8 +14,15 @@ class PortfolioContent
             return $this->publications->buildDraftPayload();
         }
 
-        return $this->publications->currentPayload()
-            ?? $this->publications->buildDraftPayload();
+        $published = $this->publications->currentPayload();
+        if ($published !== null) {
+            return $published;
+        }
+
+        $fallback = $this->publications->buildDraftPayload();
+        unset($fallback['experience']);
+
+        return $fallback;
     }
 
     public function strings(string $locale, ?bool $preview = false): array

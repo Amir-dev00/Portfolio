@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SiteSetting;
 use App\Services\PortfolioContent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 
 class PublicSiteController extends Controller
 {
@@ -162,6 +164,7 @@ class PublicSiteController extends Controller
             'activeView' => $view,
             'slug' => $slug,
             'project' => $view === 'project' ? $project : null,
+            'experience' => $view === 'work' ? $this->workExperience($payload['experience'] ?? [], $locale, (bool) $preview) : [],
             'strings' => $strings,
             'seo' => $seo,
             'hreflang' => $hreflang,
@@ -199,6 +202,42 @@ class PublicSiteController extends Controller
         ];
 
         return response()->view('site.app', $viewData, 200, $headers);
+    }
+
+    private function workExperience(array $entries, string $locale, bool $preview): array
+    {
+        $monthIndex = static fn (string $month): int => (int) substr($month, 0, 4) * 12 + (int) substr($month, 5, 2);
+        $currentMonth = $monthIndex(now()->format('Y-m'));
+
+        return array_map(function (array $entry) use ($locale, $preview, $monthIndex, $currentMonth) {
+            $end = $entry['end_month'] ?? null;
+            $start = $entry['start_month'];
+            $months = max(0, ($end ? $monthIndex($end) : $currentMonth) - $monthIndex($start));
+            $years = intdiv($months, 12);
+            $remaining = $months % 12;
+            $duration = array_filter([
+                $years ? $years.($locale === 'fa' ? ' سال' : ($years === 1 ? ' yr' : ' yrs')) : null,
+                $remaining ? $remaining.($locale === 'fa' ? ' ماه' : ($remaining === 1 ? ' mo' : ' mos')) : null,
+            ]);
+
+            return $entry + [
+                'company' => $entry['company_'.$locale],
+                'role' => $entry['role_'.$locale],
+                'description' => $entry['description_'.$locale] ?? '',
+                'type_label' => SiteSetting::EXPERIENCE_TYPES[$entry['type']][$locale] ?? '',
+                'start_label' => $this->workMonthLabel($start, $locale),
+                'end_label' => $end ? $this->workMonthLabel($end, $locale) : ($locale === 'fa' ? 'تا امروز' : 'Present'),
+                'duration' => implode(' · ', $duration),
+                'logo_url' => $preview && !empty($entry['logo_id'])
+                    ? route('admin.media.raw', $entry['logo_id'])
+                    : (!empty($entry['logo_path']) ? $this->assetUrl($entry['logo_path']) : null),
+            ];
+        }, $entries);
+    }
+
+    private function workMonthLabel(string $month, string $locale): string
+    {
+        return Carbon::createFromFormat('!Y-m', $month)->locale($locale)->translatedFormat('M Y');
     }
 
     protected function assetUrl(?string $path, string $fallback = ''): string

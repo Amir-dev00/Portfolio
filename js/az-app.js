@@ -92,6 +92,11 @@
     return null;
   }
 
+  function workSectionHash() {
+    var hash = window.location.hash;
+    return hash === "#work-projects" || hash === "#work-experience" ? hash : "";
+  }
+
   function isPortfolioHash(raw) {
     var hash = String(raw || "").replace(/^#/, "").replace(/^\/+/, "");
     if (!hash || hash === "selected-work" || hash === "/") return true;
@@ -848,6 +853,11 @@
     window.requestAnimationFrame(function () {
       applyPageScrollMode();
       if (!isHome) window.scrollTo(0, 0);
+      var hash = route.name === "work" && workSectionHash();
+      if (hash) {
+        var section = document.getElementById(hash.slice(1));
+        if (section) section.scrollIntoView();
+      }
     });
   }
 
@@ -1057,16 +1067,23 @@
     button.onclick = retry || null;
   }
 
-  function mountRoute(route, data) {
+  function mountRoute(route, data, locale) {
     var existing = views[route.name];
-    // Home and Ask keep the live UI and transcript across language switches.
-    if (existing && route.name !== "project") return;
-    if (existing && existing.dataset.azSlug === route.slug) return;
+    // Keep the mounted project browser, carousel and transcript across language switches.
+    var experience = existing && route.name === "work" && existing.querySelector("#work-experience");
+    var localizeExperience = experience && experience.lang !== locale;
+    if (existing && route.name !== "project" && !localizeExperience) return;
+    if (existing && route.name === "project" && existing.dataset.azSlug === route.slug) return;
     var fragment = document.createElement("template");
     fragment.innerHTML = data.html;
     var next = fragment.content.firstElementChild;
     if (!next || next.id !== "view-" + route.name || !next.classList.contains("az-view")) {
       throw new Error("Unexpected route view");
+    }
+    if (localizeExperience) {
+      var translated = next.querySelector("#work-experience");
+      if (translated) experience.replaceWith(translated);
+      return;
     }
     next.hidden = true;
     next.classList.remove("is-active", "is-visible");
@@ -1094,13 +1111,14 @@
         ? loadFeature("assistant").then(function () { return data; }) : data;
     }).then(function (data) {
       if (!data || token !== requestedRoute) return false;
-      mountRoute(route, data);
+      mountRoute(route, data, locale);
       routeCache.set(url, data);
       activeRouteData = data;
       if (locale !== currentLang() && window.AZ_i18n) window.AZ_i18n.setLang(locale, { resetScroll: true });
       if (mode && window.location.pathname + window.location.search !== url) {
-        if (mode === "replace") history.replaceState({ az: true }, "", url);
-        else history.pushState({ az: true }, "", url);
+        if (mode === "replace") {
+          history.replaceState({ az: true }, "", url + (route.name === "work" ? workSectionHash() : ""));
+        } else history.pushState({ az: true }, "", url);
       }
       if (route.name === "work" && workProjects !== data.projects) {
         window.clearTimeout(workFadeTimer);
@@ -1169,9 +1187,10 @@
     } else {
       route = parsePortfolioPath(window.location.pathname) || { name: "home" };
     }
-    var clean = pathForRoute(route, localeFromPath(window.location.pathname)) + query;
-    var currentClean = window.location.pathname + (window.location.search || "");
-    if (currentClean !== clean || (hash && hash !== "#")) {
+    var section = route.name === "work" ? workSectionHash() : "";
+    var clean = pathForRoute(route, localeFromPath(window.location.pathname)) + query + section;
+    var current = window.location.pathname + query + hash;
+    if (current !== clean) {
       history.replaceState({ az: true }, "", clean);
     }
     return route;
@@ -1244,6 +1263,7 @@
     openDestination(event.detail);
   });
   window.addEventListener("hashchange", function () {
+    if (activeRoute && activeRoute.name === "work" && workSectionHash()) return;
     if (serverRouted) {
       canonicalizeLegacyUrl();
     }

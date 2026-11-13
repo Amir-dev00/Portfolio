@@ -52,6 +52,11 @@ class PublicationService
         }
 
         $settings = SiteSetting::query()->pluck('value', 'key')->all();
+        $experience = collect($settings)
+            ->filter(fn ($value, $key) => str_starts_with($key, SiteSetting::EXPERIENCE_PREFIX))
+            ->sortByDesc('start_month');
+        $logos = MediaAsset::query()->whereIn('id', $experience->pluck('logo_id')->filter()->unique())->get()->keyBy('id');
+        $settings = array_diff_key($settings, $experience->all());
         $resume = ResumeVersion::query()->where('is_current', true)->with('pdf')->first();
 
         return [
@@ -59,6 +64,11 @@ class PublicationService
             'built_at' => now()->toIso8601String(),
             'strings' => $strings,
             'projects' => $projects,
+            'experience' => $experience->map(function (array $entry) use ($logos) {
+                $entry['logo_path'] = $logos->get($entry['logo_id'] ?? 0)?->public_path;
+
+                return $entry;
+            })->values()->all(),
             'seo' => $seo,
             'settings' => $settings,
             'resume' => $resume ? [
