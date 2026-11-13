@@ -1,6 +1,6 @@
 <form class="az-assistant__composer" data-az-assistant-form method="post">
   @if($inputId === 'az-assistant-input')
-  <button type="button" class="az-assistant__avatar az-tour-launch" data-az-assistant-avatar="idle" data-az-tour-launch hidden aria-expanded="false" aria-controls="az-welcome-tour" aria-label="{{ $locale === 'fa' ? 'باز کردن راهنمای سایت' : 'Open site guide' }}" data-i18n-attr="aria-label:guide.launch">
+  <button type="button" class="az-assistant__avatar az-tour-launch" data-az-assistant-avatar="idle" data-az-tour-launch hidden aria-expanded="false" aria-controls="az-welcome-tour" aria-label="{{ $locale === 'fa' ? 'باز کردن راهنمای آرین' : 'Open Arin’s site tour' }}" data-i18n-attr="aria-label:guide.launch">
   @else
   <span class="az-assistant__avatar" data-az-assistant-avatar="idle" aria-hidden="true">
   @endif
@@ -10,10 +10,15 @@
         <i class="az-assistant__avatar-eye"></i>
         <i class="az-assistant__avatar-mouth"></i>
       </span>
-      <span class="az-assistant__avatar-gesture">
-        <span class="az-assistant__avatar-arm">
-          <span class="az-assistant__avatar-hand"></span>
+      <span class="az-assistant__avatar-limbs">
+        <span class="az-assistant__avatar-arm az-assistant__avatar-arm--rest"></span>
+        <span class="az-assistant__avatar-gesture">
+          <span class="az-assistant__avatar-arm az-assistant__avatar-arm--active">
+            <span class="az-assistant__avatar-hand"></span>
+          </span>
         </span>
+        <span class="az-assistant__avatar-leg az-assistant__avatar-leg--left"></span>
+        <span class="az-assistant__avatar-leg az-assistant__avatar-leg--right"></span>
       </span>
     </span>
   @if($inputId === 'az-assistant-input')

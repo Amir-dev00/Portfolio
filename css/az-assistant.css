@@ -615,7 +615,11 @@ html.az-preloader-open .az-assistant {
   gap: 10px;
 }
 
-.az-welcome-tour__heading .az-assistant__avatar { flex: 0 0 38px; }
+.az-welcome-tour__heading .az-assistant__avatar {
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+}
 
 .az-welcome-tour h2 {
   margin: 0;
@@ -675,7 +679,7 @@ html.az-preloader-open .az-assistant {
   .az-welcome-tour__copy { margin-block: 6px 8px; }
 }
 
-/* The composer and the guide share the same face and articulating arm. */
+/* The avatar keeps the same helmet in the composer and the tour. */
 .az-assistant__avatar-shell { position: relative; }
 
 .az-tour-launch.is-guiding .az-assistant__avatar-shell { opacity: 0; }
@@ -685,41 +689,90 @@ html.az-preloader-open .az-assistant {
   --az-asst-ease: cubic-bezier(.22, 1, .36, 1);
 }
 
-.az-assistant__avatar-gesture {
+.az-assistant__avatar-limbs {
   display: none;
   position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+[data-az-tour-pose] .az-assistant__avatar-limbs { display: block; }
+
+.az-assistant__avatar-gesture {
+  position: absolute;
   z-index: 1;
-  top: 53%;
+  top: 56%;
   left: 50%;
   width: 0;
   height: 0;
   transform: rotate(var(--az-avatar-point-angle, 0rad));
 }
 
-.az-assistant__avatar-arm {
+.az-assistant__avatar-arm,
+.az-assistant__avatar-leg {
   position: absolute;
-  left: 12px;
+  border: 1px solid #83afd0;
+  border-radius: 999px;
+  background: linear-gradient(155deg, #bdd9ea, #3c658b 60%, #213d63);
+  box-shadow: 0 1px 3px #050e20bb;
+}
+
+.az-assistant__avatar-arm {
+  width: 12px;
+  height: 6px;
+}
+
+.az-assistant__avatar-arm--rest {
+  left: -8px;
+  top: 62%;
+  transform: rotate(-53deg);
+}
+
+.az-assistant__avatar-arm--rest::after,
+.az-assistant__avatar-hand {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1px solid #a3cfe9;
+  border-radius: 3px 4px 4px 3px;
+  background: linear-gradient(145deg, #e3f7ff, #6b9dc5 82%);
+}
+
+.az-assistant__avatar-arm--rest::after {
+  content: "";
+  left: -4px;
   top: -2px;
-  width: 14px;
-  height: 4px;
-  border-radius: 4px;
-  background: linear-gradient(180deg, #bcf1ff, #4079ad 90%);
+}
+
+.az-assistant__avatar-arm--active {
+  left: 14px;
+  top: -3px;
   transform-origin: 2px center;
 }
 
 .az-assistant__avatar-hand {
-  position: absolute;
   top: -2px;
-  right: -2px;
-  width: 7px;
-  height: 8px;
-  border-radius: 50%;
-  background: linear-gradient(150deg, #e4faff, #65abdb 80%);
-  box-shadow: 0 0 4px #72cffe80;
+  right: -5px;
 }
 
-[data-az-tour-pose="point"] .az-assistant__avatar-gesture,
-[data-az-tour-pose="wave"] .az-assistant__avatar-gesture { display: block; }
+.az-assistant__avatar-leg {
+  top: 95%;
+  width: 6px;
+  height: 10px;
+  transform-origin: center top;
+}
+
+.az-assistant__avatar-leg--left { left: 7px; transform: rotate(14deg); }
+.az-assistant__avatar-leg--right { right: 7px; transform: rotate(-14deg); }
+
+.az-assistant__avatar-leg::after {
+  content: "";
+  position: absolute;
+  inset: auto -2px -3px;
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #b6dcf5, #47749e);
+}
 
 [data-az-tour-pose="point"] .az-assistant__avatar-face {
   transform: translate(var(--az-avatar-look-x, 0px), var(--az-avatar-look-y, 0px));
@@ -729,15 +782,16 @@ html.az-preloader-open .az-assistant {
   content: "";
   position: absolute;
   right: -4px;
-  top: 1px;
-  width: 7px;
+  top: 0;
+  width: 6px;
   height: 3px;
   border-radius: 4px;
-  background: #c6f2ff;
+  background: #c6e7f9;
 }
 
-[data-az-tour-pose="wave"] .az-assistant__avatar-gesture { transform: rotate(-132deg); }
-html[dir="rtl"] [data-az-tour-pose="wave"] .az-assistant__avatar-gesture { transform: rotate(-48deg); }
+[data-az-tour-pose="wave"] .az-assistant__avatar-gesture { transform: rotate(-42deg); }
+
+[data-az-tour-pose="return"] .az-assistant__avatar-gesture { transform: rotate(33deg); }
 
 [data-az-tour-pose="wave"] .az-assistant__avatar-mouth {
   height: 4px;
@@ -753,16 +807,48 @@ html[dir="rtl"] [data-az-tour-pose="wave"] .az-assistant__avatar-gesture { trans
     animation: az-avatar-idle-wink 5.6s ease-in-out infinite;
   }
 
-  [data-az-tour-pose="wave"] .az-assistant__avatar-arm {
-    animation: az-avatar-wave 880ms ease-in-out 140ms both;
+  [data-az-tour-pose="wave"] .az-assistant__avatar-limbs {
+    animation: az-avatar-unfold 460ms cubic-bezier(.23,.8,.3,1) 90ms both;
+  }
+
+  [data-az-tour-pose="wave"] .az-assistant__avatar-arm--active {
+    animation: az-avatar-wave 760ms ease-in-out 410ms both;
+  }
+
+  [data-az-tour-pose="return"] .az-assistant__avatar-limbs {
+    animation: az-avatar-unfold 280ms ease-in 340ms reverse both;
   }
 
   [data-az-tour-pose="wave"] .az-assistant__avatar-mouth {
-    animation: az-avatar-speak 960ms ease-in-out 90ms both;
+    animation: az-avatar-speak 960ms ease-in-out 340ms both;
   }
 
   [data-az-tour-pose="point"] .az-assistant__avatar-gesture {
     transition: transform 240ms cubic-bezier(.22,1,.36,1);
+  }
+
+  [data-az-tour-pose="run"] .az-assistant__avatar-shell {
+    transform: rotate(var(--az-avatar-run-lean));
+  }
+
+  [data-az-tour-pose="run"] .az-assistant__avatar-gesture { transform: rotate(40deg); }
+
+  [data-az-tour-pose="run"] .az-assistant__avatar-leg {
+    animation: az-avatar-stride 210ms ease-in-out infinite;
+  }
+
+  [data-az-tour-pose="run"] .az-assistant__avatar-leg--right {
+    animation-delay: -105ms;
+  }
+
+  [data-az-tour-pose="run"] .az-assistant__avatar-arm {
+    animation: az-avatar-arm-swing 210ms ease-in-out infinite;
+  }
+
+  [data-az-tour-pose="run"] .az-assistant__avatar-arm--rest {
+    animation-delay: -105ms;
+    rotate: -53deg;
+    transform-origin: right center;
   }
 }
 
@@ -776,10 +862,26 @@ html[dir="rtl"] [data-az-tour-pose="wave"] .az-assistant__avatar-gesture { trans
   85% { transform: scaleY(.15); }
 }
 
+@keyframes az-avatar-unfold {
+  0% { transform: scale(.35); opacity: 0; }
+  75% { transform: scale(1.09); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 @keyframes az-avatar-wave {
-  0%, 100% { transform: rotate(-35deg) scaleX(.45); opacity: 0; }
-  22%, 56% { transform: rotate(24deg) scaleX(1); opacity: 1; }
-  39%, 72% { transform: rotate(-24deg) scaleX(1); opacity: 1; }
+  0%, 100% { transform: rotate(0deg); }
+  22%, 62% { transform: rotate(24deg); }
+  43%, 80% { transform: rotate(-23deg); }
+}
+
+@keyframes az-avatar-stride {
+  0%, 100% { transform: rotate(-44deg); }
+  50% { transform: rotate(44deg); }
+}
+
+@keyframes az-avatar-arm-swing {
+  0%, 100% { transform: rotate(24deg); }
+  50% { transform: rotate(-24deg); }
 }
 
 @keyframes az-avatar-speak {

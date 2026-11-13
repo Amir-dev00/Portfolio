@@ -27,7 +27,8 @@
   function ready() {
     var home = launch.closest("[data-az-assistant-home]");
     return html.dataset.azRoute === "home" && html.classList.contains("az-app-ready") &&
-      !html.classList.contains("az-preloader-open") && home && !home.hidden && !!window.AZ_i18n;
+      !html.classList.contains("az-preloader-open") && !html.classList.contains("az-loading") &&
+      home && !home.hidden && !!window.AZ_i18n;
   }
 
   function tr(key, values) {
@@ -96,7 +97,9 @@
     stopReturn();
     var target = step < 0 ? launch.closest("form") : availableTarget(steps[step]);
     if (!target) return advance(step);
-    var from = (panel.hidden ? launch : avatar).getBoundingClientRect();
+    var opening = panel.hidden;
+    var changingStep = !opening && step >= 0 && step !== index;
+    var from = (opening ? launch : avatar).getBoundingClientRect();
     if (flight) {
       flight.cancel();
       flight = null;
@@ -119,20 +122,53 @@
     launch.setAttribute("aria-expanded", "true");
     place();
 
-    if (!motion.matches && avatar.animate && from.width) {
+    if (!motion.matches && avatar.animate && from.width && (opening || changingStep)) {
       var to = avatar.getBoundingClientRect();
-      flight = avatar.animate([
-        { transform: "translate(" + (from.left - to.left) + "px," + (from.top - to.top) + "px) scale(.78)", opacity: .65 },
-        { transform: "translate(0,0) scale(1)", opacity: 1 },
-      ], { duration: 380, easing: "cubic-bezier(.2,.75,.25,1)" });
-      var arrival = flight;
-      arrival.onfinish = function () {
-        if (flight !== arrival) return;
-        flight = null;
-        if (!panel.hidden && index >= 0) aimAt(highlighted.getBoundingClientRect());
-      };
+      var x = from.left + (from.width - to.width) / 2 - to.left;
+      var y = from.top + (from.height - to.height) / 2 - to.top;
+      if (opening) {
+        flight = avatar.animate([
+          { transform: "translate(" + x + "px," + y + "px) scale(.96)" },
+          { transform: "translate(0,0) scale(1)" },
+        ], { duration: 520, easing: "cubic-bezier(.2,.75,.25,1)" });
+      } else if (Math.hypot(x, y) >= 8) {
+        flight = runToStep(x, y);
+      }
+      if (flight) {
+        var arrival = flight;
+        arrival.onfinish = function () {
+          if (flight !== arrival) return;
+          flight = null;
+          if (index >= 0) pointAtStep();
+        };
+      }
     }
     if (focus) title.focus({ preventScroll: true });
+  }
+
+  function runToStep(x, y) {
+    var distance = Math.hypot(x, y);
+    var cycles = Math.max(2, Math.min(5, Math.ceil(distance / 125)));
+    var duration = cycles * 210;
+    avatar.setAttribute("data-az-tour-pose", "run");
+    avatar.style.setProperty("--az-avatar-run-lean", (x > 0 ? -9 : 9) + "deg");
+
+    var frames = [{ transform: "translate(" + x + "px," + y + "px)" }];
+    for (var stride = 1; stride < cycles * 4; stride += 1) {
+      var fraction = stride / (cycles * 4);
+      var bounce = stride % 2 ? 4 : 0;
+      frames.push({
+        offset: fraction,
+        transform: "translate(" + x * (1 - fraction) + "px," + (y * (1 - fraction) - bounce) + "px)",
+      });
+    }
+    frames.push({ transform: "translate(0,0)" });
+    return avatar.animate(frames, { duration: duration, easing: "linear" });
+  }
+
+  function pointAtStep() {
+    avatar.setAttribute("data-az-tour-pose", "point");
+    aimAt(highlighted.getBoundingClientRect());
   }
 
   function stopReturn() {
@@ -155,7 +191,9 @@
     var copy = avatar.cloneNode(true);
     copy.classList.add("az-assistant__avatar--flying", "az-tour-return");
     copy.removeAttribute("data-az-tour-avatar");
-    copy.removeAttribute("data-az-tour-pose");
+    copy.setAttribute("data-az-tour-pose", "return");
+    copy.style.width = from.width + "px";
+    copy.style.height = from.height + "px";
     copy.style.left = from.left + "px";
     copy.style.top = from.top + "px";
     document.body.appendChild(copy);
@@ -247,7 +285,10 @@
       flight = null;
     }
     stopReturn();
-    if (!panel.hidden) launch.classList.add("is-guiding");
+    if (!panel.hidden) {
+      launch.classList.add("is-guiding");
+      if (index >= 0) pointAtStep();
+    }
     schedulePlace();
   });
   window.addEventListener("resize", schedulePlace);
