@@ -4,7 +4,7 @@
     <div class="preloader__header az-preloader__center">
       <div class="az-preloader__disc" aria-hidden="true">
         <div class="az-preloader__image-shell">
-          <img class="az-preloader__image" src="{{ $azLogoSrc }}" width="720" height="720" alt="" decoding="async" fetchpriority="high"/>
+          <img class="az-preloader__image" src="{{ $azLogoSrc }}" width="512" height="512" alt="" decoding="async" fetchpriority="high"/>
         </div>
         <svg class="az-preloader__ring" viewBox="0 0 360 360" focusable="false" aria-hidden="true">
           <defs>

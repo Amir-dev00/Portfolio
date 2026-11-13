@@ -6,6 +6,10 @@
                     <img
                       class="az-profile__photo"
                       src="{{ $profilePhoto }}"
+                      @if ($profilePhoto === asset('assets/img/amir/profile.webp'))
+                        srcset="{{ $assetV('assets/img/amir/profile-360.webp') }} 360w, {{ $profilePhoto }} 596w"
+                        sizes="(max-width: 767px) clamp(90px, 24vw, 112px), clamp(120px, 11vw, 152px)"
+                      @endif
                       width="640"
                       height="640"
                       alt="Portrait of Amirhossein Zamanzade"

@@ -28,6 +28,7 @@
 
   var desktopHome = window.matchMedia("(width > 767px)");
   var connection = window.navigator.connection;
+  var pendingHomeFeatures = false;
 
   function tt(key, vars) {
     if (window.AZ_i18n && typeof window.AZ_i18n.t === "function") {
@@ -954,13 +955,22 @@
         element.remove();
         reject(new Error(key));
       };
+      if (key === "assistant" && document.documentElement.dataset.azRoute === "home") {
+        element.fetchPriority = "low";
+      }
       if (stylesheet) {
         element.rel = "stylesheet";
         element.href = assets[key];
       } else {
         element.src = assets[key];
       }
-      document.head.appendChild(element);
+      if (key === "vendorCss" || key === "rhyeCss") {
+        element.setAttribute("data-az-theme-style", key);
+        var nextStyles = key === "vendorCss" && document.querySelector('[data-az-theme-style="rhyeCss"]');
+        document.head.insertBefore(element, nextStyles || document.querySelector("[data-az-site-styles]"));
+      } else {
+        document.head.appendChild(element);
+      }
     }).catch(function (error) {
       featureLoads.delete(key);
       throw error;
@@ -975,7 +985,11 @@
     if (connection && (connection.saveData || /^(slow-2g|2g|3g)$/.test(connection.effectiveType))) return;
 
     rhyeRequested = true;
-    loadFeature("vendor").then(function () {
+    Promise.all([
+      loadFeature("vendorCss", true),
+      loadFeature("rhyeCss", true),
+      loadFeature("vendor"),
+    ]).then(function () {
       if (!desktopHome.matches || activeRoute.name !== "home") {
         rhyeRequested = false;
         return;
@@ -991,6 +1005,16 @@
   }
 
   function startHomeFeatures() {
+    if (document.documentElement.classList.contains("az-loading")) {
+      if (!pendingHomeFeatures) {
+        pendingHomeFeatures = true;
+        window.addEventListener("az:preloader-end", function () {
+          pendingHomeFeatures = false;
+          if (activeRoute && activeRoute.name === "home") startHomeFeatures();
+        }, { once: true });
+      }
+      return;
+    }
     ["profile", "tour", "arrows"].forEach(function (key) {
       if (key === "profile" && document.querySelector("script[data-az-home-profile]")) return;
       loadFeature(key).catch(function () {});
@@ -1245,6 +1269,9 @@
     if (initial.name === "work") workProjects = activeRouteData.projects;
     if (initial.name === "project" && views.project) views.project.dataset.azSlug = initial.slug;
     if (window.AZ_assistant) window.AZ_assistant.bind();
+    else if (assets.assistant && (initial.name === "home" || initial.name === "ask")) {
+      loadFeature("assistant").catch(function () {});
+    }
     var initialView = views[initial.name];
     if (initialView) routeCache.set(routeUrl(initial, boot.lang), Object.assign({
       html: initialView.outerHTML,
@@ -1254,7 +1281,6 @@
     var clean = canonicalizeLegacyUrl();
     if (routeKey(clean) !== routeKey(initial)) applyFromLocation(true);
 
-    window.addEventListener("az:preloader-end", startDesktopSlider);
     document.addEventListener("visibilitychange", startDesktopSlider);
     if (connection && connection.addEventListener) connection.addEventListener("change", startDesktopSlider);
     desktopHome.addEventListener("change", function () {

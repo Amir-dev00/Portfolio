@@ -197,7 +197,7 @@
     if (!from.width || !to.width || !avatar.animate) return false;
 
     var x = to.left + (to.width - from.width) / 2 - from.left;
-    var y = to.top + (to.height - from.height) / 2 - from.top + 4;
+    var y = to.top + (to.height - from.height) / 2 - from.top + 10;
     var lift = Math.min(38, Math.hypot(x, y) * 0.18);
     var copy = avatar.cloneNode(true);
     copy.classList.add("az-assistant__avatar--flying", "az-tour-return");

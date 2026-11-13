@@ -1,0 +1,74 @@
+/* Public layout before the optional desktop Rhye renderer loads. */
+:root {
+  font-size: 18px;
+  --gutter-horizontal: 120px;
+  --color-dark-1: #111;
+}
+
+@media (max-width: 1400px) { :root { --gutter-horizontal: 80px; } }
+@media (max-width: 1280px) { :root { --gutter-horizontal: 60px; } }
+@media (max-width: 991px) { :root { --gutter-horizontal: 20px; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  position: relative;
+  width: 100%;
+  min-width: 320px;
+  margin: 0;
+  word-wrap: break-word;
+}
+
+button, input, textarea, select { margin: 0; font: inherit; }
+button { cursor: pointer; }
+img { vertical-align: middle; }
+a { color: inherit; text-decoration: none; }
+p { margin-block: 1em; }
+h1, h2, h3 { margin-block: .5em; }
+
+#page-header { position: fixed; inset: 0 0 auto; z-index: 500; }
+#js-webgl { display: none; }
+.page-wrapper__content { position: relative; overflow: hidden; z-index: 50; }
+
+.section-fullheight { display: flex; }
+.section-fullheight__inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+}
+.bg-dark-1 { background-color: var(--color-dark-1); }
+.text-center { text-align: center; }
+.overflow { position: relative; overflow: hidden; }
+
+/* The photo slider shares these controls with the desktop renderer. */
+.slider__arrow_absolute { position: absolute; top: 50%; transform: translateY(-50%); }
+.slider__arrow_left { left: var(--gutter-horizontal); }
+.slider__arrow_right { right: var(--gutter-horizontal); }
+
+.arrow { position: relative; display: inline-grid; place-items: center; cursor: pointer; }
+.arrow-left { transform: rotate(180deg); }
+.arrow__pointer {
+  position: absolute;
+  top: calc(50% - 1px);
+  right: 50%;
+  width: 30%;
+  height: 2px;
+}
+.arrow__triangle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: solid transparent;
+  border-width: 6px 0 6px 8px;
+  transform: translate(-50%, -50%);
+}
+
+.slider-fullscreen-projects__images,
+.slider__wrapper-canvas {
+  position: absolute;
+  inset: 0;
+}

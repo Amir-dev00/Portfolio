@@ -41,3 +41,18 @@
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
+
+# Compress text assets where cPanel has mod_deflate enabled.
+<IfModule mod_deflate.c>
+    <FilesMatch "\.(css|m?js|svg)$">
+        SetOutputFilter DEFLATE
+    </FilesMatch>
+</IfModule>
+
+# Keep public static files reusable across visits. Versioned URLs can be immutable.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|m?js|woff2?|webp|png|svg|ico)$">
+        Header set Cache-Control "public, max-age=604800"
+        Header set Cache-Control "public, max-age=31536000, immutable" "expr=%{QUERY_STRING} =~ m#^v=[0-9]+$#"
+    </FilesMatch>
+</IfModule>

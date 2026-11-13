@@ -12,7 +12,7 @@
               return asset($path).(is_file($file) ? '?v='.filemtime($file) : '');
           };
       }
-      $azLogoSrc = $assetV('assets/img/amir/az-monogram-blue.webp');
+      $azLogoSrc = $assetV('assets/img/amir/az-monogram-display.webp');
     @endphp
     <meta charset="utf-8"/>
     <meta http-equiv="x-ua-compatible" content="ie=edge"/>
@@ -46,14 +46,11 @@
       <link rel="preload" href="{{ asset('assets/fonts/estedad/estedad-variable.woff2') }}" as="font" type="font/woff2" crossorigin/>
     @endif
     {{-- Critical path for first usable loader paint (before Rhye / feature CSS). --}}
+    <link rel="stylesheet" href="{{ $assetV('css/az-shell.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-tokens.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-preloader.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/typography.css') }}"/>
-    <!-- Template Vendor's Stylesheet -->
-    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/vendor.css') }}"/>
-    <!-- Template Main Stylesheet -->
-    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/main.css') }}"/>
-    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/navbar-glass.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/navbar-glass.css') }}" data-az-site-styles/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-profile.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-app.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-i18n.css') }}"/>
@@ -64,18 +61,12 @@
       <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-home-arrows.css') }}"/>
       <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-assistant.css') }}"/>
     </noscript>
-    {{-- Material Icons are not needed for the loader / first view; load after paint. --}}
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Material+Icons&amp;display=swap" media="print" onload="this.media='all'"/>
     @if(($viewName ?? 'home') === 'home')
-      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg-01.webp') }}" type="image/webp" fetchpriority="high" media="(max-width: 767px)"/>
+      <link rel="preload" as="image" href="{{ $assetV('assets/img/amir/home/home-mobile-bg-01-640.webp') }}" type="image/webp" fetchpriority="high" media="(max-width: 520px)"/>
+      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg-01.webp') }}" type="image/webp" fetchpriority="high" media="(520px < width <= 767px)"/>
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp" fetchpriority="high" media="(width > 767px)"/>
     @endif
     <link rel="preload" href="{{ $azLogoSrc }}" as="image" type="image/webp"/>
-    <style>
-      .logo-wordmark{display:inline-block;font-family:var(--font-en),"Manrope",sans-serif;font-size:15px;font-weight:700;letter-spacing:.1em;line-height:20px;white-space:nowrap}
-      .logo__img-primary.logo-wordmark{color:#111}
-      .logo__img-secondary.logo-wordmark{color:#fff}
-    </style>
     <!-- Favicons & App Icons (regenerated from az-monogram-blue.webp) -->
     <link rel="apple-touch-icon" sizes="57x57" href="{{ $assetV('assets/img/content/apple-icon-57x57.png') }}"/>
     <link rel="apple-touch-icon" sizes="60x60" href="{{ $assetV('assets/img/content/apple-icon-60x60.png') }}"/>

@@ -498,15 +498,14 @@ html.az-preloader-open .az-assistant {
 
   #view-home .slider-fullscreen-projects__images,
   #view-home .slider__wrapper-canvas,
-  #view-home .az-home-arrows,
   #view-home .slider__overlay {
     display: none !important;
   }
 }
 
 @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
-  .az-home-mobile-bg__slide {
-    transition: opacity 0.01ms linear;
+  #view-home .az-home-photo .az-home-mobile-bg__slide {
+    transition: none;
     transform: none;
   }
 
@@ -618,8 +617,8 @@ html.az-preloader-open .az-assistant {
 .az-welcome-tour__heading .az-assistant__avatar {
   flex: 0 0 56px;
   width: 56px;
-  height: 62px;
-  padding-bottom: 8px;
+  height: 74px;
+  padding-bottom: 20px;
 }
 
 .az-welcome-tour h2 {
@@ -686,7 +685,7 @@ html.az-preloader-open .az-assistant {
 .az-tour-launch.is-guiding .az-assistant__avatar-shell { opacity: 0; }
 
 .az-tour-return {
-  padding-bottom: 8px;
+  padding-bottom: 20px;
   z-index: 111;
   --az-asst-ease: cubic-bezier(.22, 1, .36, 1);
 }
@@ -703,7 +702,7 @@ html.az-preloader-open .az-assistant {
 .az-assistant__avatar-body {
   position: absolute;
   z-index: 1;
-  top: 77%;
+  top: calc(100% + 5px);
   left: 8px;
   right: 8px;
   height: 15px;
@@ -726,7 +725,7 @@ html.az-preloader-open .az-assistant {
 .az-assistant__avatar-gesture {
   position: absolute;
   z-index: 2;
-  top: 87%;
+  top: calc(100% + 8px);
   left: 50%;
   transform: rotate(var(--az-avatar-point-angle, 0rad));
 }
@@ -757,7 +756,7 @@ html.az-preloader-open .az-assistant {
 }
 
 .az-assistant__avatar-arm--rest {
-  top: 85%;
+  top: calc(100% + 7px);
   left: 6px;
   transform: rotate(133deg);
   transform-origin: 2px center;
@@ -782,7 +781,7 @@ html.az-preloader-open .az-assistant {
 }
 
 .az-assistant__avatar-leg {
-  top: calc(77% + 10px);
+  top: calc(100% + 15px);
   width: 6px;
   height: 9px;
   transform-origin: center top;

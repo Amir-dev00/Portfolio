@@ -55,7 +55,7 @@
 
   function stopMobileBg() {
     if (mobileTimer) {
-      window.clearInterval(mobileTimer);
+      window.clearTimeout(mobileTimer);
       mobileTimer = 0;
     }
   }
@@ -83,6 +83,7 @@
         else resolve();
       };
       image.onerror = reject;
+      image.fetchPriority = "low";
       image.src = url;
     }).catch(function (error) {
       imageLoads.delete(url);
@@ -98,6 +99,7 @@
     var active = plane.querySelector(".az-home-mobile-bg__slide.is-active");
     var next = slides[(slides.indexOf(active) + direction + slides.length) % slides.length];
     if (!next) return;
+    stopMobileBg();
     var token = ++requestId;
     var url = next.dataset[MOBILE.matches ? "mobile" : "desktop"];
     var loaded = url ? loadPhoto(url) : Promise.resolve();
@@ -108,6 +110,8 @@
       next.classList.add("is-active");
     }).catch(function () {
       // Keep the current image if the next image fails to load.
+    }).finally(function () {
+      if (token === requestId) sync();
     });
   }
 
@@ -115,8 +119,10 @@
     stopMobileBg();
     if (!plane || !homeIsVisible() || !usesPhotos() || REDUCE.matches) return;
     var connection = navigator.connection;
-    if (connection && (connection.saveData || /^(slow-2g|2g|3g)$/.test(connection.effectiveType))) return;
-    mobileTimer = window.setInterval(function () { advancePhoto(1); }, MOBILE_INTERVAL_MS);
+    if (!MOBILE.matches && connection &&
+      (connection.saveData || /^(slow-2g|2g|3g)$/.test(connection.effectiveType))) return;
+    // Wait for each image to finish before counting down to the next slide.
+    mobileTimer = window.setTimeout(function () { advancePhoto(1); }, MOBILE_INTERVAL_MS);
   }
 
   function bind(root) {
