@@ -115,8 +115,8 @@
   <body>
     <div data-barba="wrapper">
       @include('components.site.preloader')
-      {{-- Start the ring before the vendor scripts without blocking the page markup. --}}
-      <script src="{{ $assetV('js/az-preloader.js') }}" defer></script>
+      {{-- Run immediately after the loader markup; do not wait for vendor.js (defer). --}}
+      <script src="{{ $assetV('js/az-preloader.js') }}"></script>
       @include('components.site.language-switcher')
       @include('components.site.chrome')
       @include('components.site.header')

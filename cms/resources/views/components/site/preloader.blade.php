@@ -22,9 +22,15 @@
 
       <span class="az-preloader__load-label">LOADING EXPERIENCE</span>
       <div class="preloader__counter az-preloader__percentage" aria-label="Loading progress">
-        <span class="preloader__counter-number preloader__counter-current">0</span>
+        {{-- Hidden sink for Rhye PagePreloader writes; AZ owns the visible number. --}}
+        <span class="preloader__counter-number preloader__counter-current az-preloader__rhye-sink" hidden aria-hidden="true">0</span>
+        <span class="preloader__counter-number az-preloader__count" data-az-preloader-count>0</span>
         <span class="preloader__counter-divider az-preloader__counter-sep" aria-hidden="true">/</span>
         <span class="preloader__counter-number preloader__counter-total">100</span>
+      </div>
+      <div class="az-preloader__fail" data-az-preloader-fail hidden>
+        <p class="az-preloader__fail-copy">This page took too long to load. Check your connection, then try again.</p>
+        <button type="button" class="az-preloader__fail-retry" data-az-preloader-retry>Retry</button>
       </div>
       <div class="az-preloader__identity">
         <div class="preloader__heading az-preloader__name">AMIRHOSSEIN ZAMANZADE</div>
