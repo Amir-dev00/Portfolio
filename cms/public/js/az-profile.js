@@ -3,7 +3,8 @@
   "use strict";
 
   var root = document.getElementById("az-profile");
-  if (!root) return;
+  if (!root || root.dataset.azBound) return;
+  root.dataset.azBound = "1";
 
   var orb = root.querySelector(".az-profile__orb");
   var glass = root.querySelector(".az-profile__glass");
@@ -93,6 +94,8 @@
   }
 
   window.addEventListener("arts/preloader/end", onPreloaderEnd);
+  window.addEventListener("az:preloader-end", tryReveal, { once: true });
+  tryReveal();
 
   var htmlWatcher = new MutationObserver(function () {
     tryReveal();

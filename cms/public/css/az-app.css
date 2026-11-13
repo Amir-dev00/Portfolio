@@ -1086,3 +1086,49 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
     opacity: 1;
   }
 }
+
+/* Render the first Home photo before the optional desktop slider initializes. */
+.az-laravel #view-home .section-fullheight__inner { position: relative; }
+.az-laravel #view-home .az-home-photo {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.az-home-photo .az-home-mobile-bg__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: center / cover no-repeat;
+  transition: opacity .8s ease;
+}
+.az-home-photo .az-home-mobile-bg__slide.is-active { opacity: 1; }
+.az-home-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.az-home-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 22%, #08122016, #050c1666);
+}
+.az-laravel:not(.az-rhye-ready) #view-home :is(.slider-fullscreen-projects__images, .slider__wrapper-canvas) {
+  opacity: 0;
+  pointer-events: none;
+}
+.az-route-status {
+  position: fixed;
+  z-index: 30;
+  inset-inline: 0;
+  bottom: calc(90px + env(safe-area-inset-bottom));
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin-inline: auto;
+  padding: .5rem .75rem;
+  border-radius: 12px;
+  background: var(--az-bg, #0b1220);
+  color: var(--az-text, white);
+  font-size: .875rem;
+}
+.az-route-status button { margin-inline-start: .5em; color: inherit; text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) {
+  .az-home-photo .az-home-mobile-bg__slide { transition: none; }
+}

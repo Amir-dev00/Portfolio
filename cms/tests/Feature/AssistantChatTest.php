@@ -51,6 +51,29 @@ class AssistantChatTest extends TestCase
         $this->get('/fa')->assertOk();
     }
 
+    public function test_public_shell_and_fragments_render_only_the_requested_view(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('id="az-preloader"', false)
+            ->assertSee('id="view-home"', false)
+            ->assertDontSee('id="view-ask"', false)
+            ->assertDontSee('id="js-page-transition-curtain"', false);
+
+        $this->get('/fa/ask')
+            ->assertOk()
+            ->assertSee('id="view-ask"', false)
+            ->assertDontSee('id="view-home"', false);
+
+        $response = $this->getJson('/fa/ask', ['X-AZ-Fragment' => '1'])
+            ->assertOk()
+            ->assertHeader('Vary', 'X-AZ-Fragment')
+            ->assertJsonPath('projects', []);
+
+        $this->assertStringContainsString('id="view-ask"', $response->json('html'));
+        $this->assertStringNotContainsString('id="az-preloader"', $response->json('html'));
+    }
+
     #[DataProvider('greetings')]
     public function test_simple_greeting_is_answered_without_a_provider_request(string $message, string $locale, string $reply): void
     {

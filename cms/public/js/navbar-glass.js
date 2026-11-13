@@ -27,7 +27,7 @@
   var bar = nav && nav.querySelector(".glass-nav__bar");
   if (!nav || !bar) {
     // Still wait for preloader before killing cursor if nav markup is missing.
-    var onlyPreloader = document.getElementById("js-preloader");
+    var onlyPreloader = document.getElementById("az-preloader") || document.getElementById("js-preloader");
     if (isPreloaderDone(onlyPreloader)) disableCustomCursor();
     return;
   }
@@ -55,7 +55,7 @@
         item.target === "_blank";
       if (isExternal) return;
       // Hash SPA routes are owned by az-app.js (keeps dock highlight + aria-current in sync).
-      if (href.charAt(0) === "#") return;
+      if (window.AZ_ASSETS || href.charAt(0) === "#") return;
       setActive(item);
     });
 
@@ -103,7 +103,7 @@
     window.setTimeout(disableCustomCursor, 1600);
   }
 
-  var preloader = document.getElementById("js-preloader");
+  var preloader = document.getElementById("az-preloader") || document.getElementById("js-preloader");
   if (isPreloaderDone(preloader)) {
     onPreloaderFinished();
   } else {

@@ -511,7 +511,7 @@
     applyDocumentShell();
     scope.querySelectorAll("[data-i18n], [data-i18n-attr]").forEach(applyNode);
     var meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", t("meta.description"));
+    if (meta && !window.AZ_ASSETS) meta.setAttribute("content", t("meta.description"));
     document.querySelectorAll(".az-lang-switch__btn").forEach(function (btn) {
       var lang = btn.getAttribute("data-lang");
       var active = lang === current;
@@ -586,7 +586,10 @@
       });
       btn.addEventListener("click", function (event) {
         event.preventDefault();
-        setLang(btn.getAttribute("data-lang"));
+        var next = normalize(btn.getAttribute("data-lang"));
+        if (window.AZ_ASSETS && window.AZ_nav) {
+          if (next !== current) window.dispatchEvent(new CustomEvent("az:langrequest", { detail: { lang: next } }));
+        } else setLang(next);
         if (btn.dataset.azPointerActivate === "1") {
           btn.blur();
           delete btn.dataset.azPointerActivate;

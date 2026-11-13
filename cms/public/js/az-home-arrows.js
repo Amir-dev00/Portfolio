@@ -60,44 +60,95 @@
     }
   }
 
-  function advanceMobileBg(root) {
-    var slides = root.querySelectorAll(".az-home-mobile-bg__slide");
-    if (slides.length < 2) return;
-    var active = root.querySelector(".az-home-mobile-bg__slide.is-active");
-    var index = active ? Array.prototype.indexOf.call(slides, active) : 0;
-    var next = slides[(index + 1) % slides.length];
-    if (active) active.classList.remove("is-active");
-    if (next) next.classList.add("is-active");
+  var plane;
+  var imageLoads = new Map();
+  var requestId = 0;
+
+  function homeIsVisible() {
+    var home = plane && plane.closest(".az-view");
+    return !!(home && !home.hidden && !document.hidden &&
+      !document.documentElement.classList.contains("az-loading"));
   }
 
-  function bindMobileBg(root) {
-    var scope = root || document;
-    var plane = scope.querySelector("[data-az-home-mobile-bg]");
-    if (!plane || plane.dataset.azHomeMobileBound === "1") return;
-    plane.dataset.azHomeMobileBound = "1";
+  function usesPhotos() {
+    return MOBILE.matches || !document.documentElement.classList.contains("az-rhye-ready");
+  }
 
-    function sync() {
-      stopMobileBg();
-      if (!MOBILE.matches || REDUCE.matches) return;
-      if (document.hidden) return;
-      mobileTimer = window.setInterval(function () {
-        advanceMobileBg(plane);
-      }, MOBILE_INTERVAL_MS);
-    }
+  function loadPhoto(url) {
+    if (imageLoads.has(url)) return imageLoads.get(url);
+    var pending = new Promise(function (resolve, reject) {
+      var image = new Image();
+      image.onload = function () {
+        if (image.decode) image.decode().then(resolve, reject);
+        else resolve();
+      };
+      image.onerror = reject;
+      image.src = url;
+    }).catch(function (error) {
+      imageLoads.delete(url);
+      throw error;
+    });
+    imageLoads.set(url, pending);
+    return pending;
+  }
 
-    sync();
-    if (typeof MOBILE.addEventListener === "function") {
-      MOBILE.addEventListener("change", sync);
-    } else if (typeof MOBILE.addListener === "function") {
-      MOBILE.addListener(sync);
-    }
-    document.addEventListener("visibilitychange", sync);
+  function advancePhoto(direction) {
+    if (!homeIsVisible() || !usesPhotos()) return;
+    var slides = Array.from(plane.querySelectorAll(".az-home-mobile-bg__slide"));
+    var active = plane.querySelector(".az-home-mobile-bg__slide.is-active");
+    var next = slides[(slides.indexOf(active) + direction + slides.length) % slides.length];
+    if (!next) return;
+    var token = ++requestId;
+    var url = next.dataset[MOBILE.matches ? "mobile" : "desktop"];
+    var loaded = url ? loadPhoto(url) : Promise.resolve();
+    loaded.then(function () {
+      if (token !== requestId || !homeIsVisible() || !usesPhotos()) return;
+      if (url) next.style.backgroundImage = 'url("' + url + '")';
+      if (active) active.classList.remove("is-active");
+      next.classList.add("is-active");
+    }).catch(function () {
+      // Keep the current image if the next image fails to load.
+    });
+  }
+
+  function sync() {
+    stopMobileBg();
+    if (!plane || !homeIsVisible() || !usesPhotos() || REDUCE.matches) return;
+    var connection = navigator.connection;
+    if (connection && (connection.saveData || /^(slow-2g|2g|3g)$/.test(connection.effectiveType))) return;
+    mobileTimer = window.setInterval(function () { advancePhoto(1); }, MOBILE_INTERVAL_MS);
   }
 
   function bind(root) {
-    bindArrows(root);
-    bindMobileBg(root);
+    var scope = root || document;
+    bindArrows(scope);
+    var nextPlane = scope.querySelector("[data-az-home-mobile-bg]");
+    if (!nextPlane || nextPlane === plane) return;
+    plane = nextPlane;
+    var home = plane.closest(".az-view");
+    if (home && document.documentElement.classList.contains("az-laravel")) {
+      home.querySelectorAll(".az-home-arrows .slider__arrow").forEach(function (arrow) {
+        arrow.addEventListener("click", function () {
+          advancePhoto(arrow.classList.contains("js-slider__arrow-prev") ? -1 : 1);
+        });
+      });
+    }
+    sync();
   }
+
+  MOBILE.addEventListener("change", function () {
+    requestId += 1;
+    if (plane) {
+      plane.querySelectorAll(".az-home-mobile-bg__slide").forEach(function (slide, index) {
+        slide.classList.toggle("is-active", index === 0);
+      });
+    }
+    sync();
+  });
+  REDUCE.addEventListener("change", sync);
+  if (navigator.connection && navigator.connection.addEventListener) navigator.connection.addEventListener("change", sync);
+  document.addEventListener("visibilitychange", sync);
+  window.addEventListener("az:preloader-end", sync);
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
@@ -107,5 +158,5 @@
     bind(document);
   }
 
-  window.AZ_HOME_ARROWS = { bind: bind };
+  window.AZ_HOME_ARROWS = { bind: bind, sync: sync };
 })();

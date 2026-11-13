@@ -1,14 +1,23 @@
           <!-- HOME VIEW -->
           <section class="az-view {{ ($viewName ?? 'home') === 'home' ? 'is-active is-visible' : '' }}" id="view-home" data-view="home" aria-label="{{ $strings['nav.home'] ?? 'Home' }}" data-i18n-attr="aria-label:nav.home" @if(($viewName ?? 'home') !== 'home') hidden aria-hidden="true" @endif>
           <!-- section PROJECTS SLIDER FULLSCREEN -->
-          <section id="selected-work" class="section section-fullheight section-projects section-projects-slider bg-dark-1 overflow" data-arts-theme-text="light" data-arts-os-animation>
+          <section id="selected-work" class="section section-fullheight section-projects section-projects-slider bg-dark-1 overflow" data-arts-theme-text="light">
             <div class="section-fullheight__inner section-fullheight__inner_mobile text-center">
-              {{-- Mobile-only photographic slideshow (desktop keeps the WebGL textures, stripped before vendor.js). --}}
-              <div class="az-home-mobile-bg" aria-hidden="true" data-az-home-mobile-bg>
-                <span class="az-home-mobile-bg__slide is-active" style="background-image: url('{{ asset('assets/img/amir/home/home-mobile-bg-01.webp') }}')"></span>
-                <span class="az-home-mobile-bg__slide" style="background-image: url('{{ asset('assets/img/amir/home/home-mobile-bg-02.webp') }}')"></span>
-                <span class="az-home-mobile-bg__slide" style="background-image: url('{{ asset('assets/img/amir/home/home-mobile-bg-03.webp') }}')"></span>
-                <span class="az-home-mobile-bg__slide" style="background-image: url('{{ asset('assets/img/amir/home/home-mobile-bg-04.webp') }}')"></span>
+              <div class="az-home-photo" aria-hidden="true" data-az-home-mobile-bg>
+                @for ($slide = 1; $slide <= 4; $slide++)
+                  @php
+                    $desktop = asset(sprintf('assets/img/amir/home/home-bg-%02d.webp', $slide));
+                    $mobile = asset(sprintf('assets/img/amir/home/home-mobile-bg-%02d.webp', $slide));
+                  @endphp
+                  @if ($slide === 1)
+                    <picture class="az-home-mobile-bg__slide is-active">
+                      <source media="(max-width: 767px)" srcset="{{ $mobile }}"/>
+                      <img src="{{ $desktop }}" alt="" fetchpriority="high" decoding="async"/>
+                    </picture>
+                  @else
+                    <span class="az-home-mobile-bg__slide" data-mobile="{{ $mobile }}" data-desktop="{{ $desktop }}"></span>
+                  @endif
+                @endfor
               </div>
               @include('components.site.profile')
               @include('components.site.assistant')
@@ -22,8 +31,8 @@
                     <div class="swiper-slide"></div>
                   </div>
                 </div>
-                <!-- slider IMAGES: four authored home backgrounds (WebP). Desktop only — mobile strips textures before Rhye boots. -->
-                <div class="slider-fullscreen-projects__images swiper-container js-slider-fullscreen-projects__images" data-mousewheel-enabled="data-mousewheel-enabled" data-direction="horizontal" data-transition-effect="distortion" data-aspect-ratio="1.5" data-transition-displacement-img="assets/img/general/bg-displacement-7.webp" data-speed="1200" data-autoplay-enabled="true" data-autoplay-delay="6000" data-counter-style="roman">
+                <!-- slider IMAGES: four authored home backgrounds (WebP). The desktop enhancement reads these URLs when it starts. -->
+                <div class="slider-fullscreen-projects__images swiper-container js-slider-fullscreen-projects__images" data-mousewheel-enabled="data-mousewheel-enabled" data-direction="horizontal" data-transition-effect="distortion" data-aspect-ratio="1.5" data-transition-displacement-img="{{ asset('assets/img/general/bg-displacement-7.webp') }}" data-speed="1200" data-autoplay-enabled="true" data-autoplay-delay="6000" data-counter-style="roman">
                   <div class="swiper-wrapper">
                     <div class="swiper-slide overflow">
                       <div class="slider__images-slide-inner js-transition-img overflow" data-swiper-parallax="90%">

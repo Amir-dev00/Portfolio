@@ -1,5 +1,5 @@
 {{-- AZ circular brand loader. Always English — never translate this block. --}}
-<div class="preloader az-preloader az-preloader--ring" id="js-preloader" lang="en" dir="ltr" data-arts-theme-text="light" aria-label="Loading Amirhossein's portfolio">
+<div class="preloader az-preloader az-preloader--ring" id="az-preloader" lang="en" dir="ltr" data-arts-theme-text="light" aria-label="Loading Amirhossein's portfolio">
   <div class="preloader__content az-preloader__layout">
     <div class="preloader__header az-preloader__center">
       <div class="az-preloader__disc" aria-hidden="true">
@@ -22,8 +22,6 @@
 
       <span class="az-preloader__load-label">LOADING EXPERIENCE</span>
       <div class="preloader__counter az-preloader__percentage" aria-label="Loading progress">
-        {{-- Hidden sink for Rhye PagePreloader writes; AZ owns the visible number. --}}
-        <span class="preloader__counter-number preloader__counter-current az-preloader__rhye-sink" hidden aria-hidden="true">0</span>
         <span class="preloader__counter-number az-preloader__count" data-az-preloader-count>0</span>
         <span class="preloader__counter-divider az-preloader__counter-sep" aria-hidden="true">/</span>
         <span class="preloader__counter-number preloader__counter-total">100</span>
@@ -38,5 +36,4 @@
       </div>
     </div>
   </div>
-  <div class="preloader__circle" aria-hidden="true"></div>
 </div>

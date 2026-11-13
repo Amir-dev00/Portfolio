@@ -781,8 +781,10 @@
     schedulePrefetch();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
-  else bind();
+  if (!window.AZ_ASSETS) {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+    else bind();
+  }
 
   window.addEventListener("az:langchange", function () {
     state.bootstrapPromise = null;

@@ -231,7 +231,7 @@
 
       if (destination === "cv") window.location.assign(url);
       else if (window.AZ_nav && typeof window.AZ_nav.open === "function") {
-        window.AZ_nav.open({ destination: destination, url: url });
+        return window.AZ_nav.open({ destination: destination, url: url });
       } else {
         window.dispatchEvent(new CustomEvent("az:navigate", { detail: { destination: destination, url: url } }));
       }
@@ -310,9 +310,9 @@
     });
   }
 
-  function send(text) {
+  async function send(text) {
     var message = String(text || "").trim();
-    if (!message || state.sending) return;
+    if (!message || state.sending) return false;
     if (/^(?:cv|resume|résumé|رزومه)[.!؟?]*$/i.test(message)) {
       var cv = destinationLink("cv");
       var pdf = resumeHref(cv && cv.getAttribute("href"));
@@ -320,11 +320,18 @@
         setBusy(true);
         openDestination({ destination: "cv", url: pdf }, window.location.href)
           .finally(function () { setBusy(false); });
-        return;
+        return true;
       }
     }
 
-    window.dispatchEvent(new Event("az:ask"));
+    if (window.AZ_ASSETS && window.AZ_nav && window.AZ_nav.current().name !== "ask") {
+      setBusy(true);
+      var opened = await window.AZ_nav.go("ask");
+      setBusy(false);
+      if (!opened) return false;
+    } else if (!window.AZ_ASSETS) {
+      window.dispatchEvent(new Event("az:ask"));
+    }
     var fromUrl = window.location.href;
     showStatus("");
     state.messages.push({ role: "user", content: message });
@@ -362,6 +369,7 @@
       .finally(function () {
         setBusy(false);
       });
+    return true;
   }
 
   function setBusy(busy) {
@@ -405,7 +413,7 @@
     if (!input || !input.value.trim() || state.sending) return;
     var message = input.value;
     input.value = "";
-    send(message);
+    send(message).then(function (sent) { if (!sent && !input.value) input.value = message; });
   }
 
   function onTranscriptClick(e) {
@@ -422,11 +430,25 @@
     return state.root ? state.root.querySelector(sel) : null;
   }
 
+  function resizeChat() {
+    var viewport = window.visualViewport;
+    if (!viewport || viewport.scale !== 1) return;
+    var height = Math.floor(viewport.height) + "px";
+    if (state.root) state.root.style.setProperty("--az-ask-height", height);
+    if (state.home) {
+      state.home.style.setProperty("--az-home-vv-height", height);
+      state.home.style.setProperty("--az-home-vv-top", Math.floor(viewport.offsetTop) + "px");
+    }
+  }
+
   function bind() {
-    state.root = document.querySelector(ROOT);
-    if (!state.root) return;
-    state.home = document.querySelector("[data-az-assistant-home]");
-    if (state.home) state.home.hidden = false;
+    var root = document.querySelector(ROOT);
+    var home = document.querySelector("[data-az-assistant-home]");
+    if (root === state.root && home === state.home) return;
+
+    state.root = root;
+    state.home = home;
+    if (home) home.hidden = false;
     syncDirection();
     renderTranscript();
 
@@ -437,65 +459,26 @@
     if (reset) reset.addEventListener("click", resetChat);
     var transcript = qs("[data-az-assistant-transcript]");
     if (transcript) transcript.addEventListener("click", onTranscriptClick);
-    setBusy(false);
-
-    var viewport = window.visualViewport;
-    if (viewport) {
-      var resizeChat = function () {
-        if (viewport.scale !== 1) return;
-        state.root.style.setProperty("--az-ask-height", Math.floor(viewport.height) + "px");
-        // Homepage composer tracks the visible viewport so mid-screen centering
-        // restores when the keyboard closes and stays reachable while open.
-        if (state.home) {
-          state.home.style.setProperty("--az-home-vv-height", Math.floor(viewport.height) + "px");
-          state.home.style.setProperty("--az-home-vv-top", Math.floor(viewport.offsetTop) + "px");
-        }
-      };
-      viewport.addEventListener("resize", resizeChat);
-      viewport.addEventListener("scroll", resizeChat);
-      resizeChat();
-    }
-
+    setBusy(state.sending);
+    resizeChat();
   }
 
-  /** Warm remaining slider textures after first paint without blocking the first slide. */
-  function deferHomeTextures() {
-    if (window.matchMedia("(max-width: 767px)").matches) return;
-    var nodes = document.querySelectorAll(".az-home-bg[data-az-defer-texture]");
-    if (!nodes.length) return;
-    var run = function () {
-      Array.prototype.forEach.call(nodes, function (el) {
-        var src = el.getAttribute("data-texture-src");
-        if (!src) return;
-        var img = new Image();
-        img.decoding = "async";
-        img.src = src;
-      });
-    };
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(run, { timeout: 2500 });
-    } else {
-      window.setTimeout(run, 900);
-    }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", resizeChat);
+    window.visualViewport.addEventListener("scroll", resizeChat);
   }
 
-  document.addEventListener("az:langchange", function () {
+  window.addEventListener("az:langchange", function () {
     syncDirection();
     renderTranscript();
   });
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", function () {
-      bind();
-      deferHomeTextures();
-    });
-  } else {
-    bind();
-    deferHomeTextures();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind, { once: true });
+  else bind();
 
   window.AZ_assistant = {
     send: send,
+    bind: bind,
     reset: resetChat,
     open: function () {
       window.dispatchEvent(new Event("az:ask"));

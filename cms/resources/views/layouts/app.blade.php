@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ $locale }}" dir="{{ $dir }}" class="az-preloader-open az-lang-{{ $locale }}" data-az-lang="{{ $locale }}" data-az-route="{{ ($viewName ?? 'home') === 'project' ? 'work' : ($viewName ?? 'home') }}">
+<html lang="{{ $locale }}" dir="{{ $dir }}" class="az-laravel az-lang-{{ $locale }}" data-az-lang="{{ $locale }}" data-az-route="{{ ($viewName ?? 'home') === 'project' ? 'work' : ($viewName ?? 'home') }}">
   
 <!-- Mirrored from https://artemsemkin.com/rhye/html/index.html by HTTrack Website Copier/3.x [XR&CO], Mon, 09 Nov 2026 08:30:04 GMT -->
 <head>
@@ -59,35 +59,19 @@
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-i18n.css') }}"/>
     {{-- Noncritical feature CSS: fetch without blocking first paint. --}}
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-home-arrows.css') }}" media="print" onload="this.media='all'"/>
-    <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-booking.css') }}" media="print" onload="this.media='all'"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-assistant.css') }}" media="print" onload="this.media='all'"/>
     <noscript>
       <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-home-arrows.css') }}"/>
-      <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-booking.css') }}"/>
       <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-assistant.css') }}"/>
     </noscript>
     {{-- Material Icons are not needed for the loader / first view; load after paint. --}}
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Material+Icons&amp;display=swap" media="print" onload="this.media='all'"/>
     @if(($viewName ?? 'home') === 'home')
-      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg-01.webp') }}" type="image/webp" media="(max-width: 767px)"/>
-      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp" media="(min-width: 768px)"/>
+      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg-01.webp') }}" type="image/webp" fetchpriority="high" media="(max-width: 767px)"/>
+      <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp" fetchpriority="high" media="(width > 767px)"/>
     @endif
     <link rel="preload" href="{{ $azLogoSrc }}" as="image" type="image/webp"/>
-    <link rel="preload" href="{{ $profilePhoto ?? asset('assets/img/amir/profile.webp') }}" as="image" type="image/webp"/>
     <style>
-      /* While open, beat Rhye's early inline display:none on cached reloads. */
-      html.az-preloader-open #js-preloader.az-preloader--ring{
-        position:fixed!important;inset:0!important;z-index:99999!important;
-        display:flex!important;align-items:stretch!important;justify-content:stretch!important;
-        width:100%!important;height:100%!important;min-height:100vh!important;min-height:100dvh!important;
-        background:var(--az-bg,#0b1220)!important;opacity:1!important;visibility:visible!important;
-        pointer-events:auto!important;overflow:hidden!important;
-      }
-      html.az-preloader-open #js-preloader.az-preloader--ring .preloader__content.az-preloader__layout{
-        position:relative!important;inset:auto!important;top:auto!important;left:auto!important;
-        transform:none!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;
-        display:flex!important;flex-direction:column!important;opacity:1!important;visibility:visible!important;
-      }
       .logo-wordmark{display:inline-block;font-family:var(--font-en),"Manrope",sans-serif;font-size:15px;font-weight:700;letter-spacing:.1em;line-height:20px;white-space:nowrap}
       .logo__img-primary.logo-wordmark{color:#111}
       .logo__img-secondary.logo-wordmark{color:#fff}
@@ -113,16 +97,15 @@
     <link rel="icon" type="image/png" href="{{ $assetV('assets/img/amir/favicon.png') }}"/>
   </head>
   <body>
-    <div data-barba="wrapper">
+    <div>
       @include('components.site.preloader')
-      {{-- Run immediately after the loader markup; do not wait for vendor.js (defer). --}}
-      <script src="{{ $assetV('js/az-preloader.js') }}"></script>
+      <script src="{{ $assetV('js/az-preloader.js') }}" async
+        onerror="document.documentElement.classList.remove('az-preloader-open', 'az-loading')"></script>
       @include('components.site.language-switcher')
-      @include('components.site.chrome')
       @include('components.site.header')
       @include('components.site.navbar')
       <!-- PAGE MAIN -->
-      <div class="js-smooth-scroll bg-dark-1" id="page-wrapper" data-barba="container">
+      <div class="js-smooth-scroll bg-dark-1" id="page-wrapper">
         <main class="page-wrapper__content az-app" id="az-app">
 @yield('content')
         </main>
@@ -132,8 +115,11 @@
       <!-- - PAGE MAIN -->
     </div>
     <canvas id="js-webgl"></canvas>
+    <div class="az-route-status" id="az-route-status" role="status" hidden>
+      <span></span>
+      <button type="button" hidden></button>
+    </div>
     @include('components.site.welcome-tour')
-    @include('components.site.photoswipe')
     @include('components.site.shaders')
     @include('components.site.scripts')
 </body>

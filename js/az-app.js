@@ -15,6 +15,19 @@
 
   var boot = window.AZ_BOOTSTRAP || null;
   var serverRouted = !!(boot && boot.canonical);
+  var assets = window.AZ_ASSETS || {};
+  var featureLoads = new Map();
+  var routeCache = new Map();
+  var routeLoads = new Map();
+  var requestedRoute = 0;
+  var routeStatus = document.getElementById("az-route-status");
+  var activeRouteData = null;
+  var workProjects = [];
+  var activeRoute = null;
+  var rhyeRequested = false;
+
+  var desktopHome = window.matchMedia("(width > 767px)");
+  var connection = window.navigator.connection;
 
   function tt(key, vars) {
     if (window.AZ_i18n && typeof window.AZ_i18n.t === "function") {
@@ -24,7 +37,7 @@
   }
 
   function localizeProject(project) {
-    if (!project) return project;
+    if (!project || serverRouted) return project;
     if (window.AZ_i18n && typeof window.AZ_i18n.localizeProject === "function") {
       return window.AZ_i18n.localizeProject(project);
     }
@@ -76,10 +89,6 @@
       return { name: "project", slug: decodeURIComponent(match[1]) };
     }
     return null;
-  }
-
-  function normalizePathname(pathname) {
-    return parsePortfolioPath(pathname) || { name: "home" };
   }
 
   function isPortfolioHash(raw) {
@@ -135,10 +144,35 @@
   }
 
   function viewFor(route) {
-    return views[route.name] || views.home;
+    return views[route.name];
   }
 
   function setDocumentTitle(route) {
+    if (serverRouted && activeRouteData) {
+      var seo = activeRouteData.seo;
+      var hreflang = activeRouteData.hreflang;
+      var canonical = hreflang[currentLang()];
+      document.title = seo.title;
+      [
+        ['link[rel="canonical"]', "href", canonical],
+        ['link[hreflang="en"]', "href", hreflang.en],
+        ['link[hreflang="fa"]', "href", hreflang.fa],
+        ['link[hreflang="x-default"]', "href", hreflang.en],
+        ['meta[name="description"]', "content", seo.description || ""],
+        ['meta[name="robots"]', "content", seo.robots || "index,follow"],
+        ['meta[property="og:title"]', "content", seo.title],
+        ['meta[property="og:description"]', "content", seo.description || ""],
+        ['meta[property="og:image"]', "content", activeRouteData.ogImage],
+        ['meta[property="og:url"]', "content", canonical],
+        ['meta[property="og:type"]', "content", route.name === "project" ? "article" : "website"],
+        ['meta[property="og:locale"]', "content", currentLang() === "fa" ? "fa_IR" : "en_US"],
+        ['meta[property="og:locale:alternate"]', "content", currentLang() === "fa" ? "en_US" : "fa_IR"],
+      ].forEach(function (entry) {
+        var node = document.querySelector(entry[0]);
+        if (node) node.setAttribute(entry[1], entry[2]);
+      });
+      return;
+    }
     if (route.name === "work") document.title = tt("title.work");
     else if (route.name === "about") document.title = tt("title.about");
     else if (route.name === "ask") document.title = tt("title.ask");
@@ -193,6 +227,10 @@
 
   function setHomeSliderLive(live) {
     homeSliderWanted = !!live;
+    if (serverRouted) {
+      applyHomeSliderLive();
+      return;
+    }
     if (applyHomeSliderLive()) {
       if (homeSliderPoll) {
         window.clearInterval(homeSliderPoll);
@@ -214,7 +252,7 @@
 
   function initPageScrollbar() {
     var pw = document.getElementById("page-wrapper");
-    if (!pw || !window.Scrollbar || typeof window.Scrollbar.init !== "function") return null;
+    if (serverRouted || !pw || !window.Scrollbar || typeof window.Scrollbar.init !== "function") return null;
     if (getPageScrollbar()) return getPageScrollbar();
     var opts = (window.theme && window.theme.smoothScroll) || {};
     try {
@@ -256,6 +294,7 @@
     }
 
     document.documentElement.classList.remove("az-native-scroll");
+    if (serverRouted) return true;
     if (!sb) sb = initPageScrollbar();
     if (sb && typeof sb.update === "function") {
       try {
@@ -268,6 +307,7 @@
   function setNativePageScroll(native) {
     nativeScrollWanted = !!native;
     applyPageScrollMode();
+    if (serverRouted) return;
     if (scrollModePoll) window.clearInterval(scrollModePoll);
     var tries = 0;
     scrollModePoll = window.setInterval(function () {
@@ -392,7 +432,7 @@
   }
 
   function getProjects() {
-    return (window.AZ_PROJECTS || []).map(localizeProject);
+    return serverRouted ? workProjects : (window.AZ_PROJECTS || []).map(localizeProject);
   }
 
   function indexForSlug(slug) {
@@ -693,7 +733,7 @@
 
   function renderProject(slug) {
     if (!projectRoot) return false;
-    var raw = window.AZ_getProjectBySlug && window.AZ_getProjectBySlug(slug);
+    var raw = serverRouted ? activeRouteData.projects[0] : window.AZ_getProjectBySlug && window.AZ_getProjectBySlug(slug);
     var project = localizeProject(raw);
     if (!project) {
       projectRoot.innerHTML =
@@ -795,7 +835,10 @@
     // Work/project/about/contact: release Rhye smooth-scrollbar so the document scrolls natively.
     // Home: restore smooth-scrollbar + Swiper mousewheel/touch.
     setNativePageScroll(!isHome);
-    setHomeSliderLive(isHome);
+    setHomeSliderLive(isHome && (!serverRouted || desktopHome.matches));
+    if (serverRouted && isHome) startHomeFeatures();
+    if (window.AZ_HOME_ARROWS && window.AZ_HOME_ARROWS.sync) window.AZ_HOME_ARROWS.sync();
+    if (!isHome && window.AZ_booking && route.name !== "contact") window.AZ_booking.close();
     window.scrollTo(0, 0);
     if (route.name === "ask" && document.documentElement.classList.contains("az-app-ready")) {
       var title = document.getElementById("az-ask-title");
@@ -809,7 +852,7 @@
 
   function showView(route, instant) {
     var next = viewFor(route);
-    var key = routeKey(route);
+    var key = serverRouted ? pathForRoute(route) : routeKey(route);
     if (!next) return;
     if (key === currentKey && !animating) {
       setDockActive(route);
@@ -849,6 +892,7 @@
         view.setAttribute("aria-hidden", on ? "false" : "true");
       });
       currentKey = key;
+      activeRoute = route;
       afterShow(route);
       animating = false;
       transitionTimer = 0;
@@ -859,13 +903,16 @@
       }
     }
 
-    if (instant || REDUCE || !prev || prev === next) {
+    if (serverRouted || instant || REDUCE || !prev || prev === next) {
       if (prev && prev !== next) {
         prev.classList.remove("is-leaving", "is-visible", "is-active");
         prev.hidden = true;
         prev.setAttribute("aria-hidden", "true");
       }
       activate();
+      if (serverRouted && !instant && !REDUCE && prev && prev !== next && next.animate) {
+        next.animate([{ opacity: 0.65 }, { opacity: 1 }], { duration: 180, easing: "ease-out" });
+      }
       return;
     }
 
@@ -898,8 +945,171 @@
     return { name: "home" };
   }
 
+  function loadFeature(key, stylesheet) {
+    if (featureLoads.has(key)) return featureLoads.get(key);
+    var promise = new Promise(function (resolve, reject) {
+      var element = document.createElement(stylesheet ? "link" : "script");
+      element.onload = resolve;
+      element.onerror = function () {
+        element.remove();
+        reject(new Error(key));
+      };
+      if (stylesheet) {
+        element.rel = "stylesheet";
+        element.href = assets[key];
+      } else {
+        element.src = assets[key];
+      }
+      document.head.appendChild(element);
+    }).catch(function (error) {
+      featureLoads.delete(key);
+      throw error;
+    });
+    featureLoads.set(key, promise);
+    return promise;
+  }
+
+  function startDesktopSlider() {
+    if (rhyeRequested || REDUCE || !desktopHome.matches || !activeRoute || activeRoute.name !== "home") return;
+    if (document.documentElement.classList.contains("az-loading") || document.hidden) return;
+    if (connection && (connection.saveData || /^(slow-2g|2g|3g)$/.test(connection.effectiveType))) return;
+
+    rhyeRequested = true;
+    loadFeature("vendor").then(function () {
+      if (!desktopHome.matches || activeRoute.name !== "home") {
+        rhyeRequested = false;
+        return;
+      }
+      return loadFeature("rhye").then(function () {
+        if (!activeRoute || activeRoute.name !== "home" || !desktopHome.matches) {
+          rhyeRequested = false;
+          return;
+        }
+        window.AZ_startDesktopSlider();
+      });
+    }).catch(function () { rhyeRequested = false; });
+  }
+
+  function startHomeFeatures() {
+    ["profile", "tour", "arrows"].forEach(function (key) {
+      if (key === "profile" && document.querySelector("script[data-az-home-profile]")) return;
+      loadFeature(key).catch(function () {});
+    });
+    // Leave the first background and the welcome UI ahead of the optional renderer.
+    window.requestAnimationFrame(startDesktopSlider);
+  }
+
+  function routeUrl(route, locale) {
+    return pathForRoute(route, locale) + (boot.preview ? "?preview=1" : "");
+  }
+
+  function fetchRoute(url) {
+    if (routeCache.has(url)) return Promise.resolve(routeCache.get(url));
+    if (routeLoads.has(url)) return routeLoads.get(url);
+    var controller = new AbortController();
+    var deadline = window.setTimeout(function () { controller.abort(); }, 30000);
+    var pending = fetch(url, {
+      credentials: "same-origin",
+      headers: { "Accept": "application/json", "X-AZ-Fragment": "1" },
+      signal: controller.signal,
+    }).then(function (response) {
+      if (!response.ok) throw new Error("Route HTTP " + response.status);
+      return response.json();
+    }).finally(function () {
+      window.clearTimeout(deadline);
+      routeLoads.delete(url);
+    });
+    routeLoads.set(url, pending);
+    return pending;
+  }
+
+  function reportRouteStatus(message, retry) {
+    if (!routeStatus) return;
+    routeStatus.hidden = !message;
+    routeStatus.querySelector("span").textContent = message;
+    var button = routeStatus.querySelector("button");
+    button.hidden = !retry;
+    button.textContent = currentLang() === "fa" ? "تلاش دوباره" : "Retry";
+    button.onclick = retry || null;
+  }
+
+  function mountRoute(route, data) {
+    var existing = views[route.name];
+    // Home and Ask keep the live UI and transcript across language switches.
+    if (existing && route.name !== "project") return;
+    if (existing && existing.dataset.azSlug === route.slug) return;
+    var fragment = document.createElement("template");
+    fragment.innerHTML = data.html;
+    var next = fragment.content.firstElementChild;
+    if (!next || next.id !== "view-" + route.name || !next.classList.contains("az-view")) {
+      throw new Error("Unexpected route view");
+    }
+    next.hidden = true;
+    next.classList.remove("is-active", "is-visible");
+    next.setAttribute("aria-hidden", "true");
+    if (route.name === "project") next.dataset.azSlug = route.slug;
+    if (existing) existing.replaceWith(next);
+    else app.appendChild(next);
+    views[route.name] = next;
+    if (route.name === "work") workBrowser = next.querySelector("#az-work-browser");
+    if (route.name === "project") projectRoot = next.querySelector("#az-project-root");
+  }
+
+  function loadRoute(route, mode, locale) {
+    var url = routeUrl(route, locale);
+    var token = ++requestedRoute;
+    var pendingStatus = window.setTimeout(function () {
+      if (token === requestedRoute) reportRouteStatus(locale === "fa" ? "در حال بارگذاری…" : "Loading…");
+    }, 180);
+    reportRouteStatus("");
+    if (nav) nav.setAttribute("aria-busy", "true");
+    return fetchRoute(url).then(function (data) {
+      if (token !== requestedRoute) return false;
+      if (!data.seo || !data.hreflang || !Array.isArray(data.projects)) throw new Error("Incomplete route");
+      return (route.name === "home" || route.name === "ask") && !window.AZ_assistant
+        ? loadFeature("assistant").then(function () { return data; }) : data;
+    }).then(function (data) {
+      if (!data || token !== requestedRoute) return false;
+      mountRoute(route, data);
+      routeCache.set(url, data);
+      activeRouteData = data;
+      if (locale !== currentLang() && window.AZ_i18n) window.AZ_i18n.setLang(locale, { resetScroll: true });
+      if (mode && window.location.pathname + window.location.search !== url) {
+        if (mode === "replace") history.replaceState({ az: true }, "", url);
+        else history.pushState({ az: true }, "", url);
+      }
+      if (route.name === "work" && workProjects !== data.projects) {
+        window.clearTimeout(workFadeTimer);
+        workProjects = data.projects;
+        if (workBrowser) delete workBrowser.dataset.ready;
+      }
+      if (window.AZ_i18n) window.AZ_i18n.apply(views[route.name]);
+      if (window.AZ_assistant) window.AZ_assistant.bind();
+      showView(route, mode === "replace");
+      if (route.name === "work" && !workBrowser.dataset.ready) renderWorkGrid();
+      setDocumentTitle(route);
+      return true;
+    }).catch(function () {
+      if (token === requestedRoute) {
+        reportRouteStatus(locale === "fa" ? "صفحه باز نشد." : "Couldn’t open the page.", function () {
+          loadRoute(route, mode, locale);
+        });
+      }
+      return false;
+    }).finally(function () {
+      window.clearTimeout(pendingStatus);
+      if (token === requestedRoute && nav) nav.removeAttribute("aria-busy");
+    });
+  }
+
+  function localeFromPath(path) {
+    return /^\/fa(?:\/|$)/.test(path) ? "fa" : "en";
+  }
+
   function applyFromLocation(instant) {
-    showView(resolveRouteFromLocation(), instant);
+    var route = resolveRouteFromLocation();
+    if (!serverRouted) return showView(route, instant);
+    return loadRoute(route, null, localeFromPath(window.location.pathname));
   }
 
   /** Rewrite dock / brand hrefs after language switches so middle-click stays correct. */
@@ -935,7 +1145,7 @@
     } else {
       route = parsePortfolioPath(window.location.pathname) || { name: "home" };
     }
-    var clean = pathForRoute(route) + query;
+    var clean = pathForRoute(route, localeFromPath(window.location.pathname)) + query;
     var currentClean = window.location.pathname + (window.location.search || "");
     if (currentClean !== clean || (hash && hash !== "#")) {
       history.replaceState({ az: true }, "", clean);
@@ -943,20 +1153,9 @@
     return route;
   }
 
-  function navigateClient(route, replace) {
-    if (serverRouted) {
-      var nextUrl = pathForRoute(route);
-      var current = window.location.pathname.replace(/\/+$/, "") || "/";
-      var nextNorm = nextUrl.replace(/\/+$/, "") || "/";
-      if (replace || current !== nextNorm || window.location.hash) {
-        if (replace) history.replaceState({ az: true }, "", nextUrl);
-        else if (current !== nextNorm || window.location.hash) {
-          history.pushState({ az: true }, "", nextUrl);
-        }
-      }
-      showView(route, false);
-      return;
-    }
+  function navigateClient(route, replace, locale) {
+    if (!Object.prototype.hasOwnProperty.call(views, route.name)) return Promise.resolve(false);
+    if (serverRouted) return loadRoute(route, replace ? "replace" : "push", locale || currentLang());
     var nextHash = hashForRoute(route);
     if (window.location.hash === nextHash) {
       showView(route, false);
@@ -995,24 +1194,30 @@
     var route = routeFromHref(href);
     if (!route) return;
     event.preventDefault();
-    navigateClient(route, false);
+    var locale = href.charAt(0) === "#" ? currentLang() : localeFromPath(new URL(href, window.location.origin).pathname);
+    navigateClient(route, false, locale);
   }
 
   document.addEventListener("click", onNavClick);
   window.addEventListener("az:ask", function () {
     navigateClient({ name: "ask" }, false);
   });
-  window.addEventListener("az:navigate", function (event) {
-    var detail = (event && event.detail) || {};
+  function openDestination(detail) {
+    detail = detail || {};
     var destination = String(detail.destination || "").toLowerCase();
     var url = String(detail.url || "");
     if (destination === "cv") {
       if (url) window.open(url, "_blank", "noopener,noreferrer");
-      return;
+      return Promise.resolve(!!url);
     }
     if (destination === "work" || destination === "about" || destination === "contact" || destination === "ask" || destination === "home") {
-      navigateClient({ name: destination }, false);
+      return navigateClient({ name: destination }, false);
     }
+    return Promise.resolve(false);
+  }
+
+  window.addEventListener("az:navigate", function (event) {
+    openDestination(event.detail);
   });
   window.addEventListener("hashchange", function () {
     if (serverRouted) {
@@ -1021,47 +1226,87 @@
     applyFromLocation(false);
   });
   window.addEventListener("popstate", function () {
-    if (serverRouted) {
-      canonicalizeLegacyUrl();
-      applyFromLocation(false);
-      return;
-    }
     applyFromLocation(false);
   });
   window.addEventListener("resize", function () {
-    setDockActive(resolveRouteFromLocation());
+    if (activeRoute) setDockActive(activeRoute);
   });
   window.addEventListener("az:langchange", function () {
-    refreshLocalizedUi();
-    if (serverRouted) {
-      var route = resolveRouteFromLocation();
-      history.replaceState({ az: true }, "", pathForRoute(route));
-      syncNavHrefs(currentLang());
-    }
+    if (serverRouted) syncNavHrefs(currentLang());
+    else refreshLocalizedUi();
+  });
+  window.addEventListener("az:langrequest", function (event) {
+    if (serverRouted) navigateClient(activeRoute || resolveRouteFromLocation(), true, event.detail.lang);
   });
 
   if (serverRouted) {
-    canonicalizeLegacyUrl();
-    syncNavHrefs(currentLang());
-  } else if (!window.location.hash || window.location.hash === "#") {
-    history.replaceState(null, "", hashForRoute(resolveRouteFromLocation()));
-  }
+    var initial = parsePortfolioPath(window.location.pathname) || { name: "home" };
+    activeRouteData = boot.routeData;
+    if (initial.name === "work") workProjects = activeRouteData.projects;
+    if (initial.name === "project" && views.project) views.project.dataset.azSlug = initial.slug;
+    if (window.AZ_assistant) window.AZ_assistant.bind();
+    var initialView = views[initial.name];
+    if (initialView) routeCache.set(routeUrl(initial, boot.lang), Object.assign({
+      html: initialView.outerHTML,
+    }, activeRouteData));
+    syncNavHrefs(boot.lang);
+    showView(initial, true);
+    var clean = canonicalizeLegacyUrl();
+    if (routeKey(clean) !== routeKey(initial)) applyFromLocation(true);
 
-  applyFromLocation(true);
-  document.documentElement.classList.add("az-app-ready");
+    window.addEventListener("az:preloader-end", startDesktopSlider);
+    document.addEventListener("visibilitychange", startDesktopSlider);
+    if (connection && connection.addEventListener) connection.addEventListener("change", startDesktopSlider);
+    desktopHome.addEventListener("change", function () {
+      setHomeSliderLive(desktopHome.matches && activeRoute.name === "home");
+      startDesktopSlider();
+    });
+    window.addEventListener("az:rhye-ready", function () {
+      document.documentElement.classList.add("az-rhye-ready");
+      applyHomeSliderLive();
+      if (window.AZ_HOME_ARROWS && window.AZ_HOME_ARROWS.sync) window.AZ_HOME_ARROWS.sync();
+    });
+    document.addEventListener("click", function (event) {
+      var trigger = event.target.closest("[data-az-booking-open]");
+      if (!trigger) return;
+      event.preventDefault();
+      if (trigger.disabled) return;
+      trigger.disabled = true;
+      trigger.setAttribute("aria-busy", "true");
+      Promise.all([
+        loadFeature("bookingCss", true),
+        loadFeature("jalali").then(function () { return loadFeature("booking"); }),
+      ]).then(function () {
+        if (activeRoute.name === "contact" && !trigger.closest(".az-view").hidden) window.AZ_booking.open(trigger);
+      }).catch(function () {
+        reportRouteStatus(currentLang() === "fa" ? "تقویم باز نشد." : "Couldn’t open the calendar.", function () {
+          reportRouteStatus("");
+          if (activeRoute.name === "contact") trigger.click();
+        });
+      }).finally(function () {
+        trigger.disabled = false;
+        trigger.removeAttribute("aria-busy");
+      });
+    });
+  } else {
+    if (!window.location.hash || window.location.hash === "#") {
+      history.replaceState(null, "", hashForRoute(resolveRouteFromLocation()));
+    }
+    applyFromLocation(true);
+  }
 
   window.AZ_nav = {
     go: function (name) {
       var routeName = String(name || "");
       if (!routeName) return;
-      navigateClient({ name: routeName }, false);
+      return navigateClient({ name: routeName }, false);
     },
-    open: function (detail) {
-      window.dispatchEvent(new CustomEvent("az:navigate", { detail: detail || {} }));
-    },
+    open: openDestination,
     current: function () {
-      return resolveRouteFromLocation();
+      return activeRoute || resolveRouteFromLocation();
     },
     pathFor: pathForRoute,
   };
+  document.documentElement.classList.add("az-app-ready");
+  window.dispatchEvent(new Event("az:app-ready"));
 })();
