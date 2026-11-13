@@ -1129,6 +1129,30 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   opacity: 0;
   pointer-events: none;
 }
+@media (width > 767px) {
+  /* The dock needs a stable gutter on scrollable pages. Home has no scrollbar. */
+  html.az-laravel[data-az-route="home"]:not(.az-native-scroll) {
+    scrollbar-gutter: auto;
+  }
+
+  .az-laravel #view-home.is-active {
+    inline-size: 100%;
+    block-size: 100vh;
+    block-size: 100dvh;
+  }
+
+  .az-laravel #view-home :is(#selected-work, .section-fullheight__inner) {
+    inline-size: 100%;
+    block-size: 100%;
+    min-block-size: 0;
+  }
+
+  /* Keep the Rhye vignette translucent so the photograph remains visible at the corners. */
+  .az-laravel #view-home .slider__overlay.overlay_circle-dark {
+    background-image: radial-gradient(ellipse at center, transparent 28%, #050c1666 100%);
+  }
+}
+
 .az-route-status {
   position: fixed;
   z-index: 30;
@@ -1172,7 +1196,7 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 #work-projects,
 .az-experience { scroll-margin-block-start: 84px; }
 
-.az-experience {
+.az-experience + #work-projects {
   margin-block-start: clamp(38px, 7vw, 76px);
   padding-block-start: clamp(24px, 4vw, 42px);
   border-block-start: 1px solid var(--az-line);
