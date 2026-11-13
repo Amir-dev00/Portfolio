@@ -33,7 +33,7 @@
                   </div>
                 </div>
                 <!-- slider IMAGES: four authored home backgrounds (WebP). The desktop enhancement reads these URLs when it starts. -->
-                <div class="slider-fullscreen-projects__images swiper-container js-slider-fullscreen-projects__images" data-mousewheel-enabled="data-mousewheel-enabled" data-direction="horizontal" data-transition-effect="distortion" data-aspect-ratio="1.5" data-transition-displacement-img="{{ asset('assets/img/general/bg-displacement-7.webp') }}" data-speed="1200" data-autoplay-enabled="true" data-autoplay-delay="6000" data-counter-style="roman">
+                <div class="slider-fullscreen-projects__images swiper-container js-slider-fullscreen-projects__images" data-mousewheel-enabled="data-mousewheel-enabled" data-direction="horizontal" data-transition-effect="distortion" data-aspect-ratio="1.5" data-transition-displacement-img="{{ asset('assets/img/general/bg-displacement-7.webp') }}" data-speed="1200" data-autoplay-enabled="false" data-counter-style="roman">
                   <div class="swiper-wrapper">
                     <div class="swiper-slide overflow">
                       <div class="slider__images-slide-inner js-transition-img overflow" data-swiper-parallax="90%">
@@ -82,36 +82,36 @@
                 </div>
                 <!-- slider ARROWS -->
                 <div class="az-home-arrows" role="group" aria-label="Background slides" data-i18n-attr="aria-label:home.arrows">
-                  <button type="button" class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev" aria-label="Previous slide" data-i18n-attr="aria-label:home.prev">
-                    <span class="arrow arrow-left js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
+                  <div class="slider__arrow slider__arrow_left slider__arrow_absolute js-slider__arrow-prev" aria-label="Previous slide" data-i18n-attr="aria-label:home.prev">
+                    <div class="arrow arrow-left js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
                       <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
                         <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
                       </svg>
-                      <span class="arrow__pointer arrow-left__pointer" aria-hidden="true"></span>
-                      <span class="arrow__triangle" aria-hidden="true"></span>
+                      <div class="arrow__pointer arrow-left__pointer" aria-hidden="true"></div>
+                      <div class="arrow__triangle" aria-hidden="true"></div>
                       <span class="az-home-arrows__tab" aria-hidden="true">
                         <span class="az-home-arrows__glint"></span>
                         <svg class="az-home-arrows__chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" focusable="false">
                           <path d="M10.25 3.5 5.75 8l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                       </span>
-                    </span>
-                  </button>
-                  <button type="button" class="slider__arrow slider__arrow_right slider__arrow_absolute js-slider__arrow-next" aria-label="Next slide" data-i18n-attr="aria-label:home.next">
-                    <span class="arrow arrow-right js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
+                    </div>
+                  </div>
+                  <div class="slider__arrow slider__arrow_right slider__arrow_absolute js-slider__arrow-next" aria-label="Next slide" data-i18n-attr="aria-label:home.next">
+                    <div class="arrow arrow-right js-arrow" data-arts-cursor="data-arts-cursor" data-arts-cursor-hide-native="true" data-arts-cursor-scale="0" data-arts-cursor-magnetic="data-arts-cursor-magnetic">
                       <svg class="svg-circle" viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
                         <circle class="circle" cx="30" cy="30" r="29" fill="none"></circle>
                       </svg>
-                      <span class="arrow__pointer arrow-right__pointer" aria-hidden="true"></span>
-                      <span class="arrow__triangle" aria-hidden="true"></span>
+                      <div class="arrow__pointer arrow-right__pointer" aria-hidden="true"></div>
+                      <div class="arrow__triangle" aria-hidden="true"></div>
                       <span class="az-home-arrows__tab" aria-hidden="true">
                         <span class="az-home-arrows__glint"></span>
                         <svg class="az-home-arrows__chevron" viewBox="0 0 16 16" width="14" height="14" fill="none" focusable="false">
                           <path d="M5.75 3.5 10.25 8l-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                       </span>
-                    </span>
-                  </button>
+                    </div>
+                  </div>
                 </div>
                 <!-- - slider ARROWS -->
                 <!-- slider CANVAS -->

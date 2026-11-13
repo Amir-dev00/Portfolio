@@ -207,7 +207,7 @@
     try {
       if (homeSliderWanted) {
         if (typeof swiper.update === "function") swiper.update();
-        if (swiper.autoplay && typeof swiper.autoplay.start === "function") swiper.autoplay.start();
+        if (!serverRouted && swiper.autoplay && typeof swiper.autoplay.start === "function") swiper.autoplay.start();
         if ("allowTouchMove" in swiper) swiper.allowTouchMove = true;
         if (swiper.mousewheel && typeof swiper.mousewheel.enable === "function") {
           swiper.mousewheel.enable();

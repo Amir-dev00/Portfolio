@@ -235,8 +235,8 @@ html[dir="rtl"] .az-assistant__composer,
 .az-assistant__avatar-shell {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 31px;
+  width: 29px;
+  height: 25px;
   border: 1px solid #8db9de;
   border-radius: 42% 42% 46% 46%;
   background:
@@ -252,8 +252,8 @@ html[dir="rtl"] .az-assistant__composer,
   justify-content: center;
   align-items: center;
   gap: 4px;
-  width: 25px;
-  height: 18px;
+  width: 21px;
+  height: 15px;
   border-radius: 42% 42% 46% 46%;
   background: linear-gradient(160deg, #162848, #050d20 76%);
   box-shadow: inset 0 1px 3px #030917, 0 1px 0 #9fcae87d;
@@ -694,7 +694,8 @@ html.az-preloader-open .az-assistant {
 .az-assistant__avatar-limbs {
   display: none;
   position: absolute;
-  inset: 0;
+  /* Keep the torso and shoulder span as the helmet gets narrower. */
+  inset: 0 -3.5px;
   pointer-events: none;
 }
 

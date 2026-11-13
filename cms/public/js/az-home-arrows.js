@@ -1,15 +1,15 @@
 /**
  * Home background helpers:
  * - Desktop arrow edge-tab feedback (Rhye/Swiper still owns prev/next).
- * - Mobile photographic crossfade (desktop WebGL path stays untouched).
+ * - Auto-advance the active photo or desktop WebGL slider.
  */
 (function () {
   var REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)");
   var MOBILE = window.matchMedia("(max-width: 767px)");
   var FIRE_MS = 160;
   var GLINT_MS = 400;
-  var MOBILE_INTERVAL_MS = 6000;
-  var mobileTimer = 0;
+  var SLIDE_INTERVAL_MS = 6000;
+  var slideTimer = 0;
 
   function bindArrows(root) {
     var scope = root || document;
@@ -53,10 +53,10 @@
     });
   }
 
-  function stopMobileBg() {
-    if (mobileTimer) {
-      window.clearTimeout(mobileTimer);
-      mobileTimer = 0;
+  function stopTimer() {
+    if (slideTimer) {
+      window.clearTimeout(slideTimer);
+      slideTimer = 0;
     }
   }
 
@@ -99,7 +99,7 @@
     var active = plane.querySelector(".az-home-mobile-bg__slide.is-active");
     var next = slides[(slides.indexOf(active) + direction + slides.length) % slides.length];
     if (!next) return;
-    stopMobileBg();
+    stopTimer();
     var token = ++requestId;
     var url = next.dataset[MOBILE.matches ? "mobile" : "desktop"];
     var loaded = url ? loadPhoto(url) : Promise.resolve();
@@ -115,14 +115,25 @@
     });
   }
 
+  function advanceDesktop() {
+    var slider = document.querySelector("#view-home .js-slider-fullscreen-projects__images");
+    var swiper = slider && slider.swiper;
+    if (swiper && !swiper.destroyed && !swiper.animating) {
+      if (swiper.isEnd) swiper.slideTo(0);
+      else swiper.slideNext();
+    }
+    sync();
+  }
+
   function sync() {
-    stopMobileBg();
-    if (!plane || !homeIsVisible() || !usesPhotos() || REDUCE.matches) return;
-    var connection = navigator.connection;
-    if (!MOBILE.matches && connection &&
-      (connection.saveData || /^(slow-2g|2g|3g)$/.test(connection.effectiveType))) return;
-    // Wait for each image to finish before counting down to the next slide.
-    mobileTimer = window.setTimeout(function () { advancePhoto(1); }, MOBILE_INTERVAL_MS);
+    stopTimer();
+    if (!homeIsVisible() || REDUCE.matches) return;
+    // The same countdown drives both renderers. Slow networks still use the photo fallback.
+    slideTimer = window.setTimeout(function () {
+      if (!homeIsVisible()) return;
+      if (usesPhotos()) advancePhoto(1);
+      else advanceDesktop();
+    }, SLIDE_INTERVAL_MS);
   }
 
   function bind(root) {
@@ -135,7 +146,8 @@
     if (home && document.documentElement.classList.contains("az-laravel")) {
       home.querySelectorAll(".az-home-arrows .slider__arrow").forEach(function (arrow) {
         arrow.addEventListener("click", function () {
-          advancePhoto(arrow.classList.contains("js-slider__arrow-prev") ? -1 : 1);
+          if (usesPhotos()) advancePhoto(arrow.classList.contains("js-slider__arrow-prev") ? -1 : 1);
+          else sync();
         });
       });
     }
@@ -152,7 +164,6 @@
     sync();
   });
   REDUCE.addEventListener("change", sync);
-  if (navigator.connection && navigator.connection.addEventListener) navigator.connection.addEventListener("change", sync);
   document.addEventListener("visibilitychange", sync);
   window.addEventListener("az:preloader-end", sync);
 

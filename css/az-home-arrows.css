@@ -36,9 +36,6 @@
 }
 
 .az-home-arrows .slider__arrow {
-  border: 0;
-  padding: 0;
-  background: transparent;
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;

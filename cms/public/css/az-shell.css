@@ -49,23 +49,39 @@ h1, h2, h3 { margin-block: .5em; }
 .slider__arrow_left { left: var(--gutter-horizontal); }
 .slider__arrow_right { right: var(--gutter-horizontal); }
 
-.arrow { position: relative; display: inline-grid; place-items: center; cursor: pointer; }
+.arrow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
 .arrow-left { transform: rotate(180deg); }
 .arrow__pointer {
+  display: block;
   position: absolute;
-  top: calc(50% - 1px);
-  right: 50%;
-  width: 30%;
+  top: 0;
+  bottom: 0;
+  right: 30px;
+  width: 100%;
   height: 2px;
+  margin: auto;
+  transform-origin: right center;
+  transition: all .2s cubic-bezier(.785,.135,.15,.86);
 }
 .arrow__triangle {
+  display: inline-block;
   position: absolute;
   top: 50%;
   left: 50%;
   border: solid transparent;
   border-width: 6px 0 6px 8px;
   transform: translate(-50%, -50%);
+  transition: all .2s cubic-bezier(.785,.135,.15,.86);
 }
+.js-arrow:hover .arrow__pointer { transform: scaleX(.3) translateX(24px); }
+.js-arrow:hover .arrow__triangle { transform: translate(calc(-50% + 6px), -50%); }
 
 .slider-fullscreen-projects__images,
 .slider__wrapper-canvas {
