@@ -616,9 +616,10 @@ html.az-preloader-open .az-assistant {
 }
 
 .az-welcome-tour__heading .az-assistant__avatar {
-  flex: 0 0 54px;
-  width: 54px;
-  height: 54px;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 62px;
+  padding-bottom: 8px;
 }
 
 .az-welcome-tour h2 {
@@ -685,6 +686,7 @@ html.az-preloader-open .az-assistant {
 .az-tour-launch.is-guiding .az-assistant__avatar-shell { opacity: 0; }
 
 .az-tour-return {
+  padding-bottom: 8px;
   z-index: 111;
   --az-asst-ease: cubic-bezier(.22, 1, .36, 1);
 }
@@ -698,23 +700,43 @@ html.az-preloader-open .az-assistant {
 
 [data-az-tour-pose] .az-assistant__avatar-limbs { display: block; }
 
-.az-assistant__avatar-gesture {
+.az-assistant__avatar-body {
   position: absolute;
   z-index: 1;
-  top: 56%;
+  top: 77%;
+  left: 8px;
+  right: 8px;
+  height: 15px;
+  border: 1px solid #82a9cf;
+  border-radius: 7px 7px 8px 8px;
+  background: linear-gradient(145deg, #a4c3d9, #446385 48%, #202f4a);
+  box-shadow: inset 0 -2px 2px #12213a, 0 2px 3px #02091980;
+}
+
+.az-assistant__avatar-body::after {
+  content: "";
+  position: absolute;
+  inset: 6px 5px auto;
+  height: 2px;
+  border-radius: 4px;
+  background: #9ce7ff;
+  box-shadow: 0 0 4px #65caff;
+}
+
+.az-assistant__avatar-gesture {
+  position: absolute;
+  z-index: 2;
+  top: 87%;
   left: 50%;
-  width: 0;
-  height: 0;
   transform: rotate(var(--az-avatar-point-angle, 0rad));
 }
 
 .az-assistant__avatar-arm,
 .az-assistant__avatar-leg {
   position: absolute;
-  border: 1px solid #83afd0;
-  border-radius: 999px;
-  background: linear-gradient(155deg, #bdd9ea, #3c658b 60%, #213d63);
-  box-shadow: 0 1px 3px #050e20bb;
+  background: linear-gradient(175deg, #a8c9e0, #446888 56%, #203c5c);
+  border: 1px solid #799fc0;
+  border-radius: 5px;
 }
 
 .az-assistant__avatar-arm {
@@ -722,68 +744,73 @@ html.az-preloader-open .az-assistant {
   height: 6px;
 }
 
-.az-assistant__avatar-arm--rest {
-  left: -8px;
-  top: 62%;
-  transform: rotate(-53deg);
-}
-
-.az-assistant__avatar-arm--rest::after,
-.az-assistant__avatar-hand {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border: 1px solid #a3cfe9;
-  border-radius: 3px 4px 4px 3px;
-  background: linear-gradient(145deg, #e3f7ff, #6b9dc5 82%);
-}
-
-.az-assistant__avatar-arm--rest::after {
+.az-assistant__avatar-arm::before {
   content: "";
-  left: -4px;
+  position: absolute;
   top: -2px;
+  left: -2px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #7dadd2;
+  border-radius: 50%;
+  background: radial-gradient(circle, #aacce4 15%, #456b8e 35%, #273f60 72%);
+}
+
+.az-assistant__avatar-arm--rest {
+  top: 85%;
+  left: 6px;
+  transform: rotate(133deg);
+  transform-origin: 2px center;
 }
 
 .az-assistant__avatar-arm--active {
-  left: 14px;
+  left: 7px;
   top: -3px;
   transform-origin: 2px center;
 }
 
 .az-assistant__avatar-hand {
+  position: absolute;
   top: -2px;
   right: -5px;
+  width: 9px;
+  height: 8px;
+  border: 1px solid #afd6ed;
+  border-radius: 3px 5px 5px 3px;
+  background: linear-gradient(150deg, #d9f0fc, #6f9ab9 80%);
+  box-shadow: inset 1px -2px #375c80;
 }
 
 .az-assistant__avatar-leg {
-  top: 95%;
+  top: calc(77% + 10px);
   width: 6px;
-  height: 10px;
+  height: 9px;
   transform-origin: center top;
 }
 
-.az-assistant__avatar-leg--left { left: 7px; transform: rotate(14deg); }
-.az-assistant__avatar-leg--right { right: 7px; transform: rotate(-14deg); }
+.az-assistant__avatar-leg--left { left: 10px; transform: rotate(12deg); }
+.az-assistant__avatar-leg--right { right: 10px; transform: rotate(-12deg); }
 
 .az-assistant__avatar-leg::after {
   content: "";
   position: absolute;
-  inset: auto -2px -3px;
-  height: 5px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #b6dcf5, #47749e);
+  inset: auto -3px -4px -2px;
+  height: 6px;
+  border: 1px solid #86b3d6;
+  border-radius: 4px 5px 3px 3px;
+  background: linear-gradient(180deg, #bddbeb 14%, #6d9cbf 57%, #314d70 64%);
 }
 
 [data-az-tour-pose="point"] .az-assistant__avatar-face {
   transform: translate(var(--az-avatar-look-x, 0px), var(--az-avatar-look-y, 0px));
 }
 
-[data-az-tour-pose="point"] .az-assistant__avatar-hand::after {
+[data-az-tour-pose="point"] .az-assistant__avatar-arm--active .az-assistant__avatar-hand::after {
   content: "";
   position: absolute;
-  right: -4px;
+  right: -5px;
   top: 0;
-  width: 6px;
+  width: 7px;
   height: 3px;
   border-radius: 4px;
   background: #c6e7f9;
@@ -847,8 +874,7 @@ html.az-preloader-open .az-assistant {
 
   [data-az-tour-pose="run"] .az-assistant__avatar-arm--rest {
     animation-delay: -105ms;
-    rotate: -53deg;
-    transform-origin: right center;
+    rotate: 133deg;
   }
 }
 

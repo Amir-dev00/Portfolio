@@ -21,6 +21,7 @@
   var returning = null;
   var greeted = false;
   var frame = 0;
+  var pointAngle = 0;
 
   avatar.appendChild(launch.firstElementChild.cloneNode(true));
 
@@ -44,7 +45,10 @@
     var face = avatar.getBoundingClientRect();
     var dx = target.left + target.width / 2 - (face.left + face.width / 2);
     var dy = target.top + target.height / 2 - (face.top + face.height / 2);
-    avatar.style.setProperty("--az-avatar-point-angle", Math.atan2(dy, dx) + "rad");
+    var angle = Math.atan2(dy, dx);
+    // Keep the wrist turn short when the target crosses the ±180° boundary.
+    pointAngle += Math.atan2(Math.sin(angle - pointAngle), Math.cos(angle - pointAngle));
+    avatar.style.setProperty("--az-avatar-point-angle", pointAngle + "rad");
     avatar.style.setProperty("--az-avatar-look-x", Math.max(-2, Math.min(2, dx / 36)) + "px");
     avatar.style.setProperty("--az-avatar-look-y", Math.max(-2, Math.min(2, dy / 36)) + "px");
   }
@@ -66,6 +70,9 @@
     var vertical = [[centerX, target.bottom + gap], [centerX, target.top - box.height - gap]];
     var horizontal = [[target.right + gap, centerY], [target.left - box.width - gap, centerY]];
     var candidates = html.clientWidth >= 768 ? horizontal.concat(vertical) : vertical.concat(horizontal);
+    if (isStationaryStep(index) && panel.style.left && panel.style.top) {
+      candidates = [[parseFloat(panel.style.left), parseFloat(panel.style.top)]];
+    }
     var obstacles = [target];
     steps.forEach(function (selector) {
       var element = availableTarget(selector);
@@ -93,12 +100,16 @@
     if (index >= 0) aimAt(target);
   }
 
+  function isStationaryStep(step) {
+    return step === 1 && html.clientWidth < 768;
+  }
+
   function show(step, focus) {
     stopReturn();
     var target = step < 0 ? launch.closest("form") : availableTarget(steps[step]);
     if (!target) return advance(step);
     var opening = panel.hidden;
-    var changingStep = !opening && step >= 0 && step !== index;
+    var changingStep = !opening && step >= 0 && step !== index && !isStationaryStep(step);
     var from = (opening ? launch : avatar).getBoundingClientRect();
     if (flight) {
       flight.cancel();
@@ -186,7 +197,7 @@
     if (!from.width || !to.width || !avatar.animate) return false;
 
     var x = to.left + (to.width - from.width) / 2 - from.left;
-    var y = to.top + (to.height - from.height) / 2 - from.top;
+    var y = to.top + (to.height - from.height) / 2 - from.top + 4;
     var lift = Math.min(38, Math.hypot(x, y) * 0.18);
     var copy = avatar.cloneNode(true);
     copy.classList.add("az-assistant__avatar--flying", "az-tour-return");
@@ -194,6 +205,7 @@
     copy.setAttribute("data-az-tour-pose", "return");
     copy.style.width = from.width + "px";
     copy.style.height = from.height + "px";
+    copy.style.boxSizing = "border-box";
     copy.style.left = from.left + "px";
     copy.style.top = from.top + "px";
     document.body.appendChild(copy);
