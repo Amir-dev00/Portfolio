@@ -18,6 +18,7 @@
   var index = -1;
   var highlighted = null;
   var flight = null;
+  var returning = null;
   var greeted = false;
   var frame = 0;
 
@@ -36,6 +37,15 @@
   function availableTarget(selector) {
     var element = document.querySelector(selector);
     return element && element.getBoundingClientRect().width > 0 ? element : null;
+  }
+
+  function aimAt(target) {
+    var face = avatar.getBoundingClientRect();
+    var dx = target.left + target.width / 2 - (face.left + face.width / 2);
+    var dy = target.top + target.height / 2 - (face.top + face.height / 2);
+    avatar.style.setProperty("--az-avatar-point-angle", Math.atan2(dy, dx) + "rad");
+    avatar.style.setProperty("--az-avatar-look-x", Math.max(-2, Math.min(2, dx / 36)) + "px");
+    avatar.style.setProperty("--az-avatar-look-y", Math.max(-2, Math.min(2, dy / 36)) + "px");
   }
 
   function place() {
@@ -79,13 +89,18 @@
     });
     panel.style.left = Math.round(best[0]) + "px";
     panel.style.top = Math.round(best[1]) + "px";
+    if (index >= 0) aimAt(target);
   }
 
   function show(step, focus) {
+    stopReturn();
     var target = step < 0 ? launch.closest("form") : availableTarget(steps[step]);
     if (!target) return advance(step);
     var from = (panel.hidden ? launch : avatar).getBoundingClientRect();
-    if (flight) flight.cancel();
+    if (flight) {
+      flight.cancel();
+      flight = null;
+    }
     if (highlighted) highlighted.classList.remove("az-tour-target");
     highlighted = target;
     index = step;
@@ -99,6 +114,8 @@
     close.textContent = tr(step < 0 ? "notNow" : "skip");
     next.textContent = tr(step < 0 ? "start" : step === steps.length - 1 ? "done" : "next");
     panel.hidden = false;
+    avatar.setAttribute("data-az-tour-pose", step < 0 ? "wave" : "point");
+    launch.classList.add("is-guiding");
     launch.setAttribute("aria-expanded", "true");
     place();
 
@@ -108,31 +125,81 @@
         { transform: "translate(" + (from.left - to.left) + "px," + (from.top - to.top) + "px) scale(.78)", opacity: .65 },
         { transform: "translate(0,0) scale(1)", opacity: 1 },
       ], { duration: 380, easing: "cubic-bezier(.2,.75,.25,1)" });
+      var arrival = flight;
+      arrival.onfinish = function () {
+        if (flight !== arrival) return;
+        flight = null;
+        if (!panel.hidden && index >= 0) aimAt(highlighted.getBoundingClientRect());
+      };
     }
     if (focus) title.focus({ preventScroll: true });
   }
 
-  function dismiss(restoreFocus) {
+  function stopReturn() {
+    if (returning) {
+      var current = returning;
+      returning = null;
+      current.animation.cancel();
+      current.copy.remove();
+    }
+    launch.classList.remove("is-guiding");
+  }
+
+  function returnToChat(from) {
+    var to = launch.getBoundingClientRect();
+    if (!from.width || !to.width || !avatar.animate) return false;
+
+    var x = to.left + (to.width - from.width) / 2 - from.left;
+    var y = to.top + (to.height - from.height) / 2 - from.top;
+    var lift = Math.min(38, Math.hypot(x, y) * 0.18);
+    var copy = avatar.cloneNode(true);
+    copy.classList.add("az-assistant__avatar--flying", "az-tour-return");
+    copy.removeAttribute("data-az-tour-avatar");
+    copy.removeAttribute("data-az-tour-pose");
+    copy.style.left = from.left + "px";
+    copy.style.top = from.top + "px";
+    document.body.appendChild(copy);
+
+    var animation = copy.animate([
+      { transform: "translate(0,0) scale(1)" },
+      { transform: "translate(" + x * 0.55 + "px," + (y * 0.55 - lift) + "px) scale(.94)", offset: 0.55 },
+      { transform: "translate(" + x + "px," + y + "px) scale(1)" },
+    ], { duration: 640, easing: "cubic-bezier(.32,0,.24,1)", fill: "forwards" });
+    returning = { animation: animation, copy: copy };
+    animation.onfinish = function () {
+      if (returning && returning.animation === animation) stopReturn();
+    };
+    return true;
+  }
+
+  function dismiss(restoreFocus, animateReturn) {
     if (panel.hidden) return;
-    if (flight) flight.cancel();
+    var shouldReturn = animateReturn && !motion.matches && ready();
+    var from = shouldReturn && avatar.getBoundingClientRect();
+    if (flight) {
+      flight.cancel();
+      flight = null;
+    }
     if (highlighted) highlighted.classList.remove("az-tour-target");
     panel.hidden = true;
     highlighted = null;
     index = -1;
     launch.setAttribute("aria-expanded", "false");
+    if (!shouldReturn || !returnToChat(from)) stopReturn();
     if (restoreFocus && ready()) launch.focus({ preventScroll: true });
   }
 
   function advance(step) {
     var following = step + 1;
     while (following < steps.length && !availableTarget(steps[following])) following += 1;
-    if (following === steps.length) dismiss(true);
+    if (following === steps.length) dismiss(true, true);
     else show(following, true);
   }
 
   function sync() {
     if (!ready()) {
       dismiss(false);
+      stopReturn();
       return;
     }
     if (greeted) return;
@@ -147,6 +214,7 @@
   }
 
   function schedulePlace() {
+    if (returning) stopReturn();
     if (frame || panel.hidden) return;
     frame = window.requestAnimationFrame(function () {
       frame = 0;
@@ -158,12 +226,12 @@
   launch.addEventListener("click", function () {
     if (!ready()) return;
     if (panel.hidden) show(-1, true);
-    else dismiss(true);
+    else dismiss(true, true);
   });
-  close.addEventListener("click", function () { dismiss(true); });
+  close.addEventListener("click", function () { dismiss(true, true); });
   next.addEventListener("click", function () { advance(index); });
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape" && !panel.hidden) dismiss(panel.contains(document.activeElement));
+    if (event.key === "Escape" && !panel.hidden) dismiss(panel.contains(document.activeElement), true);
   });
   document.addEventListener("focusin", function (event) {
     if (event.target.matches("[data-az-assistant-input]")) dismiss(false);
@@ -171,6 +239,16 @@
   window.addEventListener("az:langchange", function () {
     if (!panel.hidden && ready()) show(index, false);
     else sync();
+  });
+  motion.addEventListener("change", function () {
+    if (!motion.matches) return;
+    if (flight) {
+      flight.cancel();
+      flight = null;
+    }
+    stopReturn();
+    if (!panel.hidden) launch.classList.add("is-guiding");
+    schedulePlace();
   });
   window.addEventListener("resize", schedulePlace);
   window.addEventListener("scroll", schedulePlace, { passive: true });

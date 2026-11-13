@@ -4,11 +4,16 @@
   @else
   <span class="az-assistant__avatar" data-az-assistant-avatar="idle" aria-hidden="true">
   @endif
-    <span class="az-assistant__avatar-shell">
+    <span class="az-assistant__avatar-shell" aria-hidden="true">
       <span class="az-assistant__avatar-face">
         <i class="az-assistant__avatar-eye"></i>
         <i class="az-assistant__avatar-eye"></i>
         <i class="az-assistant__avatar-mouth"></i>
+      </span>
+      <span class="az-assistant__avatar-gesture">
+        <span class="az-assistant__avatar-arm">
+          <span class="az-assistant__avatar-hand"></span>
+        </span>
       </span>
     </span>
   @if($inputId === 'az-assistant-input')
