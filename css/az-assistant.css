@@ -569,3 +569,108 @@ html.az-preloader-open .az-assistant {
     animation: none !important;
   }
 }
+
+.az-tour-launch {
+  appearance: none;
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.az-tour-launch[hidden],
+.az-welcome-tour[hidden] {
+  display: none;
+}
+
+.az-tour-launch:focus-visible,
+.az-welcome-tour button:focus-visible {
+  outline: 2px solid var(--az-accent, #6ee7ff);
+  outline-offset: 3px;
+}
+
+.az-welcome-tour {
+  --az-asst-ease: cubic-bezier(.22, 1, .36, 1);
+  position: fixed;
+  z-index: 110;
+  box-sizing: border-box;
+  width: min(304px, calc(100% - 24px));
+  padding: 16px;
+  border: 1px solid var(--az-line, #38516f);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #1a3049f5, #0b1728f5);
+  box-shadow: 0 14px 36px #0007, inset 0 1px 0 #ffffff14;
+  color: var(--az-text, #f4f7ff);
+  text-align: start;
+  font-family: var(--font-ui, sans-serif);
+  line-height: 1.5;
+}
+
+.az-welcome-tour__heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.az-welcome-tour__heading .az-assistant__avatar { flex: 0 0 38px; }
+
+.az-welcome-tour h2 {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  font-size: .95rem;
+  font-weight: 700;
+  line-height: 1.4;
+  outline: none;
+}
+
+.az-welcome-tour__step {
+  margin: 0 0 3px;
+  color: var(--az-accent, #6ee7ff);
+  font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.az-welcome-tour__copy {
+  margin: 8px 0 12px;
+  color: var(--az-text-secondary, #bacade);
+  font-size: .86rem;
+}
+
+.az-welcome-tour__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.az-welcome-tour button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 14px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 650;
+}
+
+.az-welcome-tour [data-az-tour-next] {
+  background: var(--az-accent, #6ee7ff);
+  color: var(--az-accent-ink, #0b1220);
+}
+
+.az-tour-target {
+  outline: 2px solid var(--az-accent, #6ee7ff);
+  outline-offset: 4px;
+}
+
+@media (max-width: 767px) {
+  .az-tour-launch { width: 44px; height: 44px; }
+  .az-welcome-tour { width: min(288px, calc(100% - 24px)); padding: 13px; }
+  .az-welcome-tour__copy { margin-block: 6px 8px; }
+}

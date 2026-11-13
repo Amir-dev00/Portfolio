@@ -151,8 +151,10 @@
 
     var x = end.left + (end.width - start.width) / 2 - start.left;
     var y = end.top + (end.height - start.height) / 2 - start.top;
-    var copy = avatar.cloneNode(true);
-    copy.classList.add("az-assistant__avatar--flying");
+    var copy = document.createElement("span");
+    copy.className = "az-assistant__avatar az-assistant__avatar--flying";
+    copy.setAttribute("aria-hidden", "true");
+    copy.appendChild(avatar.firstElementChild.cloneNode(true));
     copy.setAttribute("data-az-assistant-avatar", "point");
     copy.style.left = start.left + "px";
     copy.style.top = start.top + "px";

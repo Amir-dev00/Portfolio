@@ -1,5 +1,9 @@
 <form class="az-assistant__composer" data-az-assistant-form method="post">
+  @if($inputId === 'az-assistant-input')
+  <button type="button" class="az-assistant__avatar az-tour-launch" data-az-assistant-avatar="idle" data-az-tour-launch hidden aria-expanded="false" aria-controls="az-welcome-tour" aria-label="{{ $locale === 'fa' ? 'باز کردن راهنمای سایت' : 'Open site guide' }}" data-i18n-attr="aria-label:guide.launch">
+  @else
   <span class="az-assistant__avatar" data-az-assistant-avatar="idle" aria-hidden="true">
+  @endif
     <span class="az-assistant__avatar-shell">
       <span class="az-assistant__avatar-face">
         <i class="az-assistant__avatar-eye"></i>
@@ -7,7 +11,11 @@
         <i class="az-assistant__avatar-mouth"></i>
       </span>
     </span>
+  @if($inputId === 'az-assistant-input')
+  </button>
+  @else
   </span>
+  @endif
   <label class="az-assistant__sr" for="{{ $inputId }}" data-i18n="assistant.prompt">{{ $strings['assistant.prompt'] ?? ($locale === 'fa' ? 'دربارهٔ امیرحسین بپرس' : 'Ask about Amirhossein') }}</label>
   <input
     id="{{ $inputId }}" data-az-assistant-input

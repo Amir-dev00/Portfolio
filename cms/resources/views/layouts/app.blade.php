@@ -132,6 +132,7 @@
       <!-- - PAGE MAIN -->
     </div>
     <canvas id="js-webgl"></canvas>
+    @include('components.site.welcome-tour')
     @include('components.site.photoswipe')
     @include('components.site.shaders')
     @include('components.site.scripts')
