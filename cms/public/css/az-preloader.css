@@ -225,6 +225,10 @@ html.az-preloader-open #js-preloader.az-preloader--ring {
   to { opacity: 1; transform: translateY(0); }
 }
 @media (max-width: 600px) {
+  /* Center the visible number group, including when the current value has fewer digits. */
+  #js-preloader.az-preloader--ring .az-preloader__percentage .preloader__counter-number {
+    min-width: 0;
+  }
   #js-preloader.az-preloader--ring .az-preloader__disc { --az-size: clamp(222px, 70vw, 290px); margin-bottom: 21px; }
   #js-preloader.az-preloader--ring .preloader__heading.az-preloader__name { font-size: 14px; letter-spacing: .12em; padding-left: .12em; }
   #js-preloader.az-preloader--ring .preloader__subline.az-preloader__role { font-size: 11px; letter-spacing: .22em; padding-left: .22em; }
