@@ -158,7 +158,7 @@ html.az-preloader-open :is(#js-preloader, #az-preloader).az-preloader--ring {
 :is(#js-preloader, #az-preloader).az-preloader--ring .az-preloader__load-label {
   display: block; color: var(--az-text-secondary); font-size: 11px; line-height: 1.5;
   letter-spacing: .28em; padding-left: .28em; font-weight: 600;
-  animation: az-ring-fade-up 900ms 550ms both;
+  animation: az-ring-fade-up 300ms 65ms ease-out both;
 }
 :is(#js-preloader, #az-preloader).az-preloader--ring .preloader__counter.az-preloader__percentage {
   position: relative; display: flex; align-items: baseline; justify-content: center;
@@ -168,7 +168,7 @@ html.az-preloader-open :is(#js-preloader, #az-preloader).az-preloader--ring {
   letter-spacing: -.04em; white-space: nowrap;
   font-variant-numeric: lining-nums tabular-nums;
   opacity: 1;
-  animation: az-ring-fade-up 700ms 220ms both;
+  animation: az-ring-fade-up 300ms ease-out both;
 }
 :is(#js-preloader, #az-preloader).az-preloader--ring .az-preloader__rhye-sink {
   display: none !important;
@@ -188,7 +188,7 @@ html.az-preloader-open :is(#js-preloader, #az-preloader).az-preloader--ring {
 }
 :is(#js-preloader, #az-preloader).az-preloader--ring .az-preloader__identity {
   margin-top: clamp(18px, 2.4vw, 27px); padding-top: clamp(18px, 2.4vw, 27px);
-  position: relative; animation: az-ring-fade-up 850ms 850ms both;
+  position: relative; animation: az-ring-fade-up 340ms 100ms ease-out both;
 }
 :is(#js-preloader, #az-preloader).az-preloader--ring .az-preloader__identity::before {
   content: ''; position: absolute; top: 0; left: calc(50% - 27px); width: 54px; height: 1px;
@@ -264,7 +264,7 @@ html.az-preloader-open :is(#js-preloader, #az-preloader).az-preloader--ring {
   to { transform: translateY(0) scale(1); opacity: 1; }
 }
 @keyframes az-ring-fade-up {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: .6; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes az-ring-stall-pulse {

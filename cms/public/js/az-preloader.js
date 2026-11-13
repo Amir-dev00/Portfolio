@@ -18,6 +18,9 @@
   var progress = 0;
   var readyAt = null;
   var readyProgress = 0;
+  var finishDuration = 0;
+  var FAST_READY_MS = 650;
+  var FAST_DISPLAY_MS = 1150;
   var frame = 0;
   var timeout;
   var state = "loading";
@@ -44,8 +47,7 @@
   function step(now) {
     frame = 0;
     if (readyAt !== null) {
-      var duration = readyAt - start < 350 ? 500 : Math.min(850, Math.max(300, (100 - readyProgress) * 10));
-      var elapsed = Math.min(1, (now - readyAt) / duration);
+      var elapsed = Math.min(1, (now - readyAt) / finishDuration);
       // Limit a large timestamp gap after a blocked frame or background tab.
       var target = readyProgress + (100 - readyProgress) * elapsed;
       progress = reduce.matches ? 100 : Math.min(target, progress + 3.5);
@@ -69,6 +71,16 @@
     window.clearTimeout(timeout);
     readyAt = performance.now();
     readyProgress = progress;
+    var startupMs = readyAt - start;
+    finishDuration = startupMs < 350 ? 500 : Math.min(850, Math.max(300, (100 - readyProgress) * 10));
+
+    // Include the time before this script loaded when deciding whether startup was fast.
+    var connection = window.navigator && window.navigator.connection;
+    var constrained = connection && (connection.saveData || /^(slow-2g|2g|3g)$/.test(connection.effectiveType));
+    if (!reduce.matches && !constrained && readyAt < FAST_READY_MS) {
+      finishDuration = Math.max(finishDuration, FAST_DISPLAY_MS - startupMs);
+    }
+
     if (!frame) frame = window.requestAnimationFrame(step);
   }
 
