@@ -6,6 +6,7 @@
   var state = {
     root: null,
     sending: false,
+    askedCustom: false,
     home: null,
     messages: [],
     reactionTimer: 0,
@@ -239,6 +240,55 @@
     });
   }
 
+  function syncSuggestions() {
+    var suggestions = qs("[data-az-assistant-suggestions]");
+    if (!suggestions) return;
+    suggestions.hidden = false;
+    suggestions.inert = state.askedCustom;
+    suggestions.classList.toggle("is-dismissed", state.askedCustom);
+    suggestions.querySelectorAll("button").forEach(function (button) {
+      button.disabled = state.sending;
+    });
+  }
+
+  function answerSuggestion(event) {
+    var button = event.target.closest("[data-az-assistant-suggestion]");
+    if (!button || state.sending || state.askedCustom) return;
+
+    var destination = button.getAttribute("data-az-assistant-suggestion");
+    if (["work", "about", "contact"].indexOf(destination) === -1) return;
+    var link = destinationLink(destination);
+    var url = link && link.getAttribute("href");
+    if (!url) return;
+
+    var key = "assistant.suggestions." + destination;
+    var fromUrl = window.location.href;
+    setBusy(true);
+    showStatus("");
+    state.messages.push({ role: "user", content: t(key + ".question") });
+    var reply = {
+      role: "assistant",
+      content: t(key + ".reply"),
+      action: "navigate",
+      destination: destination,
+      url: url,
+    };
+    state.messages.push(reply);
+    renderTranscript();
+    react("reply");
+
+    // Give the visitor time to read the answer before Miro flies to the dock.
+    window.setTimeout(function () {
+      openDestination(reply, fromUrl)
+        .catch(function () { return false; })
+        .then(function (opened) {
+          reply.deferred = !opened;
+          if (!opened) renderTranscript();
+        })
+        .finally(function () { setBusy(false); });
+    }, 1800);
+  }
+
   function applyDecision(data, fromUrl) {
     var action = String((data && data.action) || "answer").toLowerCase();
     var reply = String((data && data.reply) || "");
@@ -313,6 +363,8 @@
   async function send(text) {
     var message = String(text || "").trim();
     if (!message || state.sending) return false;
+    state.askedCustom = true;
+    syncSuggestions();
     if (/^(?:cv|resume|résumé|رزومه)[.!؟?]*$/i.test(message)) {
       var cv = destinationLink("cv");
       var pdf = resumeHref(cv && cv.getAttribute("href"));
@@ -374,6 +426,7 @@
 
   function setBusy(busy) {
     state.sending = busy;
+    syncSuggestions();
     [state.root, state.home].forEach(function (root) {
       if (!root) return;
       var button = root.querySelector("[data-az-assistant-send]");
@@ -391,6 +444,7 @@
       .then(function (res) {
         if (!res.ok || !res.data.ok) throw new Error("reset");
         state.messages = [];
+        state.askedCustom = false;
         react("idle");
         renderTranscript();
         var input = qs("[data-az-assistant-input]");
@@ -457,6 +511,8 @@
     });
     var reset = qs("[data-az-assistant-reset]");
     if (reset) reset.addEventListener("click", resetChat);
+    var suggestions = qs("[data-az-assistant-suggestions]");
+    if (suggestions) suggestions.addEventListener("click", answerSuggestion);
     var transcript = qs("[data-az-assistant-transcript]");
     if (transcript) transcript.addEventListener("click", onTranscriptClick);
     setBusy(state.sending);

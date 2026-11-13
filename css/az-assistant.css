@@ -916,3 +916,59 @@ html.az-preloader-open .az-assistant {
   22%, 60% { height: 5px; }
   40%, 77% { height: 2px; }
 }
+
+.az-ask__composer-area { min-width: 0; }
+
+.az-ask__suggestions {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 240ms ease, opacity 180ms ease, visibility 0s;
+}
+.az-ask__suggestions.is-dismissed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition-delay: 0s, 0s, 240ms;
+}
+.az-ask__suggestions-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 0;
+  overflow: hidden;
+}
+.az-ask__suggestion {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 44px;
+  margin-block-end: 8px;
+  padding: 6px 11px;
+  border: 1px solid var(--az-asst-edge);
+  border-radius: 999px;
+  background: var(--az-asst-navy);
+  color: var(--az-asst-text);
+  font: 600 .74rem/1.35 var(--font-ui);
+  text-align: start;
+  white-space: normal;
+}
+.az-ask__suggestion > span:last-child { color: var(--az-asst-accent); }
+.az-ask__suggestion:enabled:hover { border-color: var(--az-asst-accent); }
+.az-ask__suggestion:focus-visible { outline: 2px solid var(--az-asst-accent); outline-offset: -2px; }
+.az-ask__suggestion:disabled { opacity: .55; cursor: default; }
+
+@media (max-width: 560px) {
+  .az-ask__suggestions-inner {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .az-ask__suggestion { flex: 0 0 auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .az-ask__suggestions { transition: none; }
+}

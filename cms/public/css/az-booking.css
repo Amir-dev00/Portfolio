@@ -1,20 +1,5 @@
 /* AZ booking — self-hosted Liquid Glass calendar (no third-party widgets). */
 
-.az-contact-pill_book {
-  -webkit-appearance: none;
-  appearance: none;
-  margin: 0;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.az-contact-pill__icon {
-  width: 16px;
-  height: 16px;
-  flex: 0 0 auto;
-  opacity: 0.82;
-}
-
 html.az-booking-open,
 html.az-booking-open body {
   overflow: hidden;
