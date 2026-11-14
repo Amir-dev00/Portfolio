@@ -17,27 +17,39 @@ class OpenAiResponsesClient
      */
     public function createDecision(array $messages, string $instructions): array
     {
-        $text = $this->create($messages, $instructions, true);
-        $decoded = $this->decodeJsonObject($text);
-        if ($decoded === null) {
-            throw new RuntimeException('provider_empty');
-        }
+        $budget = max(400, (int) config('assistant.max_output_tokens', 400));
 
-        return $decoded;
+        try {
+            return $this->requestDecision($messages, $instructions, $budget);
+        } catch (RuntimeException $error) {
+            if ($error->getMessage() !== 'provider_incomplete' || $budget >= 800) {
+                throw $error;
+            }
+
+            return $this->requestDecision($messages, $instructions, 800);
+        }
+    }
+
+    /**
+     * @param  list<array{role:string,content:string}>  $messages
+     * @return array<string, mixed>
+     */
+    private function requestDecision(array $messages, string $instructions, int $budget): array
+    {
+        $text = $this->create($messages, $instructions, ! Cache::get(self::SCHEMA_UNSUPPORTED_CACHE_KEY), $budget);
+
+        return $this->decodeJsonObject($text);
     }
 
     /**
      * @param  list<array{role:string,content:string}>  $messages
      */
-    public function create(array $messages, string $instructions, bool $jsonObject = false): string
+    private function create(array $messages, string $instructions, bool $useSchema, int $budget): string
     {
         $apiKey = (string) config('assistant.api_key');
         if ($apiKey === '') {
             throw new RuntimeException('missing_config');
         }
-
-        // After a gateway rejects json_schema, stay on prompt-only JSON for a day (one call per ask).
-        $useSchema = $jsonObject && ! Cache::get(self::SCHEMA_UNSUPPORTED_CACHE_KEY);
 
         $payload = [
             'model' => (string) config('assistant.model', 'gpt-4.1-mini'),
@@ -49,7 +61,7 @@ class OpenAiResponsesClient
                 ];
             }, $messages),
             'store' => (bool) config('assistant.store', false),
-            'max_output_tokens' => (int) config('assistant.max_output_tokens', 200),
+            'max_output_tokens' => $budget,
         ];
 
         if ($useSchema) {
@@ -77,7 +89,7 @@ class OpenAiResponsesClient
         if ($useSchema && $response->status() === 400) {
             Cache::put(self::SCHEMA_UNSUPPORTED_CACHE_KEY, true, now()->addDay());
 
-            return $this->create($messages, $instructions, false);
+            return $this->create($messages, $instructions, false, $budget);
         }
 
         if ($response->failed()) {
@@ -85,6 +97,13 @@ class OpenAiResponsesClient
         }
 
         $data = $response->json();
+        if (($data['incomplete_details']['reason'] ?? null) === 'max_output_tokens') {
+            throw new RuntimeException('provider_incomplete');
+        }
+        if (in_array($data['status'] ?? null, ['incomplete', 'failed', 'cancelled', 'queued', 'in_progress'], true)) {
+            throw new RuntimeException('provider_error');
+        }
+
         $text = $this->extractText($data);
         if ($text === '') {
             throw new RuntimeException('provider_empty');
@@ -124,33 +143,32 @@ class OpenAiResponsesClient
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return array<string, mixed>
      */
-    protected function decodeJsonObject(string $text): ?array
+    protected function decodeJsonObject(string $text): array
     {
-        $text = trim($text);
-        if ($text === '') {
-            return null;
-        }
+        $candidate = preg_replace('/^\s*```(?:json)?\s*|\s*```\s*$/iu', '', $text) ?? $text;
+        $candidate = ltrim($candidate);
 
-        $decoded = json_decode($text, true);
-        if (is_array($decoded)) {
-            return $decoded;
-        }
-
-        if (preg_match('/\{.*\}/s', $text, $match)) {
-            $decoded = json_decode($match[0], true);
-            if (is_array($decoded)) {
+        if (str_starts_with($candidate, '{') || str_starts_with($candidate, '[')) {
+            $decoded = json_decode($candidate, true);
+            if (! is_array($decoded)) {
+                // Some gateways omit the incomplete status or HTML-encode JSON quotes.
+                $decoded = json_decode(html_entity_decode($candidate, ENT_QUOTES | ENT_HTML5, 'UTF-8'), true);
+            }
+            if (is_array($decoded) && is_string($decoded['action'] ?? null) && is_string($decoded['reply'] ?? null)) {
                 return $decoded;
             }
+
+            throw new RuntimeException('provider_incomplete');
         }
 
-        // Schema-less fallback: treat a non-empty prose reply as an answer.
-        return [
-            'action' => 'answer',
-            'reply' => $text,
-            'destination' => '',
-        ];
+        // Some compatible gateways return prose. Reject text wrapping a JSON decision.
+        if (preg_match('/\{\s*(?:"|&quot;|&#34;)(?:action|reply|destination)(?:"|&quot;|&#34;)\s*:/iu', $candidate)) {
+            throw new RuntimeException('provider_incomplete');
+        }
+
+        return ['action' => 'answer', 'reply' => $candidate, 'destination' => ''];
     }
 
     protected function extractText(mixed $data): string

@@ -358,7 +358,7 @@ class AssistantChatTest extends TestCase
         Http::assertSent(function ($request) use ($question) {
             $data = $request->data();
             $this->assertSame('gpt-4.1-mini', $data['model']);
-            $this->assertSame(200, $data['max_output_tokens']);
+            $this->assertSame(400, $data['max_output_tokens']);
             $this->assertCount(1, $data['input']);
             $this->assertSame($question, $data['input'][0]['content']);
             $this->assertArrayHasKey('text', $data);
@@ -427,6 +427,48 @@ class AssistantChatTest extends TestCase
         Http::assertSentCount(3);
         $third = Http::recorded()[2][0]->data();
         $this->assertArrayNotHasKey('text', $third);
+    }
+
+    public function test_truncated_biography_is_retried_and_only_the_complete_reply_is_rendered(): void
+    {
+        $question = 'راجب امیرحسین بیشتر توضیح بده';
+        $reply = 'امیرحسین از کودکی به کامپیوتر علاقه داشت و اکنون مهندس نرم‌افزار است.';
+        $partial = '{&quot;action&quot;:&quot;answer&quot;,&quot;reply&quot;:&quot;امیرحسین از کودکی';
+
+        Http::fake([
+            'api.openai.com/*' => Http::sequence()
+                ->push(['output_text' => $partial])
+                ->push(['output_text' => htmlspecialchars(json_encode([
+                    'action' => 'answer',
+                    'reply' => $reply,
+                    'destination' => '',
+                ], JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8')]),
+        ]);
+
+        $this->postJson('/api/assistant/chat', ['message' => $question, 'locale' => 'fa'])
+            ->assertOk()->assertJsonPath('action', 'answer')->assertJsonPath('reply', $reply);
+
+        $this->assertSame([400, 800], Http::recorded()->map(fn ($exchange) => $exchange[0]['max_output_tokens'])->all());
+        $this->assertSame($reply, session(AssistantService::SESSION_KEY)[1]['content']);
+    }
+
+    public function test_provider_token_limit_does_not_show_or_store_an_incomplete_reply(): void
+    {
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'status' => 'incomplete',
+                'incomplete_details' => ['reason' => 'max_output_tokens'],
+                'output_text' => 'امیرحسین از کودکی',
+            ]),
+        ]);
+
+        $this->postJson('/api/assistant/chat', ['message' => 'راجب امیرحسین بیشتر توضیح بده', 'locale' => 'fa'])
+            ->assertStatus(502)
+            ->assertJsonPath('code', 'provider_incomplete')
+            ->assertJsonPath('message', 'پاسخ کامل نشد. دوباره امتحان کن یا دربارهٔ یک بخش از داستان بپرس.');
+
+        Http::assertSentCount(2);
+        $this->assertNull(session(AssistantService::SESSION_KEY));
     }
 
     public function test_server_error_does_not_blindly_retry_schema_request(): void

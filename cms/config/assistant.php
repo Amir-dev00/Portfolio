@@ -24,7 +24,7 @@ return [
     'connect_timeout' => (int) env('ASSISTANT_CONNECT_TIMEOUT', 5),
 
     /** Max output tokens for the Responses API. */
-    'max_output_tokens' => (int) env('ASSISTANT_MAX_OUTPUT_TOKENS', 200),
+    'max_output_tokens' => (int) env('ASSISTANT_MAX_OUTPUT_TOKENS', 400),
 
     /** Visitor message hard cap (characters). */
     'max_message_chars' => (int) env('ASSISTANT_MAX_MESSAGE_CHARS', 500),

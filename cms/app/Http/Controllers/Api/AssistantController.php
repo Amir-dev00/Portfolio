@@ -120,6 +120,7 @@ class AssistantController extends Controller
                 'provider_rate' => 'The assistant is busy. Please retry in a minute.',
                 'provider_error' => 'The assistant is temporarily unavailable. Please retry or use Contact.',
                 'provider_empty' => 'No answer came back. Please retry.',
+                'provider_incomplete' => 'The answer was cut off. Please try again or ask about one part of the story.',
             ],
             'fa' => [
                 'empty' => 'اول یک پرسش کوتاه بنویسید.',
@@ -131,6 +132,7 @@ class AssistantController extends Controller
                 'provider_rate' => 'دستیار الان شلوغ است. یک دقیقه دیگر دوباره تلاش کنید.',
                 'provider_error' => 'دستیار موقتاً در دسترس نیست. دوباره تلاش کنید یا از صفحه تماس استفاده کنید.',
                 'provider_empty' => 'پاسخی برنگشت. لطفاً دوباره تلاش کنید.',
+                'provider_incomplete' => 'پاسخ کامل نشد. دوباره امتحان کن یا دربارهٔ یک بخش از داستان بپرس.',
             ],
         ];
 
