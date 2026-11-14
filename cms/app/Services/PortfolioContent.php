@@ -26,6 +26,8 @@ class PortfolioContent
             'app' => ['en' => 'Mobile App', 'fa' => 'اپلیکیشن موبایل'],
         ];
 
+        $caseStudies = config('novin-case-studies', []);
+
         foreach (config('novin.projects', []) as $sourceSlug => $entry) {
             $slug = 'novin-'.$sourceSlug;
             if (isset($existingSlugs[$slug])) {
@@ -48,6 +50,7 @@ class PortfolioContent
                     'title' => $locale === 'fa' ? $entry['title_fa'] : $entry['title'],
                     'shortDescription' => $shortDescription,
                     'fullDescription' => $fullDescription,
+                    'caseStudy' => $caseStudies[$sourceSlug][$locale] ?? [],
                     'category' => $categories[$entry['category']][$locale],
                     'role' => $locale === 'fa' ? 'امیرحسین زمان‌زاده (توسعه‌دهنده)' : 'Amirhossein Zamanzade (developer)',
                 ];

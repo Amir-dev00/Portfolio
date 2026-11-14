@@ -782,6 +782,22 @@
     });
   }
 
+  function renderCaseStudy(study) {
+    if (!study || !study.overview) return "";
+
+    var features = study.features.map(function (feature) {
+      return "<li>" + escapeHtml(feature) + "</li>";
+    }).join("");
+
+    return '<section class="az-project__case-study" aria-labelledby="az-project-case-title">' +
+      '<h2 id="az-project-case-title">' + escapeHtml(tt("project.case.title")) + '</h2>' +
+      '<div class="az-project__case-overview"><h3>' + escapeHtml(tt("project.case.overview")) + '</h3>' +
+      '<p>' + escapeHtml(study.overview) + '</p></div>' +
+      '<div><h3>' + escapeHtml(tt("project.case.features")) + '</h3><ul>' + features + '</ul></div>' +
+      '<div><h3>' + escapeHtml(tt("project.case.approach")) + '</h3><p>' +
+      escapeHtml(study.approach) + '</p></div></section>';
+  }
+
   function renderProject(slug) {
     if (!projectRoot) return false;
     var openViewer = projectRoot.querySelector(".az-project-viewer[open]");
@@ -866,7 +882,7 @@
       escapeHtml(project.title) +
       "</h1>" +
       '<p class="az-panel__lead">' +
-      escapeHtml(project.fullDescription) +
+      escapeHtml((project.caseStudy && project.caseStudy.overview ? project.shortDescription : project.fullDescription) || "") +
       "</p>" +
       (project.image
         ? '<a class="az-project__hero" href="' + escapeHtml(project.image) + '" data-project-photo="0">' +
@@ -882,6 +898,7 @@
       '<ul class="az-skills">' +
       tech +
       "</ul>" +
+      renderCaseStudy(project.caseStudy) +
       actions +
       (gallery
         ? '<section class="az-project__gallery"><h2>' + escapeHtml(tt("project.gallery")) +

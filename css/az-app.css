@@ -1293,6 +1293,40 @@ html[dir="rtl"] .az-about__miro-arrow { scale: -1 1; }
 .az-about-team__arrow { flex: 0 0 16px; color: var(--az-accent); }
 html[dir="rtl"] .az-about-team__arrow { transform: scaleX(-1); }
 
+.az-project__case-study {
+  display: grid;
+  gap: 10px;
+  margin-block: 12px;
+}
+.az-project__case-study h2 {
+  margin: 0 0 4px;
+  font: 650 clamp(1.4rem, 4vw, 1.8rem)/1.3 var(--font-display);
+}
+.az-project__case-study > div {
+  min-width: 0;
+  padding: clamp(14px, 3vw, 22px);
+  border: 1px solid var(--az-line);
+  border-radius: 16px;
+  background: #101d30;
+}
+.az-project__case-study h3 {
+  margin: 0 0 8px;
+  color: var(--az-accent);
+  font: 650 1rem/1.4 var(--font-ui);
+}
+.az-project__case-study :is(p, ul) {
+  margin: 0;
+  color: var(--az-text-secondary);
+  font: 500 .92rem/1.85 var(--font-ui);
+}
+.az-project__case-study ul { padding-inline-start: 1.2em; list-style: disc; }
+.az-project__case-study li + li { margin-block-start: 4px; }
+
+@media (min-width: 768px) {
+  .az-project__case-study { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .az-project__case-study > :is(h2, .az-project__case-overview) { grid-column: 1 / -1; }
+}
+
 .az-project__gallery { margin-block-start: 32px; }
 .az-project__gallery h2 {
   font: 650 1.4rem/1.3 var(--font-display);

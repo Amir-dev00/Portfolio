@@ -115,6 +115,7 @@ class PublicSiteController extends Controller
                 'category' => $copy['category'] ?? $item['category'] ?? '',
                 'shortDescription' => $copy['shortDescription'] ?? '',
                 'fullDescription' => $view === 'project' ? ($copy['fullDescription'] ?? '') : '',
+                'caseStudy' => $view === 'project' ? ($copy['caseStudy'] ?? []) : [],
                 'role' => $view === 'project' ? ($copy['role'] ?? '') : '',
                 'technologies' => $item['technologies'] ?? [],
                 'image' => empty($item['image']) ? null : $this->assetUrl($item['image']),
