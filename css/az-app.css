@@ -1303,6 +1303,94 @@ html[dir="rtl"] .az-about__miro-arrow { scale: -1 1; }
   .az-about__portrait { aspect-ratio: auto; min-height: 360px; }
   .az-about__portrait img { position: absolute; inset: 0; }
 }
+@media (max-width: 767px) {
+  #view-about {
+    background:
+      radial-gradient(ellipse 100% 330px at 85% 0%, #132d4a, transparent),
+      var(--az-bg);
+  }
+
+  #view-about .az-panel_about {
+    width: min(540px, calc(100% - 32px));
+    padding-block:
+      calc(var(--az-header-inset-top, 8px) + var(--az-header-row-height, 48px) + 12px)
+      calc(118px + env(safe-area-inset-bottom));
+  }
+
+  .az-about {
+    grid-template-areas: "intro portrait" "copy copy";
+    grid-template-columns: minmax(0, 1fr) clamp(88px, 27vw, 142px);
+    align-items: center;
+    gap: 20px 12px;
+  }
+
+  .az-about__intro { align-self: center; }
+  .az-about__eyebrow { gap: 8px; margin-block-end: 8px; }
+  .az-about__eyebrow::before { width: 14px; }
+  #view-about .az-about__title {
+    font-size: clamp(1.55rem, 6.8vw, 2.55rem);
+    line-height: 1.05;
+  }
+  html[dir="rtl"] #view-about .az-about__title { line-height: 1.25; }
+  .az-about__role { margin-block-start: 7px; font-size: clamp(.77rem, 3.1vw, 1rem); }
+
+  .az-about__portrait {
+    aspect-ratio: 4 / 5;
+    border-radius: 20px;
+    box-shadow: 0 8px 26px #03081260;
+  }
+
+  .az-about__copy {
+    padding-block-start: 16px;
+    border-block-start: 1px solid var(--az-line);
+  }
+  .az-about__copy .az-about__lead {
+    max-width: none;
+    font-size: .875rem;
+    line-height: 1.75;
+  }
+  .az-about__copy .az-about__lead_last { margin-block-start: 9px; }
+  .az-about__actions { margin-block-start: 15px; }
+  .az-about__actions .az-about__action { min-height: 44px; }
+  html[dir="rtl"] .az-about__action_primary svg { scale: -1 1; }
+
+  .az-about__copy .az-about__miro {
+    max-inline-size: none;
+    margin-block-start: 12px;
+    border-radius: 16px;
+    background: linear-gradient(130deg, #1a3450, #141f37 70%);
+  }
+
+  .az-about__facts {
+    grid-template-columns: minmax(0, 1fr);
+    margin-block-start: 24px;
+    border-radius: 16px;
+  }
+  .az-about__facts li {
+    display: grid;
+    grid-template-columns: minmax(64px, .34fr) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 10px;
+    padding: 11px 12px;
+  }
+  .az-about__facts span {
+    margin-block-start: 0;
+    font-size: .78rem;
+    overflow-wrap: anywhere;
+  }
+
+  .az-about-skills { margin-block-start: 29px; }
+  .az-about-skills__title { margin-block-end: 12px; }
+  .az-about-skills__card { padding: 12px; border-radius: 15px; }
+  .az-about-skills__heading { margin-block-end: 8px; font-size: .83rem; }
+  .az-about-skills__list { gap: 5px; }
+  .az-about-skills__list li { padding: 3px 6px; }
+}
+
+@media (min-width: 360px) and (max-width: 767px) {
+  .az-about-skills__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   #view-about.is-visible :is(.az-about__intro, .az-about__portrait, .az-about__copy) {
     animation: az-about-in .7s cubic-bezier(.2,.75,.3,1) backwards;
