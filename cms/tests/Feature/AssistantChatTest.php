@@ -506,6 +506,51 @@ class AssistantChatTest extends TestCase
             ->assertJson(['ok' => true, 'reset' => true, 'history' => []]);
     }
 
+    public function test_miro_answers_the_reported_persian_chat_without_a_provider(): void
+    {
+        config(['assistant.api_key' => '']);
+        Http::fake();
+
+        $this->postJson('/api/assistant/chat', ['message' => 'سلام', 'locale' => 'fa'])
+            ->assertOk()->assertJsonPath('action', 'answer');
+        RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+
+        $this->postJson('/api/assistant/chat', ['message' => 'امیرحسین دوس دختر داره؟', 'locale' => 'en'])
+            ->assertOk()->assertJsonPath('locale', 'fa')->assertJsonPath('reply', config('assistant-biography.relationship.fa'));
+        RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+
+        $this->postJson('/api/assistant/chat', ['message' => 'رتبه کنکورش چنده؟', 'locale' => 'en'])
+            ->assertOk()->assertJsonPath('locale', 'fa')->assertJsonPath('reply', config('assistant.entrance_exam_rank.fa'));
+
+        Http::assertNothingSent();
+    }
+
+    #[DataProvider('directBiographyQuestions')]
+    public function test_direct_biography_shortcuts_keep_the_question_language(
+        string $question,
+        string $locale,
+        string $expected
+    ): void {
+        Http::fake();
+        config(['assistant-biography.relationship.'.$locale => 'Relationship fixture']);
+
+        $reply = $this->postJson('/api/assistant/chat', ['message' => $question, 'locale' => $locale === 'fa' ? 'en' : 'fa'])
+            ->assertOk()->assertJsonPath('locale', $locale)->assertJsonPath('action', 'answer')->json('reply');
+
+        $this->assertStringContainsString($expected, $reply);
+        Http::assertNothingSent();
+    }
+
+    public static function directBiographyQuestions(): array
+    {
+        return [
+            'Persian entrance exam rank' => ['رتبهٔ کنکور امیرحسین چند بود؟', 'fa', '۷۹۰ منطقهٔ ۳'],
+            'English entrance exam rank' => ['What was his rank in the university entrance exam?', 'en', '790th in Region 3'],
+            'English girlfriend question' => ['Who is his girlfriend?', 'en', 'Relationship fixture'],
+            'Persian girlfriend spelling' => ['دوست‌دخترش کیه؟', 'fa', 'Relationship fixture'],
+        ];
+    }
+
     #[DataProvider('biographyQuestions')]
     public function test_biography_questions_supply_relevant_facts_in_the_question_language(
         string $question,
@@ -514,6 +559,7 @@ class AssistantChatTest extends TestCase
         array $expectedFacts,
         array $unrelatedFacts
     ): void {
+        config(['assistant-biography.relationship.en' => 'Relationship fixture']);
         Http::fake([
             'api.openai.com/*' => Http::response([
                 'output_text' => json_encode(['action' => 'answer', 'reply' => 'Example', 'destination' => '']),
@@ -541,15 +587,12 @@ class AssistantChatTest extends TestCase
     public static function biographyQuestions(): array
     {
         return [
-            'Persian entrance exam rank' => ['رتبهٔ کنکور امیرحسین چند بود؟', 'en', 'fa', ['رتبهٔ ۷۹۰ منطقهٔ ۳'], ['رتبهٔ ۶۷']],
-            'English entrance exam rank' => ['What was his rank in the university entrance exam?', 'fa', 'en', ['790th in Region 3'], ['Quera leaderboard']],
-            'Persian question on English site' => ['رتبهٔ امیرحسین در کوئرا چند بود؟', 'en', 'fa', ['رتبهٔ ۶۷', 'پارسا'], ['Hasti', 'اسم شریک عاطفی']],
-            'English question on Persian site' => ['What was his first paid project?', 'fa', 'en', ['first paid project, CourseScan', 'with Amir'], ['Hasti', 'رتبهٔ ۶۷']],
-            'Persian with English company name' => ['پروژهٔ MedPip چیه؟', 'en', 'fa', ['پل ایده‌آل پارس', 'این مهاجرت در حد برنامه است'], ['Hasti', 'اسم شریک عاطفی']],
-            'Explicit relationship question' => ['Who is his girlfriend?', 'en', 'en', ['in a relationship with Hasti'], ['Quera leaderboard']],
-            'General biography' => ['Tell me his career journey', 'en', 'en', ['childhood interests in hardware and robotics', 'became a C teaching assistant'], ['Hasti']],
-            'Business partner question' => ['Who is his business partner at Novin Coders?', 'en', 'en', ['revived Novin Coders'], ['Hasti']],
-            'Unrelated project question' => ['Which Laravel projects has he built?', 'en', 'en', ['Clinic Booking Portal'], ['Relevant personal background:', 'Hasti']],
+            'Persian question on English site' => ['رتبهٔ امیرحسین در کوئرا چند بود؟', 'en', 'fa', ['رتبهٔ ۶۷', 'پارسا'], ['Relationship fixture', 'اسم شریک عاطفی']],
+            'English question on Persian site' => ['What was his first paid project?', 'fa', 'en', ['first paid project, CourseScan', 'with Amir'], ['Relationship fixture', 'رتبهٔ ۶۷']],
+            'Persian with English company name' => ['پروژهٔ MedPip چیه؟', 'en', 'fa', ['پل ایده‌آل پارس', 'این مهاجرت در حد برنامه است'], ['Relationship fixture', 'اسم شریک عاطفی']],
+            'General biography' => ['Tell me his career journey', 'en', 'en', ['childhood interests in hardware and robotics', 'became a C teaching assistant'], ['Relationship fixture']],
+            'Business partner question' => ['Who is his business partner at Novin Coders?', 'en', 'en', ['revived Novin Coders'], ['Relationship fixture']],
+            'Unrelated project question' => ['Which Laravel projects has he built?', 'en', 'en', ['Clinic Booking Portal'], ['Relevant personal background:', 'Relationship fixture']],
         ];
     }
 

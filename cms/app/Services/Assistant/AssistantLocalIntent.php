@@ -3,7 +3,7 @@
 namespace App\Services\Assistant;
 
 /**
- * Zero-token shortcuts for exact commands. Natural-language intents go to the model.
+ * Zero-token answers for simple commands and verified biographical facts.
  */
 class AssistantLocalIntent
 {
@@ -34,6 +34,16 @@ class AssistantLocalIntent
             );
         }
 
+        $topic = $this->biographyTopic($normalized);
+        if ($topic !== null) {
+            $reply = $topic === 'entrance_exam_rank'
+                ? config('assistant.entrance_exam_rank.'.$locale)
+                : config('assistant-biography.relationship.'.$locale);
+            if (is_string($reply) && $reply !== '') {
+                return $this->decisions->answer($reply);
+            }
+        }
+
         // Exact CV / résumé commands only — natural phrasing uses the model.
         if ($this->isExactCv($normalized)) {
             $decision = $this->decisions->navigate(
@@ -60,11 +70,32 @@ class AssistantLocalIntent
     protected function normalize(string $message): string
     {
         $message = mb_strtolower(trim($message));
-        $message = str_replace(['ي', 'ك', '‌'], ['ی', 'ک', ''], $message);
+        $message = str_replace(['ي', 'ك', '‌'], ['ی', 'ک', ' '], $message);
         $message = preg_replace('/[^\p{L}\p{N}\s+]/u', ' ', $message) ?? $message;
         $message = preg_replace('/\s+/u', ' ', $message) ?? $message;
 
         return trim($message);
+    }
+
+    protected function biographyTopic(string $question): ?string
+    {
+        $question = ' '.$question.' ';
+        $rank = preg_match('/(?:رتبه|رنک)(?:ش|اش)?|\b(?:rank|ranking|placement)\b/u', $question);
+        $exam = preg_match('/کنکور|\bkonkur\b|\b(?:university |college )?entrance exam\b/u', $question);
+
+        if ($rank && $exam && ! preg_match('/کوئرا|\bquera\b/u', $question)) {
+            return 'entrance_exam_rank';
+        }
+
+        if (preg_match('/(?:^| )(?:دوس(?:ت)? *دختر(?:ش|اش)?|پارتنر(?:ش|اش)?|مجرده|مجرد است|تو رابطه|در رابطه|رابطه عاطفی)(?= |$)|\b(?:girlfriend|romantic partner|in a relationship|dating anyone|is he single)\b/u', $question)) {
+            if (preg_match('/(?:آدرس|شماره|قد|سن|تولد|کجا|کی آشنا|از کی|چند وقته|چند وقت)|\b(?:age|how old|where|when|since|how long|phone|address|birthday|birthdate|height|contact|instagram)\b/u', $question)) {
+                return null;
+            }
+
+            return 'relationship';
+        }
+
+        return null;
     }
 
     protected function isGreeting(string $normalized): bool
