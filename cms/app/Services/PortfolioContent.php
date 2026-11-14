@@ -10,19 +10,53 @@ class PortfolioContent
 
     public function payload(?bool $preview = false): array
     {
-        if ($preview) {
-            return $this->publications->buildDraftPayload();
+        $payload = $preview ? null : $this->publications->currentPayload();
+        if ($payload === null) {
+            $payload = $this->publications->buildDraftPayload();
+            if (! $preview) {
+                unset($payload['experience']);
+            }
         }
 
-        $published = $this->publications->currentPayload();
-        if ($published !== null) {
-            return $published;
+        $projects = $payload['projects'] ?? [];
+        $existingSlugs = array_fill_keys(array_column($projects, 'slug'), true);
+        $categories = [
+            'website' => ['en' => 'Website', 'fa' => 'طراحی سایت'],
+            'design' => ['en' => 'UI/UX Design', 'fa' => 'طراحی رابط و تجربهٔ کاربری'],
+            'app' => ['en' => 'Mobile App', 'fa' => 'اپلیکیشن موبایل'],
+        ];
+
+        foreach (config('novin.projects', []) as $sourceSlug => $entry) {
+            $slug = 'novin-'.$sourceSlug;
+            if (isset($existingSlugs[$slug])) {
+                continue;
+            }
+
+            $directory = 'assets/img/novin-coders/'.$sourceSlug;
+            $project = [
+                'slug' => $slug,
+                'title' => $entry['title'],
+                'image' => '/'.$directory.'/cover.webp',
+                'gallery' => array_map(fn (int $index) => sprintf('/%s/gallery-%02d.webp', $directory, $index), range(1, $entry['gallery'])),
+                'sourceUrl' => config('novin.url').'projects/show/?'.http_build_query(['slug' => $sourceSlug]),
+                'technologies' => $entry['technologies'],
+            ];
+
+            foreach (['en', 'fa'] as $locale) {
+                [$shortDescription, $fullDescription] = $entry[$locale];
+                $project[$locale] = [
+                    'title' => $locale === 'fa' ? $entry['title_fa'] : $entry['title'],
+                    'shortDescription' => $shortDescription,
+                    'fullDescription' => $fullDescription,
+                    'category' => $categories[$entry['category']][$locale],
+                    'role' => $locale === 'fa' ? 'پروژهٔ تیم نوین کدرز' : 'Novin Coders team project',
+                ];
+            }
+            $projects[] = $project;
         }
+        $payload['projects'] = $projects;
 
-        $fallback = $this->publications->buildDraftPayload();
-        unset($fallback['experience']);
-
-        return $fallback;
+        return $payload;
     }
 
     public function strings(string $locale, ?bool $preview = false): array
@@ -42,7 +76,7 @@ class PortfolioContent
 
             return [
                 'slug' => $project['slug'],
-                'title' => $project['title'],
+                'title' => $copy['title'] ?? $project['title'],
                 'shortDescription' => $copy['shortDescription'] ?? '',
                 'fullDescription' => $copy['fullDescription'] ?? '',
                 'category' => $copy['category'] ?? $project['category'] ?? '',

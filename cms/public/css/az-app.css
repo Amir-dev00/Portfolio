@@ -1265,6 +1265,57 @@ html[dir="rtl"] .az-about__miro-arrow { scale: -1 1; }
 .az-about__facts li { min-width: 0; padding: 14px 18px; background: #101c2e; }
 .az-about__facts strong { display: block; color: var(--az-text-secondary); font-size: .72rem; font-weight: 500; }
 .az-about__facts span { display: block; margin-block-start: 4px; color: var(--az-text); font-size: .87rem; font-weight: 600; }
+.az-about-team {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-block-start: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--az-line);
+  border-radius: 16px;
+  background: linear-gradient(120deg, #18304a, #101b2d 70%);
+  color: var(--az-text);
+  text-decoration: none;
+}
+.az-about-team:is(:hover, :focus-visible) { border-color: var(--az-accent); }
+.az-about-team__mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  block-size: 42px;
+  border: 1px solid var(--az-line);
+  border-radius: 12px;
+  color: var(--az-accent);
+}
+.az-about-team__copy { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.az-about-team__copy span { font-size: .76rem; color: var(--az-text-secondary); }
+.az-about-team__arrow { flex: 0 0 16px; color: var(--az-accent); }
+html[dir="rtl"] .az-about-team__arrow { transform: scaleX(-1); }
+
+.az-project__gallery { margin-block-start: 32px; }
+.az-project__gallery h2 {
+  font: 650 1.4rem/1.3 var(--font-display);
+  margin-block-end: 14px;
+}
+.az-project__gallery ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.az-project__gallery a {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--az-line);
+  border-radius: 14px;
+  background: var(--az-bg);
+}
+.az-project__gallery a:focus-visible { outline: 2px solid var(--az-accent); outline-offset: 3px; }
+.az-project__gallery img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
 .az-about-skills { margin-block-start: clamp(38px, 7vw, 80px); }
 .az-about-skills__title {
   margin: 0 0 16px;

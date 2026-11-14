@@ -774,7 +774,17 @@
           escapeHtml(tt("project.live")) +
           "</a>"
         : "") +
+      (project.sourceUrl
+        ? '<a class="az-btn" href="' + escapeHtml(project.sourceUrl) +
+          '" target="_blank" rel="noopener">' + escapeHtml(tt("project.source")) + "</a>"
+        : "") +
       "</div>";
+    var gallery = (project.gallery || []).map(function (url, index) {
+      var path = escapeHtml(url);
+      var alt = escapeHtml(tt("project.gallery.image", { title: project.title, n: index + 1 }));
+      return '<li><a href="' + path + '" target="_blank" rel="noopener">' +
+        '<img src="' + path + '" alt="' + alt + '" loading="lazy" decoding="async"/></a></li>';
+    }).join("");
     var tech = (project.technologies || [])
       .map(function (item) {
         return "<li>" + escapeHtml(item) + "</li>";
@@ -789,8 +799,7 @@
       "</a>" +
       '<p class="az-panel__eyebrow">' +
       escapeHtml(project.category) +
-      " · " +
-      escapeHtml(project.date) +
+      (project.date ? " · " + escapeHtml(project.date) : "") +
       "</p>" +
       '<h1 class="az-panel__title">' +
       escapeHtml(project.title) +
@@ -814,6 +823,10 @@
       tech +
       "</ul>" +
       actions +
+      (gallery
+        ? '<section class="az-project__gallery"><h2>' + escapeHtml(tt("project.gallery")) +
+          '</h2><ul>' + gallery + '</ul></section>'
+        : "") +
       "</article>";
     return true;
   }

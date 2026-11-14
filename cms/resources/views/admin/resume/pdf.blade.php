@@ -17,7 +17,11 @@
   <h2>{{ $locale === 'fa' ? 'مهارت‌ها' : 'Skills' }}</h2>
   <p>{{ $fields['skills'] ?? '' }}</p>
   <h2>{{ $locale === 'fa' ? 'تجربه' : 'Experience' }}</h2>
-  <p>{!! nl2br(e($fields['experience'] ?? '')) !!}</p>
+  @php($experience = $fields['experience'] ?? '')
+  @if (!str_contains(mb_strtolower($experience), mb_strtolower(config('novin.'.$locale.'.role'))))
+    <p><strong>{{ config('novin.'.$locale.'.role') }}</strong> · {{ config('novin.'.$locale.'.name') }}</p>
+  @endif
+  <p>{!! nl2br(e($experience)) !!}</p>
   <h2>{{ $locale === 'fa' ? 'تحصیلات' : 'Education' }}</h2>
   <p>{!! nl2br(e($fields['education'] ?? '')) !!}</p>
 </body>

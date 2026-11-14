@@ -111,13 +111,15 @@ class PublicSiteController extends Controller
 
             return [
                 'slug' => $item['slug'],
-                'title' => $item['title'],
+                'title' => $copy['title'] ?? $item['title'],
                 'category' => $copy['category'] ?? $item['category'] ?? '',
                 'shortDescription' => $copy['shortDescription'] ?? '',
                 'fullDescription' => $view === 'project' ? ($copy['fullDescription'] ?? '') : '',
                 'role' => $view === 'project' ? ($copy['role'] ?? '') : '',
                 'technologies' => $item['technologies'] ?? [],
                 'image' => empty($item['image']) ? null : $this->assetUrl($item['image']),
+                'gallery' => $view === 'project' ? array_map(fn (string $path) => $this->assetUrl($path), $item['gallery'] ?? []) : [],
+                'sourceUrl' => $view === 'project' ? ($item['sourceUrl'] ?? null) : null,
                 'liveUrl' => $item['liveUrl'] ?? null,
                 'githubUrl' => $item['githubUrl'] ?? null,
                 'date' => $item['date'] ?? null,

@@ -134,6 +134,7 @@ class PortfolioAssistantContext
 
         $lines = [];
         $lines[] = 'Subject: '.$name.' — '.$role;
+        $lines[] = 'Team: '.config('novin.'.$locale.'.name').' — '.config('novin.'.$locale.'.role');
         if ($about !== '') {
             $lines[] = 'Bio: '.$this->clip($about, 280);
         }
@@ -186,6 +187,7 @@ class PortfolioAssistantContext
 
         $lines = [];
         $lines[] = 'Subject: '.$name.' — '.$role;
+        $lines[] = 'Team: '.config('novin.'.$locale.'.name').' — '.config('novin.'.$locale.'.role');
         $lines[] = 'Portfolio site: public personal site for this engineer (EN/FA).';
         if ($about !== '') {
             $lines[] = 'Bio: '.$this->clip($about, 900);
