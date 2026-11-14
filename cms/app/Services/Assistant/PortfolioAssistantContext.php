@@ -3,6 +3,8 @@
 namespace App\Services\Assistant;
 
 use App\Services\PortfolioContent;
+use App\Support\Jalali;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 class PortfolioAssistantContext
@@ -185,22 +187,9 @@ class PortfolioAssistantContext
         $details = config('assistant-biography-details', []);
         $matched = collect($topics)->filter(fn (array $entry) => $this->matchesBiographyTopic($query, $entry['match']));
         $relationship = $topics['relationship'] ?? null;
-        if ($relationship !== null && ! $matched->has('relationship') && $this->isBiographyFollowUp($query)) {
-            foreach (array_reverse($priorExchange) as $turn) {
-                if ($turn['role'] !== 'user') {
-                    continue;
-                }
-
-                $previous = ' '.$this->fold($turn['content']).' ';
-                if ($this->matchesBiographyTopic($previous, $relationship['match'])) {
-                    $matched->put('relationship', $relationship);
-                    break;
-                }
-
-                if (! $this->isBiographyFollowUp($previous)) {
-                    break;
-                }
-            }
+        if ($relationship !== null && $matched->isEmpty() && $this->isBiographyFollowUp($query)
+            && $this->followsRelationship($priorExchange, $topics)) {
+            $matched->put('relationship', $relationship);
         }
 
         if ($matched->keys()->all() === ['relationship']) {
@@ -218,7 +207,8 @@ class PortfolioAssistantContext
 
         return collect($topics)
             ->filter(fn (array $entry, string $topic) => $topic !== 'relationship' || $matched->has($topic))
-            ->map(static fn (array $entry, string $topic) => $entry[$locale].' '.($details[$topic][$locale] ?? ''))
+            ->map(fn (array $entry, string $topic) => $entry[$locale].' '
+                .($topic === 'profile' ? $this->birthFacts($entry['birth_date_jalali'], $locale) : ($details[$topic][$locale] ?? '')))
             ->map(trim(...))
             ->values()->all();
     }
@@ -235,9 +225,69 @@ class PortfolioAssistantContext
         return false;
     }
 
+    /**
+     * @param  list<array{role:string,content:string}>  $history
+     * @param  array<string,array>  $topics
+     */
+    protected function followsRelationship(array $history, array $topics): bool
+    {
+        $lastReply = '';
+        foreach (array_reverse($history) as $turn) {
+            $previous = ' '.$this->fold($turn['content']).' ';
+            if ($turn['role'] === 'assistant') {
+                $lastReply = $previous;
+
+                continue;
+            }
+
+            if ($this->matchesBiographyTopic($previous, $topics['relationship']['match'])) {
+                return true;
+            }
+
+            foreach ($topics as $topic => $entry) {
+                if ($topic !== 'relationship' && $this->matchesBiographyTopic($previous, $entry['match'])) {
+                    return false;
+                }
+            }
+
+            if ($this->matchesBiographyTopic($lastReply, $topics['relationship']['match'])) {
+                return true;
+            }
+
+            if (! $this->isBiographyFollowUp($previous)) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
     protected function isBiographyFollowUp(string $query): bool
     {
-        return (bool) preg_match('/^(?:(?:and |so )?(?:tell me more|what about (?:him|her|them)|who is she|how long|since when)(?: about (?:him|her|them|it))?|(?:خب |پس )?(?:بیشتر بگو|بیشتر توضیح بده|دیگه چی|اون کیه|از کی|چند وقته))$/u', trim($query));
+        return (bool) preg_match('/^(?:and |so |خب |پس )?(?:tell me more(?: about (?:him|her|them|it))?|what about (?:him|her|them)|who is she|what (?:is|was) her name|how long(?: have they been together)?|since when|بیشتر بگو|بیشتر توضیح بده|دیگه چی|اون کیه|از کی|چند وقته(?: با هم(?:ن| هستند))?|اسمش (?:چی بود|چیه|چیست)|مگه نگفتی .+|خودت (?:نگفتی|گفتی|نوشتی) .+)$/u', trim($query));
+    }
+
+    /** @param array{int,int,int} $jalaliDate */
+    protected function birthFacts(array $jalaliDate, string $locale): string
+    {
+        [$year, $month, $day] = $jalaliDate;
+        [$gregorianYear, $gregorianMonth, $gregorianDay] = Jalali::toGregorian($year, $month, $day);
+        $birthDate = Carbon::createMidnightDate($gregorianYear, $gregorianMonth, $gregorianDay, 'Asia/Tehran');
+        $today = now('Asia/Tehran');
+        [$currentYear, $currentMonth, $currentDay] = Jalali::toJalali($today->year, $today->month, $today->day);
+        $age = $currentYear - $year;
+        if ([$currentMonth, $currentDay] < [$month, $day]) {
+            $age--;
+        }
+
+        if ($locale === 'fa') {
+            $date = Jalali::digits($day.' '.Jalali::monthName($month).' '.$year);
+            $gregorianDate = Jalali::digits($birthDate->format('Y-m-d'));
+
+            return 'تاریخ تولد امیرحسین '.$date.' ('.$gregorianDate.' میلادی) است. سن فعلی او '.Jalali::digits((string) $age).' سال است.';
+        }
+
+        return 'Amirhossein was born on '.$birthDate->format('F j, Y').' ('.$day.' '.Jalali::monthName($month, 'en').' '.$year.' in the Solar Hijri calendar). His current age is '.$age.'.';
     }
 
     protected function buildFull(array $payload, string $locale, bool $preview = false): string

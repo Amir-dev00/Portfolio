@@ -7,6 +7,7 @@ use App\Services\Assistant\OpenAiResponsesClient;
 use App\Services\Assistant\PortfolioAssistantContext;
 use App\Services\PortfolioContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
@@ -370,25 +371,40 @@ class AssistantChatTest extends TestCase
 
     public function test_age_question_gets_casual_persian_guidance_and_respects_a_model_override(): void
     {
+        $this->travelTo(Carbon::parse('2026-11-15', 'Asia/Tehran'));
         config(['assistant.model' => 'gpt-4.1-mini']);
         Http::fake([
-            'api.openai.com/*' => Http::response(['output_text' => 'تا جایی که می‌دونم، ۲۱ سالشه.']),
+            'api.openai.com/*' => Http::response(['output_text' => '۲۱ سالشه.']),
         ]);
 
         $this->postJson('/api/assistant/chat', ['message' => 'امیرحسین چند سالشه؟', 'locale' => 'en'])
             ->assertOk()
             ->assertJsonPath('locale', 'fa')
-            ->assertJsonPath('reply', 'تا جایی که می‌دونم، ۲۱ سالشه.');
+            ->assertJsonPath('reply', '۲۱ سالشه.');
 
         Http::assertSent(function ($request) {
             $data = $request->data();
             $this->assertSame('gpt-4.1-mini', $data['model']);
             $this->assertArrayNotHasKey('reasoning', $data);
             $this->assertStringContainsString('everyday Iranian Persian', $data['instructions']);
-            $this->assertStringContainsString('۲۱ ساله است', $data['instructions']);
+            $this->assertStringContainsString('سن فعلی او ۲۱ سال است', $data['instructions']);
+            $this->assertStringContainsString('۳ تیر ۱۳۸۴ (۲۰۰۵-۰۶-۲۴ میلادی)', $data['instructions']);
 
             return true;
         });
+    }
+
+    public function test_biographical_age_rolls_over_at_midnight_in_tehran(): void
+    {
+        $context = app(PortfolioAssistantContext::class);
+
+        $this->travelTo(Carbon::parse('2026-06-23 20:29:59', 'UTC'));
+        $before = $context->forQuestion('en', 'When was he born?');
+        $this->assertStringContainsString('June 24, 2005 (3 Tir 1384', $before);
+        $this->assertStringContainsString('His current age is 20.', $before);
+
+        $this->travel(1)->second();
+        $this->assertStringContainsString('His current age is 21.', $context->forQuestion('en', 'How old is he?'));
     }
 
     public function test_provider_outage_returns_localized_error_and_counts_toward_caps(): void
@@ -630,6 +646,37 @@ class AssistantChatTest extends TestCase
         $this->assertStringContainsString($relationship, $duration['instructions']);
         $this->assertStringNotContainsString($relationship, $newTopic['instructions']);
         $this->assertNotContains($relationship, array_column($newTopic['input'], 'content'));
+    }
+
+    public function test_miro_keeps_relationship_facts_through_the_reported_follow_up_sequence(): void
+    {
+        config(['assistant.max_history_turns' => 4]);
+        $relationship = config('assistant-biography.relationship.fa');
+        $exchanges = [
+            'بیشتر بگو راجب دوس دخترش' => 'هستی شریک عاطفی امیرحسینه و امیرحسین می‌گه خیلی دوستش داره.',
+            'اسمش چی بود؟' => 'هستی.',
+            'مگه نگفتی هستیه؟' => 'آره، اسمش هستیه.',
+            'چند وقته با همن؟' => 'مدت رابطه‌شون مشخص نیست.',
+        ];
+        Http::fake(['api.openai.com/*' => function ($request) use ($exchanges, $relationship) {
+            $payload = $request->data();
+            $input = $payload['input'];
+            $this->assertStringContainsString($relationship, $payload['instructions']);
+            $this->assertContains($relationship, array_column($input, 'content'));
+            $this->assertLessThanOrEqual(9, count($input));
+
+            return Http::response(['output_text' => $exchanges[end($input)['content']]]);
+        }]);
+
+        foreach (['دوس دختر داره؟' => $relationship, ...$exchanges] as $question => $reply) {
+            $this->postJson('/api/assistant/chat', ['message' => $question, 'locale' => 'fa'])
+                ->assertOk()->assertJsonPath('reply', $reply);
+
+            RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+        }
+
+        Http::assertSentCount(4);
+        $this->assertCount(8, session(AssistantService::SESSION_KEY));
     }
 
     #[DataProvider('directBiographyQuestions')]
