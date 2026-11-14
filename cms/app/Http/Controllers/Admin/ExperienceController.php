@@ -49,7 +49,7 @@ class ExperienceController extends Controller
     {
         $this->find($experience)->delete();
 
-        return redirect()->route('admin.experience.index')->with('status', 'Experience removed from draft. Publish live to update the site.');
+        return redirect()->route('admin.experience.index')->with('status', __('Experience removed from draft. Publish live to update the site.'));
     }
 
     private function find(string $experience): SiteSetting
@@ -122,6 +122,6 @@ class ExperienceController extends Controller
             throw $error;
         }
 
-        return redirect()->route('admin.experience.index')->with('status', 'Experience saved as draft. Publish live to update the site.');
+        return redirect()->route('admin.experience.index')->with('status', __('Experience saved as draft. Publish live to update the site.'));
     }
 }

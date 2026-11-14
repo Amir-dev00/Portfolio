@@ -140,7 +140,7 @@ class ContentController extends Controller
             }
         });
 
-        return back()->with('status', 'Draft saved. Preview it or publish to update the public site.');
+        return back()->with('status', __('Draft saved. Preview it or publish to update the public site.'));
     }
 
     private function defaultStrings(): array

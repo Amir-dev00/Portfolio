@@ -51,7 +51,7 @@ class ResumeController extends Controller
             'is_current' => true,
         ]);
 
-        return back()->with('status', 'CV uploaded (draft). Publish to make it public.');
+        return back()->with('status', __('CV uploaded (draft). Publish to make it public.'));
     }
 
     public function updateFields(Request $request): RedirectResponse
@@ -74,7 +74,7 @@ class ResumeController extends Controller
         $current->fields_fa = $data['fields_fa'] ?? [];
         $current->save();
 
-        return back()->with('status', 'Resume fields saved.');
+        return back()->with('status', __('Resume fields saved.'));
     }
 
     public function generate(Request $request): RedirectResponse
@@ -122,7 +122,7 @@ class ResumeController extends Controller
             'is_current' => true,
         ]);
 
-        return back()->with('status', 'Generated '.$locale.' PDF (draft). Persian uses DejaVu Sans for reliable Dompdf glyph coverage; embed Estedad TTF later if needed.');
+        return back()->with('status', __('Generated :language PDF (draft).', ['language' => __($locale === 'fa' ? 'Persian' : 'English')]));
     }
 
     public function activate(ResumeVersion $resume): RedirectResponse
@@ -131,6 +131,6 @@ class ResumeController extends Controller
         $resume->is_current = true;
         $resume->save();
 
-        return back()->with('status', 'Resume version activated (draft). Publish to update download link.');
+        return back()->with('status', __('Resume version activated (draft). Publish to update download link.'));
     }
 }

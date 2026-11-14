@@ -43,7 +43,7 @@ class MediaController extends Controller
         $file = $data['file'];
         $ext = strtolower($file->getClientOriginalExtension() ?: 'bin');
         if (in_array($ext, ['php', 'phtml', 'phar', 'cgi', 'js', 'html', 'htm'], true)) {
-            return back()->withErrors(['file' => 'Executable or script uploads are not allowed.']);
+            return back()->withErrors(['file' => __('Executable or script uploads are not allowed.')]);
         }
 
         $isPdf = $file->getMimeType() === 'application/pdf';
@@ -63,7 +63,7 @@ class MediaController extends Controller
             'used_by' => [],
         ]);
 
-        return back()->with('status', 'Media uploaded to private draft storage.');
+        return back()->with('status', __('Media uploaded to private draft storage.'));
     }
 
     public function update(Request $request, MediaAsset $media): RedirectResponse
@@ -74,7 +74,7 @@ class MediaController extends Controller
         ]);
         $media->fill($data)->save();
 
-        return back()->with('status', 'Media metadata updated.');
+        return back()->with('status', __('Media metadata updated.'));
     }
 
     public function raw(MediaAsset $media): StreamedResponse|BinaryFileResponse

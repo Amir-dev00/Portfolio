@@ -23,7 +23,7 @@ class AuthController extends Controller
         ]);
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
-            return back()->withErrors(['email' => 'Invalid credentials.'])->onlyInput('email');
+            return back()->withErrors(['email' => __('Invalid credentials.')])->onlyInput('email');
         }
 
         $request->session()->regenerate();
@@ -31,7 +31,7 @@ class AuthController extends Controller
         if (! $request->user()?->isOwner()) {
             Auth::logout();
 
-            return back()->withErrors(['email' => 'Owner access required.']);
+            return back()->withErrors(['email' => __('Owner access required.')]);
         }
 
         return redirect()->intended(route('admin.dashboard'));
@@ -39,8 +39,10 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
+        $locale = $request->session()->get('admin_locale', 'en');
         Auth::logout();
         $request->session()->invalidate();
+        $request->session()->put('admin_locale', $locale);
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login');

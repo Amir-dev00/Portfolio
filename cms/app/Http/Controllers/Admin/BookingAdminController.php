@@ -71,7 +71,7 @@ class BookingAdminController extends Controller
         $data['visitor_notify'] = $request->boolean('visitor_notify');
         BookingSettings::put($data);
 
-        return back()->with('status', 'Booking settings saved. Public availability updates immediately.');
+        return back()->with('status', __('Booking settings saved. Public availability updates immediately.'));
     }
 
     public function saveAvailability(Request $request): RedirectResponse
@@ -98,7 +98,7 @@ class BookingAdminController extends Controller
             ]);
         }
 
-        return back()->with('status', 'Weekly availability updated.');
+        return back()->with('status', __('Weekly availability updated.'));
     }
 
     public function storeBlock(Request $request): RedirectResponse
@@ -130,14 +130,14 @@ class BookingAdminController extends Controller
             'reason' => $data['reason'] ?? null,
         ]);
 
-        return back()->with('status', 'Blocked slot added.');
+        return back()->with('status', __('Blocked slot added.'));
     }
 
     public function destroyBlock(BlockedSlot $block): RedirectResponse
     {
         $block->delete();
 
-        return back()->with('status', 'Blocked slot removed.');
+        return back()->with('status', __('Blocked slot removed.'));
     }
 
     public function show(Booking $booking): View
@@ -152,14 +152,14 @@ class BookingAdminController extends Controller
     {
         $this->bookings->cancel($booking);
 
-        return back()->with('status', 'Booking cancelled. The slot is available again.');
+        return back()->with('status', __('Booking cancelled. The slot is available again.'));
     }
 
     public function complete(Booking $booking): RedirectResponse
     {
         $this->bookings->markCompleted($booking);
 
-        return back()->with('status', 'Booking marked completed.');
+        return back()->with('status', __('Booking marked completed.'));
     }
 
     public function exportCsv(): Response
@@ -190,13 +190,13 @@ class BookingAdminController extends Controller
     protected function weekdayLabels(): array
     {
         return [
-            0 => 'Sunday',
-            1 => 'Monday',
-            2 => 'Tuesday',
-            3 => 'Wednesday',
-            4 => 'Thursday',
-            5 => 'Friday',
-            6 => 'Saturday',
+            0 => __('Sunday'),
+            1 => __('Monday'),
+            2 => __('Tuesday'),
+            3 => __('Wednesday'),
+            4 => __('Thursday'),
+            5 => __('Friday'),
+            6 => __('Saturday'),
         ];
     }
 }

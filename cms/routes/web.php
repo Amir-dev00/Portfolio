@@ -50,7 +50,14 @@ Route::get('/fa/ask', fn (\Illuminate\Http\Request $r) => app(PublicSiteControll
 Route::get('/fa/contact', fn (\Illuminate\Http\Request $r) => app(PublicSiteController::class)->contact($r, 'fa'))->name('fa.contact');
 Route::get('/fa/work/{slug}', fn (\Illuminate\Http\Request $r, string $slug) => app(PublicSiteController::class)->project($r, 'fa', $slug))->name('fa.project');
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminLocale::class)->group(function () {
+    Route::post('/language', function (\Illuminate\Http\Request $request) {
+        $data = $request->validate(['locale' => ['required', 'in:en,fa']]);
+        $request->session()->put('admin_locale', $data['locale']);
+
+        return back();
+    })->name('language');
+
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])
@@ -85,6 +92,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
         Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
         Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
+        Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
         Route::post('/projects/import', [ProjectController::class, 'import'])->name('projects.import');
         Route::post('/projects/reorder', [ProjectController::class, 'reorder'])->name('projects.reorder');
         Route::post('/projects/{project}/archive', [ProjectController::class, 'archive'])->name('projects.archive');

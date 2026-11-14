@@ -58,7 +58,7 @@ class SeoController extends Controller
             }
         }
 
-        return back()->with('status', 'SEO draft saved. Publish when ready.');
+        return back()->with('status', __('SEO draft saved. Publish when ready.'));
     }
     private function projectTargets(array $slugs): array
     {

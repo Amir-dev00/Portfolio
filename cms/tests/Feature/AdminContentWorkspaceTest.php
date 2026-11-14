@@ -73,10 +73,65 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/fa/work/novin-inova')->assertOk()->assertSee('عنوان جست‌وجوی اینوا');
     }
 
+    public function test_owner_can_delete_a_project_without_reimporting_it(): void
+    {
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->post('/admin/projects/import')->assertRedirect();
+        $project = Project::query()->where('slug', 'novin-inova')->firstOrFail();
+        $this->get(route('admin.projects.edit', $project))->assertOk()->assertSee('Delete project');
+        $this->delete(route('admin.projects.destroy', $project))->assertSessionHasErrors('confirm_delete');
+        $this->assertModelExists($project);
+
+        $this->delete(route('admin.projects.destroy', $project), ['confirm_delete' => 1])
+            ->assertRedirect(route('admin.projects.index'));
+        $this->assertModelMissing($project);
+        $this->assertDatabaseMissing('project_translations', ['project_id' => $project->id]);
+        $this->get('/work/novin-inova')->assertOk();
+        $this->get('/work/novin-inova?preview=1')->assertNotFound();
+        $this->post('/admin/projects/import')->assertRedirect();
+        $this->assertDatabaseCount('projects', 9);
+        $this->post('/admin/publish')->assertRedirect();
+        $this->get('/work/novin-inova')->assertNotFound();
+        $this->get('/fa/work/novin-inova')->assertNotFound();
+    }
+
+    public function test_persian_admin_language_is_saved_and_does_not_change_public_pages(): void
+    {
+        $this->get('/admin/login')->assertOk()->assertSee('Owner login');
+        $this->from('/admin/login')->post('/admin/language', ['locale' => 'fa'])->assertRedirect('/admin/login');
+        $this->get('/admin/login')->assertOk()->assertSee('lang="fa" dir="rtl"', false)->assertSee('ورود مدیر');
+
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        foreach ([
+            '/admin' => 'داشبورد',
+            '/admin/projects/create' => 'پروژه جدید',
+            '/admin/projects' => 'افزودن پروژه',
+            '/admin/content?group=Miro' => 'جست‌وجو بر اساس کلید یا متن فعلی',
+            '/admin/bookings/settings' => 'تنظیمات جلسه',
+            '/admin/bookings' => 'خروجی CSV',
+            '/admin/experience/create' => 'نام شرکت',
+            '/admin/resume' => 'رزومه فعلی',
+            '/admin/seo' => 'جست‌وجو و اشتراک‌گذاری',
+            '/admin/media' => 'کتابخانه رسانه',
+        ] as $url => $label) {
+            $this->get($url)->assertOk()->assertSee('lang="fa" dir="rtl"', false)->assertSee($label);
+        }
+        $this->get('/about')->assertOk()->assertSee('lang="en" dir="ltr"', false);
+        $this->from('/admin/projects')->post('/admin/language', ['locale' => 'de'])->assertSessionHasErrors('locale');
+        $this->from('/admin/projects')->post('/admin/language', ['locale' => 'en'])->assertRedirect('/admin/projects');
+        $this->get('/admin/projects')->assertOk()->assertSee('lang="en" dir="ltr"', false);
+        $this->from('/admin/projects')->post('/admin/language', ['locale' => 'fa'])->assertRedirect('/admin/projects');
+        $this->post('/admin/logout')->assertRedirect('/admin/login');
+        $this->get('/admin/login')->assertOk()->assertSee('ورود مدیر');
+    }
+
     public function test_non_owners_cannot_manage_content(): void
     {
         $this->actingAs(User::factory()->create(['is_owner' => false]));
         $this->post('/admin/projects/import')->assertForbidden();
+        $project = Project::query()->create(['title' => 'Protected', 'slug' => 'protected']);
+        $this->delete(route('admin.projects.destroy', $project), ['confirm_delete' => 1])->assertForbidden();
+        $this->assertModelExists($project);
         $this->post('/admin/content')->assertForbidden();
         $this->get('/admin/export.json')->assertForbidden();
     }

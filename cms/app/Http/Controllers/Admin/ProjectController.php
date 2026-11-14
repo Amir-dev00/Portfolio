@@ -8,8 +8,10 @@ use App\Models\MediaAsset;
 use App\Models\Project;
 use App\Models\ProjectTechnology;
 use App\Models\ProjectTranslation;
+use App\Models\Publication;
 use App\Models\SeoEntry;
 use App\Models\SiteSetting;
+use App\Models\SiteState;
 use App\Services\BundledProjectImporter;
 use App\Services\PortfolioContent;
 use Illuminate\Http\RedirectResponse;
@@ -48,7 +50,7 @@ class ProjectController extends Controller
     {
         $importer->import();
 
-        return back()->with('status', 'Bundled projects are ready to edit. Publish when ready.');
+        return back()->with('status', __('Bundled projects are ready to edit. Publish when ready.'));
     }
 
     public function create(): View
@@ -65,7 +67,7 @@ class ProjectController extends Controller
         $project = new Project;
         $this->persist($request, $project);
 
-        return redirect()->route('admin.projects.edit', $project)->with('status', 'Project created (draft).');
+        return redirect()->route('admin.projects.edit', $project)->with('status', __('Project created (draft).'));
     }
 
     public function edit(Project $project): View
@@ -83,7 +85,7 @@ class ProjectController extends Controller
     {
         $this->persist($request, $project);
 
-        return back()->with('status', 'Project saved (draft). Publish to go live.');
+        return back()->with('status', __('Project saved (draft). Publish to go live.'));
     }
 
     public function reorder(Request $request): RedirectResponse
@@ -96,7 +98,7 @@ class ProjectController extends Controller
             Project::query()->where('id', $id)->update(['sort_order' => $i, 'is_dirty' => true]);
         }
 
-        return back()->with('status', 'Order updated (draft).');
+        return back()->with('status', __('Order updated (draft).'));
     }
 
     public function archive(Project $project): RedirectResponse
@@ -105,7 +107,7 @@ class ProjectController extends Controller
         $project->is_dirty = true;
         $project->save();
 
-        return back()->with('status', 'Project archived (draft).');
+        return back()->with('status', __('Project archived (draft).'));
     }
 
     public function restore(Project $project): RedirectResponse
@@ -114,7 +116,56 @@ class ProjectController extends Controller
         $project->is_dirty = true;
         $project->save();
 
-        return back()->with('status', 'Project restored (draft).');
+        return back()->with('status', __('Project restored (draft).'));
+    }
+
+    public function destroy(Request $request, Project $project, PortfolioContent $content): RedirectResponse
+    {
+        $request->validate(['confirm_delete' => ['required', 'accepted']]);
+
+        DB::transaction(function () use ($project, $request, $content) {
+            $state = SiteState::query()->lockForUpdate()->findOrFail(SiteState::current()->id);
+            if (! $state->current_publication_id) {
+                $snapshot = Publication::query()->create([
+                    'label' => __('Site before first project deletion'),
+                    'payload' => $content->payload(),
+                    'published_at' => now(),
+                ]);
+                $state->publication()->associate($snapshot)->save();
+            }
+
+            $project = Project::query()->lockForUpdate()->findOrFail($project->id);
+            $setting = SiteSetting::query()->firstOrNew(['key' => SiteSetting::PROJECT_PREFIX.$project->id]);
+            $bundled = $setting->value['bundled_slug'] ?? null;
+            if (! $bundled && in_array($project->slug, array_column($content->bundledProjects(), 'slug'), true)) {
+                $bundled = $project->slug;
+            }
+
+            // Preserve the import marker so an intentionally deleted project cannot be re-imported.
+            if ($bundled) {
+                $setting->value = ['bundled_slug' => $bundled];
+                $setting->save();
+            } elseif ($setting->exists) {
+                $setting->delete();
+            }
+
+            SeoEntry::query()->where('scope', 'project')->where('scope_key', $project->slug)->delete();
+            $featured = SiteSetting::query()->where('key', 'featured_slugs')->lockForUpdate()->first();
+            if ($featured) {
+                $featured->update(['value' => array_values(array_diff($featured->value ?? [], [$project->slug]))]);
+            }
+
+            ContentRevision::query()->create([
+                'entity_type' => 'project',
+                'entity_id' => $project->id,
+                'action' => 'delete',
+                'before' => $project->toArray(),
+                'user_id' => $request->user()->id,
+            ]);
+            $project->delete();
+        });
+
+        return redirect()->route('admin.projects.index')->with('status', __('Project deleted from the draft. Publish live to remove it from the site.'));
     }
 
     private function imageLibrary()
@@ -162,13 +213,13 @@ class ProjectController extends Controller
         $techs = array_values(array_unique(array_filter(array_map('trim', explode(',', $data['technologies'] ?? '')))));
         foreach ($techs as $tech) {
             if (mb_strlen($tech) > 255) {
-                throw ValidationException::withMessages(['technologies' => 'Each technology must be at most 255 characters.']);
+                throw ValidationException::withMessages(['technologies' => __('Each technology must be at most 255 characters.')]);
             }
         }
 
         foreach (array_filter(array_merge([$data['cover'] ?? null], $this->lines($data['gallery'] ?? null))) as $path) {
             if (! preg_match('~^/?(?:assets/|media/published/)[a-zA-Z0-9_./-]+$~D', $path) || str_contains($path, '..')) {
-                throw ValidationException::withMessages(['gallery' => 'Use a local asset or published-media path for each image.']);
+                throw ValidationException::withMessages(['gallery' => __('Use a local asset or published-media path for each image.')]);
             }
         }
 

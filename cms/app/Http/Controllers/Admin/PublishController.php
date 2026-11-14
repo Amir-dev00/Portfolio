@@ -20,13 +20,13 @@ class PublishController extends Controller
 
         $publication = $this->publications->publish($request->user(), $data['label'] ?? null);
 
-        return back()->with('status', 'Published #'.$publication->id.' — public site updated atomically.');
+        return back()->with('status', __('Published #:id — public site updated atomically.', ['id' => $publication->id]));
     }
 
     public function rollback(Request $request, Publication $publication): RedirectResponse
     {
         $this->publications->rollback($publication, $request->user());
 
-        return back()->with('status', 'Rolled back to publication #'.$publication->id);
+        return back()->with('status', __('Rolled back to publication #:id', ['id' => $publication->id]));
     }
 }
