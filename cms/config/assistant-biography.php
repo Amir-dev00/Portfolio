@@ -2,7 +2,7 @@
 
 return [
     'profile' => [
-        'match' => ['how old', 'age', 'tell me about', 'about him', 'introduce', 'biography', 'who is', 'چند سال', 'سن',  'معرفی', 'درباره امیرحسین', 'کیه', 'کیست'],
+        'match' => ['how old', 'age', 'tell me about', 'about him', 'introduce', 'biography', 'who is amirhossein', 'چند سال', 'سن',  'معرفی', 'درباره امیرحسین', 'امیرحسین کیه', 'امیرحسین کیست'],
         'fa' => 'امیرحسین زمان‌زاده مهندس نرم‌افزار و دانشجوی علوم کامپیوتر دانشگاه صنعتی امیرکبیر است. در آبان ۱۴۰۵ گفته که ۲۱ ساله است. تاریخ تولدش مشخص نیست.',
         'en' => 'Amirhossein Zamanzade is a software engineer and a Computer Science student at Amirkabir University of Technology. He reported being 21 in November 2026. His date of birth is unknown.',
     ],
@@ -57,7 +57,7 @@ return [
         'en' => 'As of November 2026, Amirhossein had recently joined Pol Ideal Pars (medpip.com) as a Software Engineer and was learning in his new role. The company’s current site runs on WordPress, and the team plans to build a new platform with Next.js and PHP/Laravel and migrate the site to it. The migration is planned. His main interest is back-end development.',
     ],
     'relationship' => [
-        'match' => ['girlfriend', 'dating', 'romantic relationship', 'in a relationship', 'romantic partner', 'his girlfriend', 'hasti', 'دوست دختر', 'دوستدختر', 'پارتنر', 'تو رابطه', 'در رابطه', 'رابطه عاطفی', 'هستی کیه', 'هستی کیست', 'دوستش داره', 'مجرده', 'مجرد است'],
+        'match' => ['girlfriend', 'dating', 'romantic relationship', 'in a relationship', 'romantic partner', 'his girlfriend', 'hasti', 'دوس دختر', 'دوست دختر', 'دوستدختر', 'دوست دخترش', 'دوستدخترش', 'پارتنر', 'تو رابطه', 'در رابطه', 'رابطه عاطفی', 'رابطش', 'رابطه ش', 'رابطه اش', 'رابطهش', 'رابطهاش', 'هستی کیه', 'هستی کیست', 'دوستش داره', 'مجرده', 'مجرد است'],
         'fa' => 'امیرحسین در رابطه است. اسم شریک عاطفی‌اش هستی است. امیرحسین او را خیلی زیبا و دوست‌داشتنی توصیف می‌کند و می‌گوید خیلی دوستش دارد.',
         'en' => 'Amirhossein is in a relationship with Hasti. He describes her as beautiful and sweet and says he loves her very much.',
     ],

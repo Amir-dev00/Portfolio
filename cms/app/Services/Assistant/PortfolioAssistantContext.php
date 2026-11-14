@@ -32,7 +32,7 @@ class PortfolioAssistantContext
     /**
      * Compact, question-scoped facts for the model (profile + ≤3 projects).
      *
-     * @param  list<array{role:string,content:string}>  $priorExchange  Last substantive user/assistant pair, if any.
+     * @param  list<array{role:string,content:string}>  $priorExchange  Recent user and assistant messages, if any.
      */
     public function forQuestion(string $locale, string $question, array $priorExchange = [], bool $preview = false): string
     {
@@ -171,7 +171,7 @@ class PortfolioAssistantContext
         $context = $this->clip(implode("\n", $lines), 2200);
         $biography = $this->relevantBiography($locale, $question, $priorExchange);
 
-        return $biography === [] ? $context : "Owner’s complete biographical account:\n".implode("\n", $biography)."\n\n".$context;
+        return $biography === [] ? $context : "Verified biographical facts from the owner:\n".implode("\n", $biography)."\n\n".$context;
     }
 
     /**
@@ -183,15 +183,32 @@ class PortfolioAssistantContext
         $query = ' '.$this->fold($question).' ';
         $topics = config('assistant-biography', []);
         $details = config('assistant-biography-details', []);
-        $matched = collect($topics)->filter(function (array $entry) use ($query) {
-            foreach ($entry['match'] as $term) {
-                if (str_contains($query, ' '.$this->fold($term).' ')) {
-                    return true;
+        $matched = collect($topics)->filter(fn (array $entry) => $this->matchesBiographyTopic($query, $entry['match']));
+        $relationship = $topics['relationship'] ?? null;
+        if ($relationship !== null && ! $matched->has('relationship') && $this->isBiographyFollowUp($query)) {
+            foreach (array_reverse($priorExchange) as $turn) {
+                if ($turn['role'] !== 'user') {
+                    continue;
+                }
+
+                $previous = ' '.$this->fold($turn['content']).' ';
+                if ($this->matchesBiographyTopic($previous, $relationship['match'])) {
+                    $matched->put('relationship', $relationship);
+                    break;
+                }
+
+                if (! $this->isBiographyFollowUp($previous)) {
+                    break;
                 }
             }
+        }
 
-            return false;
-        });
+        if ($matched->keys()->all() === ['relationship']) {
+            return [
+                $relationship[$locale],
+                'These are the only verified facts about this relationship. Answer only the detail asked and distinguish any unknown detail from what is already known.',
+            ];
+        }
 
         // Keep clearly scoped project and navigation questions on the smaller context.
         $scoped = preg_match('/(?:\b(?:stack|portfolio projects|which .*projects?|open|navigate|show me the cv)\b|چه پروژه|کدام پروژه|باز کن|ببند|تکنولوژی های پروژه)/u', $query);
@@ -199,10 +216,28 @@ class PortfolioAssistantContext
             return [];
         }
 
-        return collect($topics)->except('relationship')->map(
-            static fn (array $entry, string $topic) => $entry[$locale]
-                .(isset($details[$topic][$locale]) ? ' '.$details[$topic][$locale] : '')
-        )->values()->all();
+        return collect($topics)
+            ->filter(fn (array $entry, string $topic) => $topic !== 'relationship' || $matched->has($topic))
+            ->map(static fn (array $entry, string $topic) => $entry[$locale].' '.($details[$topic][$locale] ?? ''))
+            ->map(trim(...))
+            ->values()->all();
+    }
+
+    /** @param list<string> $terms */
+    protected function matchesBiographyTopic(string $query, array $terms): bool
+    {
+        foreach ($terms as $term) {
+            if (str_contains($query, ' '.$this->fold($term).' ')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function isBiographyFollowUp(string $query): bool
+    {
+        return (bool) preg_match('/^(?:(?:and |so )?(?:tell me more|what about (?:him|her|them)|who is she|how long|since when)(?: about (?:him|her|them|it))?|(?:خب |پس )?(?:بیشتر بگو|بیشتر توضیح بده|دیگه چی|اون کیه|از کی|چند وقته))$/u', trim($query));
     }
 
     protected function buildFull(array $payload, string $locale, bool $preview = false): string

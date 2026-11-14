@@ -26,7 +26,7 @@ class AssistantLocalIntent
             return null;
         }
 
-        if ($this->isGreeting($normalized)) {
+        if ($this->isGreeting($message)) {
             return $this->decisions->answer(
                 $locale === 'fa'
                     ? 'سلام! دوست داری دربارهٔ امیرحسین چی بدونی؟'
@@ -88,7 +88,7 @@ class AssistantLocalIntent
         }
 
         if (preg_match('/(?:^| )(?:دوس(?:ت)? *دختر(?:ش|اش)?|پارتنر(?:ش|اش)?|مجرده|مجرد است|تو رابطه|در رابطه|رابطه عاطفی)(?= |$)|\b(?:girlfriend|romantic partner|in a relationship|dating anyone|is he single)\b/u', $question)) {
-            if (preg_match('/(?:آدرس|شماره|قد|سن|تولد|کجا|کی آشنا|از کی|چند وقته|چند وقت)|\b(?:age|how old|where|when|since|how long|phone|address|birthday|birthdate|height|contact|instagram)\b/u', $question)) {
+            if (preg_match('/(?:بیشتر|جزئیات|آدرس|شماره|قد|سن|تولد|کجا|کی آشنا|از کی|چند وقته|چند وقت)|\b(?:more|details|age|how old|where|when|since|how long|phone|address|birthday|birthdate|height|contact|instagram)\b/u', $question)) {
                 return null;
             }
 
@@ -98,11 +98,11 @@ class AssistantLocalIntent
         return null;
     }
 
-    protected function isGreeting(string $normalized): bool
+    public function isGreeting(string $message): bool
     {
         return (bool) preg_match(
             '/^(hi|hello|hey|yo|hi there|hello there|hey there|good morning|good afternoon|good evening|greetings|salam|salaam|سلام|درود|سلام علیکم)$/u',
-            $normalized
+            $this->normalize($message)
         );
     }
 

@@ -30,7 +30,7 @@ return [
     'max_message_chars' => (int) env('ASSISTANT_MAX_MESSAGE_CHARS', 500),
 
     /** Turns kept in the PHP session (user+assistant pairs). */
-    'max_history_turns' => (int) env('ASSISTANT_MAX_HISTORY_TURNS', 1),
+    'max_history_turns' => (int) env('ASSISTANT_MAX_HISTORY_TURNS', 2),
 
     /** Per-IP requests allowed per rolling window (minutes). */
     'rate_limit' => (int) env('ASSISTANT_RATE_LIMIT', 20),

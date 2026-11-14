@@ -567,6 +567,48 @@ class AssistantChatTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_miro_resolves_relationship_follow_ups_with_verified_facts(): void
+    {
+        config(['assistant.max_history_turns' => 2]);
+        $relationship = 'هستی شریک عاطفی امیرحسین است و امیرحسین می‌گوید خیلی دوستش دارد.';
+        config(['assistant-biography.relationship.fa' => $relationship]);
+        Http::fake([
+            'api.openai.com/*' => Http::sequence()
+                ->push(['output_text' => 'امیرحسین گفته خیلی دوستش دارد. جزئیات بیشتری دربارهٔ رابطه نگفته است.'])
+                ->push(['output_text' => 'هستی شریک عاطفی امیرحسین است.'])
+                ->push(['output_text' => 'زمان شروع رابطه مشخص نیست.'])
+                ->push(['output_text' => 'او در دانشگاه صنعتی امیرکبیر تحصیل می‌کند.']),
+        ]);
+
+        foreach ([
+            'دوس دختر داری؟' => $relationship,
+            'بیشتر راجب رابطش بگو' => 'امیرحسین گفته خیلی دوستش دارد. جزئیات بیشتری دربارهٔ رابطه نگفته است.',
+            'پس هستی کیه؟' => 'هستی شریک عاطفی امیرحسین است.',
+            'چند وقته؟' => 'زمان شروع رابطه مشخص نیست.',
+            'کدوم دانشگاه درس می‌خونه؟' => 'او در دانشگاه صنعتی امیرکبیر تحصیل می‌کند.',
+        ] as $question => $reply) {
+            $this->postJson('/api/assistant/chat', ['message' => $question, 'locale' => 'fa'])
+                ->assertOk()->assertJsonPath('reply', $reply);
+
+            RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+        }
+
+        Http::assertSentCount(4);
+        [$followUp, $identity, $duration, $newTopic] = Http::recorded()->map(fn ($exchange) => $exchange[0]->data())->all();
+
+        $this->assertSame([
+            ['role' => 'user', 'content' => 'دوس دختر داری؟'],
+            ['role' => 'assistant', 'content' => $relationship],
+            ['role' => 'user', 'content' => 'بیشتر راجب رابطش بگو'],
+        ], $followUp['input']);
+        $this->assertCount(5, $identity['input']);
+        $this->assertStringContainsString($relationship, $followUp['instructions']);
+        $this->assertStringContainsString($relationship, $identity['instructions']);
+        $this->assertStringContainsString($relationship, $duration['instructions']);
+        $this->assertStringNotContainsString($relationship, $newTopic['instructions']);
+        $this->assertNotContains($relationship, array_column($newTopic['input'], 'content'));
+    }
+
     #[DataProvider('directBiographyQuestions')]
     public function test_direct_biography_shortcuts_keep_the_question_language(
         string $question,
@@ -635,8 +677,9 @@ class AssistantChatTest extends TestCase
             'General biography' => ['Tell me his career journey', 'en', 'en', ['childhood interests in hardware and robotics', 'became a C teaching assistant', 'built many robots', 'Urmia University', '790th in Region 3', 'CS50X Iran Python', 'practice projects on his laptop', 'were paid for their work', 'getting an office', 'medpip.com'], ['Relationship fixture']],
             'Informal Persian question without a topic keyword' => ['اون موقع چی شد که جا نزد؟', 'en', 'fa', ['بانک سؤال کوئرا', 'رتبهٔ ۷۹۰ منطقهٔ ۳', 'دستمزدشان را دریافت کردند'], ['Relationship fixture', 'اسم شریک عاطفی']],
             'Unmarked English follow-up' => ['Did that work out?', 'en', 'en', ['Urmia University', 'were paid for their work', 'medpip.com'], ['Relationship fixture']],
+            'English relationship identity' => ['Who is Hasti?', 'en', 'en', ['Relationship fixture'], ['CS50X Iran Python']],
             'Business partner question' => ['Who is his business partner at Novin Coders?', 'en', 'en', ['revived Novin Coders'], ['Relationship fixture']],
-            'Unrelated project question' => ['Which Laravel projects has he built?', 'en', 'en', ['Clinic Booking Portal'], ['Owner’s complete biographical account:', 'Relationship fixture']],
+            'Unrelated project question' => ['Which Laravel projects has he built?', 'en', 'en', ['Clinic Booking Portal'], ['Verified biographical facts from the owner:', 'Relationship fixture']],
         ];
     }
 
