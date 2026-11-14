@@ -171,7 +171,7 @@ class PortfolioAssistantContext
         $context = $this->clip(implode("\n", $lines), 2200);
         $biography = $this->relevantBiography($locale, $question, $priorExchange);
 
-        return $biography === [] ? $context : "Relevant personal background:\n".implode("\n", $biography)."\n\n".$context;
+        return $biography === [] ? $context : "Owner’s complete biographical account:\n".implode("\n", $biography)."\n\n".$context;
     }
 
     /**
@@ -180,36 +180,29 @@ class PortfolioAssistantContext
      */
     protected function relevantBiography(string $locale, string $question, array $priorExchange): array
     {
-        $question = ' '.$this->fold($question).' ';
-        $followUp = preg_match('/^ *(and\b|why\b|how so\b|what about\b|tell me more\b|و |چرا |خب |بعدش |بیشتر |ادامه )/u', $question);
-        $history = '';
-        if ($followUp) {
-            foreach ($priorExchange as $message) {
-                if ($message['role'] === 'user') {
-                    $history = ' '.$this->fold($message['content']).' ';
-                }
-            }
-        }
-
-        $matches = [];
-        foreach (config('assistant-biography', []) as $topic => $entry) {
-            $score = 0;
+        $query = ' '.$this->fold($question).' ';
+        $topics = config('assistant-biography', []);
+        $details = config('assistant-biography-details', []);
+        $matched = collect($topics)->filter(function (array $entry) use ($query) {
             foreach ($entry['match'] as $term) {
-                $phrase = ' '.$this->fold($term).' ';
-                if (str_contains($question, $phrase)) {
-                    $score += str_contains(trim($phrase), ' ') ? 6 : 3;
-                } elseif ($topic !== 'relationship' && str_contains($history, $phrase)) {
-                    $score++;
+                if (str_contains($query, ' '.$this->fold($term).' ')) {
+                    return true;
                 }
             }
-            if ($score > 0) {
-                $matches[] = ['score' => $score, 'text' => $entry[$locale]];
-            }
+
+            return false;
+        });
+
+        // Keep clearly scoped project and navigation questions on the smaller context.
+        $scoped = preg_match('/(?:\b(?:stack|portfolio projects|which .*projects?|open|navigate|show me the cv)\b|چه پروژه|کدام پروژه|باز کن|ببند|تکنولوژی های پروژه)/u', $query);
+        if ($scoped && $matched->isEmpty() && $priorExchange === []) {
+            return [];
         }
 
-        usort($matches, static fn (array $a, array $b): int => $b['score'] <=> $a['score']);
-
-        return array_column(array_slice($matches, 0, 3), 'text');
+        return collect($topics)->except('relationship')->map(
+            static fn (array $entry, string $topic) => $entry[$locale]
+                .(isset($details[$topic][$locale]) ? ' '.$details[$topic][$locale] : '')
+        )->values()->all();
     }
 
     protected function buildFull(array $payload, string $locale, bool $preview = false): string
