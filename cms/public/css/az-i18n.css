@@ -126,12 +126,6 @@ html.az-lang-fa .glass-nav__name {
   text-transform: none;
 }
 
-/* Keep tech chip labels LTR inside Persian About cards. */
-html[dir="rtl"] .az-about-skills__list {
-  direction: ltr;
-  unicode-bidi: isolate;
-}
-
 /* Preloader is English-only regardless of saved locale. */
 #js-preloader {
   direction: ltr;
