@@ -49,7 +49,7 @@ class PortfolioContent
                     'shortDescription' => $shortDescription,
                     'fullDescription' => $fullDescription,
                     'category' => $categories[$entry['category']][$locale],
-                    'role' => $locale === 'fa' ? 'پروژهٔ تیم نوین کدرز' : 'Novin Coders team project',
+                    'role' => $locale === 'fa' ? 'امیرحسین زمان‌زاده (توسعه‌دهنده)' : 'Amirhossein Zamanzade (developer)',
                 ];
             }
             $projects[] = $project;
