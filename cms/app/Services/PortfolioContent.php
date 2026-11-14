@@ -12,7 +12,7 @@ class PortfolioContent
     {
         $payload = $preview ? null : $this->publications->currentPayload();
         if ($payload === null) {
-            $payload = $this->publications->buildDraftPayload();
+            $payload = $this->publications->buildDraftPayload((bool) $preview);
             if (! $preview) {
                 unset($payload['experience']);
             }
@@ -20,6 +20,20 @@ class PortfolioContent
 
         $projects = $payload['projects'] ?? [];
         $existingSlugs = array_fill_keys(array_column($projects, 'slug'), true);
+        foreach ($this->bundledProjects() as $project) {
+            if (! isset($existingSlugs[$project['slug']]) &&
+                ! in_array($project['slug'], $payload['managed_bundled_projects'] ?? [], true)) {
+                $projects[] = $project;
+            }
+        }
+        $payload['projects'] = $projects;
+
+        return $payload;
+    }
+
+    public function bundledProjects(): array
+    {
+        $projects = [];
         $categories = [
             'website' => ['en' => 'Website', 'fa' => 'طراحی سایت'],
             'design' => ['en' => 'UI/UX Design', 'fa' => 'طراحی رابط و تجربهٔ کاربری'],
@@ -30,10 +44,6 @@ class PortfolioContent
 
         foreach (config('novin.projects', []) as $sourceSlug => $entry) {
             $slug = 'novin-'.$sourceSlug;
-            if (isset($existingSlugs[$slug])) {
-                continue;
-            }
-
             $directory = 'assets/img/novin-coders/'.$sourceSlug;
             $project = [
                 'slug' => $slug,
@@ -57,9 +67,8 @@ class PortfolioContent
             }
             $projects[] = $project;
         }
-        $payload['projects'] = $projects;
 
-        return $payload;
+        return $projects;
     }
 
     public function strings(string $locale, ?bool $preview = false): array
@@ -84,7 +93,7 @@ class PortfolioContent
                 'fullDescription' => $copy['fullDescription'] ?? '',
                 'category' => $copy['category'] ?? $project['category'] ?? '',
                 'technologies' => $project['technologies'] ?? [],
-                'image' => ltrim((string) ($project['image'] ?? ''), '/') ?: null,
+                'image' => $project['image'] ?? null,
                 'liveUrl' => $project['liveUrl'] ?? null,
                 'githubUrl' => $project['githubUrl'] ?? null,
                 'date' => $project['date'] ?? null,

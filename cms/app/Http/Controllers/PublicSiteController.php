@@ -132,7 +132,7 @@ class PublicSiteController extends Controller
             abort_unless($project, 404);
             $seo['title'] = $seo['title'] ?? $project['title'];
         } elseif ($view === 'ask') {
-            $seo['title'] = $strings['title.ask'] ?? ($locale === 'fa'
+            $seo['title'] ??= $strings['title.ask'] ?? ($locale === 'fa'
                 ? 'گفتگو — امیرحسین زمان‌زاده'
                 : 'Ask — Amirhossein Zamanzade');
         }
@@ -174,7 +174,7 @@ class PublicSiteController extends Controller
             'canonical' => $hreflang[$locale],
             'cvHref' => $cvHref,
             'assetV' => $assetV,
-            'navPaths' => array_combine($pages, array_map(fn (string $page) => $this->urlFor($locale, $page), $pages)),
+            'navPaths' => array_combine($pages, array_map(fn (string $page) => $this->urlFor($locale, $page).($preview ? '?preview=1' : ''), $pages)),
             'social' => array_merge([
                 'email' => 'itsamirzamani@gmail.com',
                 'linkedin' => 'https://linkedin.com/in/amirhossein-zamanzade',
@@ -183,6 +183,17 @@ class PublicSiteController extends Controller
                 'telegram_handle' => '@Amir_dev00',
             ], array_filter((array) ($payload['social'] ?? []), fn ($value) => is_string($value) && trim($value) !== '')),
             'profile' => $profile,
+            'homeBackgrounds' => array_map(function (int $slide) use ($payload) {
+                $paths = $payload['settings']['home_backgrounds'][$slide] ?? [];
+
+                return [
+                    'desktop' => $this->assetUrl($paths['desktop'] ?? '', sprintf('assets/img/amir/home/home-bg-%02d.webp', $slide)),
+                    'mobile' => $this->assetUrl($paths['mobile'] ?? '', sprintf('assets/img/amir/home/home-mobile-bg-%02d.webp', $slide)),
+                    'customMobile' => ! empty($paths['mobile']),
+                ];
+            }, range(1, 4)),
+            'aboutSkills' => array_replace(config('portfolio.about_skills'), $payload['settings']['about_skills'] ?? []),
+            'teamUrl' => $payload['settings']['team']['url'] ?? config('novin.url'),
             'profilePhoto' => $this->assetUrl($profile['photo'] ?? '', 'assets/img/amir/profile.webp'),
             'booking' => $booking,
             'bookingAdmin' => (bool) $request->user()?->isOwner(),

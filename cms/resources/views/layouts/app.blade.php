@@ -12,7 +12,7 @@
               return asset($path).(is_file($file) ? '?v='.filemtime($file) : '');
           };
       }
-      $azLogoSrc = $assetV('assets/img/amir/az-monogram-display.webp');
+      $azLogoSrc = $assetV(ltrim($profile['logo'] ?? 'assets/img/amir/az-monogram-display.webp', '/'));
     @endphp
     <meta charset="utf-8"/>
     <meta http-equiv="x-ua-compatible" content="ie=edge"/>
@@ -66,7 +66,7 @@
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-mobile-bg-01.webp') }}" type="image/webp" fetchpriority="high" media="(520px < width <= 767px)"/>
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp" fetchpriority="high" media="(width > 767px)"/>
     @endif
-    <link rel="preload" href="{{ $azLogoSrc }}" as="image" type="image/webp"/>
+    <link rel="preload" href="{{ $azLogoSrc }}" as="image"/>
     <!-- Favicons & App Icons (regenerated from az-monogram-blue.webp) -->
     <link rel="apple-touch-icon" sizes="57x57" href="{{ $assetV('assets/img/content/apple-icon-57x57.png') }}"/>
     <link rel="apple-touch-icon" sizes="60x60" href="{{ $assetV('assets/img/content/apple-icon-60x60.png') }}"/>

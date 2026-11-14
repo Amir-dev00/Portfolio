@@ -85,6 +85,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
         Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
         Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
+        Route::post('/projects/import', [ProjectController::class, 'import'])->name('projects.import');
         Route::post('/projects/reorder', [ProjectController::class, 'reorder'])->name('projects.reorder');
         Route::post('/projects/{project}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
         Route::post('/projects/{project}/restore', [ProjectController::class, 'restore'])->name('projects.restore');

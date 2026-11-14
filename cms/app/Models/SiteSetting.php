@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SiteSetting extends Model
 {
+    public const PROJECT_PREFIX = 'project-details.';
+
     public const EXPERIENCE_PREFIX = 'work-experience.';
 
     public const EXPERIENCE_TYPES = [

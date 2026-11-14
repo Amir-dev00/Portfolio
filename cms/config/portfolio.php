@@ -9,4 +9,10 @@ return [
 
     'locales' => ['en', 'fa'],
     'default_locale' => 'en',
+    'about_skills' => [
+        'frontend' => ['HTML', 'CSS', 'JavaScript', 'React', 'Bootstrap', 'Tailwind', 'Sass'],
+        'languages' => ['Python', 'Java', 'PHP', 'C', 'C#'],
+        'backend' => ['Node.js', 'Laravel', '.NET', 'MySQL', 'PostgreSQL', 'MongoDB'],
+        'other' => ['JavaFX', 'Scrum'],
+    ],
 ];

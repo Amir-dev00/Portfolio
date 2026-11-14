@@ -6,17 +6,29 @@ use App\Http\Controllers\Controller;
 use App\Models\MediaAsset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MediaController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = $request->query('q');
+        $type = $request->query('type');
+        $media = MediaAsset::query()->latest('id');
+        if (is_string($search) && trim($search) !== '') {
+            $media->where('original_name', 'like', '%'.trim($search).'%');
+        }
+        if ($type === 'images') {
+            $media->where('mime', 'like', 'image/%');
+        } elseif ($type === 'pdf') {
+            $media->where('mime', 'application/pdf');
+        }
+
         return view('admin.media.index', [
-            'media' => MediaAsset::query()->latest()->limit(100)->get(),
+            'media' => $media->paginate(30)->withQueryString(),
         ]);
     }
 
@@ -65,10 +77,12 @@ class MediaController extends Controller
         return back()->with('status', 'Media metadata updated.');
     }
 
-    public function raw(MediaAsset $media): StreamedResponse|Response
+    public function raw(MediaAsset $media): StreamedResponse|BinaryFileResponse
     {
         if (! Storage::disk($media->disk)->exists($media->path)) {
-            abort(404);
+            abort_unless($media->is_published && $media->public_path && is_file(public_path($media->public_path)), 404);
+
+            return response()->file(public_path($media->public_path), ['X-Content-Type-Options' => 'nosniff']);
         }
 
         return Storage::disk($media->disk)->response($media->path, $media->original_name, [

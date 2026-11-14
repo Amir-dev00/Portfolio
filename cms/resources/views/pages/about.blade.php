@@ -47,14 +47,14 @@
                 <li><strong data-i18n="about.meta.status.label">Status:</strong> <span data-i18n="about.meta.status.value">Available for freelance</span></li>
               </ul>
 
-              <a class="az-about-team" href="{{ config('novin.url') }}">
+              <a class="az-about-team" href="{{ $teamUrl ?? config('novin.url') }}">
                 <span class="az-about-team__mark" aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5m8-10 5 5-5 5m-3-12-2 14"/></svg>
                 </span>
                 <span class="az-about-team__copy">
                   <span data-i18n="about.team.label">{{ $locale === 'fa' ? 'تیم' : 'Team' }}</span>
-                  <strong data-i18n="about.team.name">{{ config('novin.'.$locale.'.name') }}</strong>
-                  <span data-i18n="about.team.role">{{ config('novin.'.$locale.'.role') }}</span>
+                  <strong data-i18n="about.team.name">{{ $strings['about.team.name'] ?? config('novin.'.$locale.'.name') }}</strong>
+                  <span data-i18n="about.team.role">{{ $strings['about.team.role'] ?? config('novin.'.$locale.'.role') }}</span>
                 </span>
                 <svg class="az-about-team__arrow" viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 12 4M5 4h7v7"/></svg>
               </a>
@@ -62,46 +62,17 @@
               <section class="az-about-skills" aria-labelledby="about-skills-heading">
                 <h2 class="az-about-skills__title" id="about-skills-heading" data-i18n="about.skills">{{ $strings['about.skills'] ?? 'Skills' }}</h2>
                 <div class="az-about-skills__grid">
-                  <article class="az-about-skills__card">
-                    <h3 class="az-about-skills__heading" data-i18n="about.skills.frontend">Front-end</h3>
-                    <ul class="az-about-skills__list">
-                      <li dir="ltr">HTML</li>
-                      <li dir="ltr">CSS</li>
-                      <li dir="ltr">JavaScript</li>
-                      <li dir="ltr">React</li>
-                      <li dir="ltr">Bootstrap</li>
-                      <li dir="ltr">Tailwind</li>
-                      <li dir="ltr">Sass</li>
-                    </ul>
-                  </article>
-                  <article class="az-about-skills__card">
-                    <h3 class="az-about-skills__heading" data-i18n="about.skills.languages">Programming Languages</h3>
-                    <ul class="az-about-skills__list">
-                      <li dir="ltr">Python</li>
-                      <li dir="ltr">Java</li>
-                      <li dir="ltr">PHP</li>
-                      <li dir="ltr">C</li>
-                      <li dir="ltr">C#</li>
-                    </ul>
-                  </article>
-                  <article class="az-about-skills__card">
-                    <h3 class="az-about-skills__heading" data-i18n="about.skills.backend">Back-end &amp; Database</h3>
-                    <ul class="az-about-skills__list">
-                      <li dir="ltr">Node.js</li>
-                      <li dir="ltr">Laravel</li>
-                      <li dir="ltr">.NET</li>
-                      <li dir="ltr">MySQL</li>
-                      <li dir="ltr">PostgreSQL</li>
-                      <li dir="ltr">MongoDB</li>
-                    </ul>
-                  </article>
-                  <article class="az-about-skills__card">
-                    <h3 class="az-about-skills__heading" data-i18n="about.skills.other">Other Skills</h3>
-                    <ul class="az-about-skills__list">
-                      <li dir="ltr">JavaFX</li>
-                      <li dir="ltr">Scrum</li>
-                    </ul>
-                  </article>
+                  @foreach($aboutSkills ?? config('portfolio.about_skills') as $key => $skills)
+                    @continue(!$skills)
+                    <article class="az-about-skills__card">
+                      <h3 class="az-about-skills__heading" data-i18n="about.skills.{{ $key }}">{{ $strings['about.skills.'.$key] ?? ucfirst($key) }}</h3>
+                      <ul class="az-about-skills__list">
+                        @foreach($skills as $skill)
+                          <li dir="auto">{{ $skill }}</li>
+                        @endforeach
+                      </ul>
+                    </article>
+                  @endforeach
                 </div>
               </section>
             </div>

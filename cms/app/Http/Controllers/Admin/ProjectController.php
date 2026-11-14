@@ -8,25 +8,55 @@ use App\Models\MediaAsset;
 use App\Models\Project;
 use App\Models\ProjectTechnology;
 use App\Models\ProjectTranslation;
+use App\Models\SeoEntry;
+use App\Models\SiteSetting;
+use App\Services\BundledProjectImporter;
+use App\Services\PortfolioContent;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ProjectController extends Controller
 {
-    public function index(): View
+    public function index(Request $request, PortfolioContent $content): View
     {
+        $search = $request->query('q');
+        $search = is_string($search) ? trim($search) : '';
+        $status = $request->query('status');
+        $projects = Project::query()->with('cover')->orderBy('sort_order')->orderBy('id');
+        if ($search !== '') {
+            $projects->where(fn ($query) => $query->where('title', 'like', '%'.$search.'%')->orWhere('slug', 'like', '%'.$search.'%'));
+        }
+        if ($status === 'active') {
+            $projects->active();
+        } elseif ($status === 'archived') {
+            $projects->whereNotNull('archived_at');
+        }
+
         return view('admin.projects.index', [
-            'projects' => Project::query()->with('translations')->orderBy('sort_order')->get(),
+            'projects' => $projects->get(),
+            'unmanaged' => array_diff(array_column($content->bundledProjects(), 'slug'), Project::query()->pluck('slug')->all(),
+                SiteSetting::query()->where('key', 'like', SiteSetting::PROJECT_PREFIX.'%')->get()->pluck('value.bundled_slug')->filter()->all()),
         ]);
+    }
+
+    public function import(BundledProjectImporter $importer): RedirectResponse
+    {
+        $importer->import();
+
+        return back()->with('status', 'Bundled projects are ready to edit. Publish when ready.');
     }
 
     public function create(): View
     {
         return view('admin.projects.edit', [
             'project' => new Project(['sort_order' => Project::query()->max('sort_order') + 1]),
-            'media' => MediaAsset::query()->latest()->limit(100)->get(),
+            'media' => $this->imageLibrary(),
+            'details' => [],
         ]);
     }
 
@@ -40,11 +70,12 @@ class ProjectController extends Controller
 
     public function edit(Project $project): View
     {
-        $project->load(['translations', 'technologies', 'cover']);
+        $project->load(['translations', 'technologies', 'cover', 'media']);
 
         return view('admin.projects.edit', [
             'project' => $project,
-            'media' => MediaAsset::query()->latest()->limit(100)->get(),
+            'media' => $this->imageLibrary(),
+            'details' => SiteSetting::query()->where('key', SiteSetting::PROJECT_PREFIX.$project->id)->first()?->value ?? [],
         ]);
     }
 
@@ -86,79 +117,152 @@ class ProjectController extends Controller
         return back()->with('status', 'Project restored (draft).');
     }
 
+    private function imageLibrary()
+    {
+        return MediaAsset::query()->where('mime', 'like', 'image/%')->orderBy('original_name')->get();
+    }
+
     protected function persist(Request $request, Project $project): void
     {
+        $title = $request->input('title');
+        if (! $request->filled('slug') && is_string($title)) {
+            $request->merge(['slug' => Str::slug($title)]);
+        }
         $data = $request->validate([
             'title' => ['required', 'string', 'max:190'],
-            'slug' => ['nullable', 'string', 'max:190'],
+            'slug' => ['required', 'alpha_dash:ascii', 'lowercase', 'max:190', Rule::unique('projects', 'slug')->ignore($project)],
             'category' => ['nullable', 'string', 'max:64'],
             'year' => ['nullable', 'string', 'max:16'],
-            'live_url' => ['nullable', 'url', 'max:255'],
-            'github_url' => ['nullable', 'url', 'max:255'],
+            'live_url' => ['nullable', 'url:http,https', 'max:255'],
+            'github_url' => ['nullable', 'url:http,https', 'max:255'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'is_featured' => ['nullable', 'boolean'],
-            'cover_media_id' => ['nullable', 'exists:media_assets,id'],
-            'technologies' => ['nullable', 'string'],
-            'en_short' => ['nullable', 'string'],
-            'en_full' => ['nullable', 'string'],
-            'en_role' => ['nullable', 'string'],
-            'fa_short' => ['nullable', 'string'],
-            'fa_full' => ['nullable', 'string'],
-            'fa_role' => ['nullable', 'string'],
-            'fa_category' => ['nullable', 'string'],
+            'cover_media_id' => ['nullable', Rule::exists('media_assets', 'id')->where(fn ($query) => $query->where('mime', 'like', 'image/%'))],
+            'gallery_media' => ['nullable', 'array', 'max:40'],
+            'gallery_media.*' => ['integer', 'distinct', Rule::exists('media_assets', 'id')->where(fn ($query) => $query->where('mime', 'like', 'image/%'))],
+            'gallery' => ['nullable', 'string', 'max:12000'],
+            'source' => ['nullable', 'url:http,https', 'max:255'],
+            'cover' => ['nullable', 'string', 'max:255'],
+            'details' => ['nullable', 'array:en,fa'],
+            'details.*' => ['array:title,overview,features,approach'],
+            'details.*.title' => ['nullable', 'string', 'max:190'],
+            'details.*.overview' => ['nullable', 'string', 'max:5000'],
+            'details.*.features' => ['nullable', 'string', 'max:5000'],
+            'details.*.approach' => ['nullable', 'string', 'max:5000'],
+            'technologies' => ['nullable', 'string', 'max:3000'],
+            'en_full' => ['nullable', 'string', 'max:20000'],
+            'fa_full' => ['nullable', 'string', 'max:20000'],
+            'en_short' => ['nullable', 'string', 'max:255'],
+            'en_role' => ['nullable', 'string', 'max:255'],
+            'fa_short' => ['nullable', 'string', 'max:255'],
+            'fa_role' => ['nullable', 'string', 'max:255'],
+            'fa_category' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $before = $project->exists ? $project->toArray() : null;
-        $slug = $data['slug'] ?: Str::slug($data['title']);
-        $project->fill([
-            'title' => $data['title'],
-            'slug' => $slug,
-            'category' => $data['category'] ?? null,
-            'year' => $data['year'] ?? null,
-            'live_url' => $data['live_url'] ?? null,
-            'github_url' => $data['github_url'] ?? null,
-            'sort_order' => $data['sort_order'] ?? 0,
-            'is_featured' => $request->boolean('is_featured'),
-            'cover_media_id' => $data['cover_media_id'] ?? null,
-            'is_dirty' => true,
-        ])->save();
-
-        ProjectTranslation::query()->updateOrCreate(
-            ['project_id' => $project->id, 'locale' => 'en'],
-            [
-                'short_description' => $data['en_short'] ?? null,
-                'full_description' => $data['en_full'] ?? null,
-                'role' => $data['en_role'] ?? null,
-                'category_label' => $data['category'] ?? null,
-            ]
-        );
-        ProjectTranslation::query()->updateOrCreate(
-            ['project_id' => $project->id, 'locale' => 'fa'],
-            [
-                'short_description' => $data['fa_short'] ?? null,
-                'full_description' => $data['fa_full'] ?? null,
-                'role' => $data['fa_role'] ?? null,
-                'category_label' => $data['fa_category'] ?? null,
-            ]
-        );
-
-        $project->technologies()->delete();
-        $techs = array_values(array_filter(array_map('trim', explode(',', (string) ($data['technologies'] ?? '')))));
-        foreach ($techs as $i => $name) {
-            ProjectTechnology::query()->create([
-                'project_id' => $project->id,
-                'name' => $name,
-                'sort_order' => $i,
-            ]);
+        $techs = array_values(array_unique(array_filter(array_map('trim', explode(',', $data['technologies'] ?? '')))));
+        foreach ($techs as $tech) {
+            if (mb_strlen($tech) > 255) {
+                throw ValidationException::withMessages(['technologies' => 'Each technology must be at most 255 characters.']);
+            }
         }
 
-        ContentRevision::query()->create([
-            'entity_type' => 'project',
-            'entity_id' => $project->id,
-            'action' => $before ? 'update' : 'create',
-            'before' => $before,
-            'after' => $project->fresh()->toArray(),
-            'user_id' => $request->user()->id,
-        ]);
+        foreach (array_filter(array_merge([$data['cover'] ?? null], $this->lines($data['gallery'] ?? null))) as $path) {
+            if (! preg_match('~^/?(?:assets/|media/published/)[a-zA-Z0-9_./-]+$~D', $path) || str_contains($path, '..')) {
+                throw ValidationException::withMessages(['gallery' => 'Use a local asset or published-media path for each image.']);
+            }
+        }
+
+        DB::transaction(function () use ($data, $request, $project, $techs) {
+            $before = $project->exists ? $project->toArray() : null;
+            $previousSlug = $project->slug;
+            $project->fill([
+                'title' => $data['title'],
+                'slug' => $data['slug'],
+                'category' => $data['category'] ?? null,
+                'year' => $data['year'] ?? null,
+                'live_url' => $data['live_url'] ?? null,
+                'github_url' => $data['github_url'] ?? null,
+                'sort_order' => $data['sort_order'] ?? 0,
+                'is_featured' => $request->boolean('is_featured'),
+                'cover_media_id' => $data['cover_media_id'] ?? null,
+                'is_dirty' => true,
+            ])->save();
+
+            if ($previousSlug && $previousSlug !== $project->slug) {
+                foreach (SeoEntry::query()->where('scope', 'project')->where('scope_key', $previousSlug)->get() as $seo) {
+                    SeoEntry::query()->firstOrCreate(
+                        ['scope' => 'project', 'scope_key' => $project->slug, 'locale' => $seo->locale],
+                        $seo->only(['title', 'description', 'og_image', 'robots']) + ['is_dirty' => true],
+                    );
+                }
+            }
+
+            ProjectTranslation::query()->updateOrCreate(
+                ['project_id' => $project->id, 'locale' => 'en'],
+                [
+                    'short_description' => $data['en_short'] ?? null,
+                    'full_description' => $data['en_full'] ?? null,
+                    'role' => $data['en_role'] ?? null,
+                    'category_label' => $data['category'] ?? null,
+                ]
+            );
+            ProjectTranslation::query()->updateOrCreate(
+                ['project_id' => $project->id, 'locale' => 'fa'],
+                [
+                    'short_description' => $data['fa_short'] ?? null,
+                    'full_description' => $data['fa_full'] ?? null,
+                    'role' => $data['fa_role'] ?? null,
+                    'category_label' => $data['fa_category'] ?? null,
+                ]
+            );
+
+            $project->technologies()->delete();
+            foreach ($techs as $i => $name) {
+                ProjectTechnology::query()->create([
+                    'project_id' => $project->id,
+                    'name' => $name,
+                    'sort_order' => $i,
+                ]);
+            }
+
+            if ($request->has('gallery_media_present')) {
+                $project->media()->where('role', 'gallery')->delete();
+                foreach ($data['gallery_media'] ?? [] as $index => $id) {
+                    $project->media()->create(['media_asset_id' => $id, 'role' => 'gallery', 'sort_order' => $index]);
+                }
+            }
+
+            $setting = SiteSetting::query()->firstOrNew(['key' => SiteSetting::PROJECT_PREFIX.$project->id]);
+            $details = $setting->value ?? [];
+            foreach (['source', 'cover', 'gallery'] as $field) {
+                if (array_key_exists($field, $data)) {
+                    $details[$field] = $field === 'gallery' ? $this->lines($data[$field]) : $data[$field];
+                }
+            }
+            foreach ($data['details'] ?? [] as $locale => $copy) {
+                $details[$locale] = [
+                    'title' => $locale === 'fa' ? ($copy['title'] ?? null) : null,
+                    'overview' => $copy['overview'] ?? null,
+                    'features' => $this->lines($copy['features'] ?? null),
+                    'approach' => $copy['approach'] ?? null,
+                ];
+            }
+            $setting->value = $details;
+            $setting->save();
+
+            ContentRevision::query()->create([
+                'entity_type' => 'project',
+                'entity_id' => $project->id,
+                'action' => $before ? 'update' : 'create',
+                'before' => $before,
+                'after' => $project->fresh()->toArray() + ['details' => $details],
+                'user_id' => $request->user()->id,
+            ]);
+        });
+    }
+
+    private function lines(?string $text): array
+    {
+        return array_values(array_filter(array_map('trim', preg_split('/\R/', $text ?? ''))));
     }
 }

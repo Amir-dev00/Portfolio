@@ -2,12 +2,31 @@
 @section('title','Projects')
 @section('heading','Projects')
 @section('content')
-<p><a class="btn" href="{{ route('admin.projects.create') }}">Add project</a></p>
-<div class="card">
+<div class="admin-pills">
+  <a class="btn" href="{{ route('admin.projects.create') }}">Add project</a>
+  @if(count($unmanaged))
+    <form method="post" action="{{ route('admin.projects.import') }}">
+      @csrf
+      <button type="submit" class="btn-secondary">Import {{ count($unmanaged) }} existing portfolio projects</button>
+    </form>
+  @endif
+</div>
+<form method="get" class="card">
+  <div class="row">
+    <label>Find a project<input type="search" name="q" value="{{ is_string(request('q')) ? request('q') : '' }}" placeholder="Title or slug"></label>
+    <label>Status<select name="status">
+      <option value="">All</option>
+      <option value="active" @selected(request('status') === 'active')>Active</option>
+      <option value="archived" @selected(request('status') === 'archived')>Archived</option>
+    </select></label>
+  </div>
+  <div class="admin-pills"><button class="btn-secondary">Filter</button><a href="{{ route('admin.projects.index') }}">Clear</a></div>
+</form>
+<div class="card admin-table">
 <table>
   <thead><tr><th>Order</th><th>Title</th><th>Slug</th><th>Status</th><th></th></tr></thead>
   <tbody>
-  @foreach ($projects as $project)
+  @forelse ($projects as $project)
     <tr>
       <td>{{ $project->sort_order }}</td>
       <td>{{ $project->title }} @if($project->is_dirty)<span class="badge warn">dirty</span>@endif</td>
@@ -22,17 +41,10 @@
         @endif
       </td>
     </tr>
-  @endforeach
+  @empty
+    <tr><td colspan="5">No projects match this filter.</td></tr>
+  @endforelse
   </tbody>
 </table>
 </div>
-<form method="post" action="{{ route('admin.projects.reorder') }}" class="card">
-  @csrf
-  <h3>Reorder (IDs top to bottom)</h3>
-  @foreach ($projects->whereNull('archived_at') as $project)
-    <input type="hidden" name="order[]" value="{{ $project->id }}">
-  @endforeach
-  <p class="badge">Drag-reorder UI omitted for cPanel simplicity — edit sort_order on each project, or use the hidden order list above after manually rearranging IDs in a future update.</p>
-  <button type="submit" class="btn-secondary">Keep current order marker</button>
-</form>
 @endsection

@@ -2,65 +2,107 @@
 @section('title','Site content')
 @section('heading','Site content')
 @section('content')
+<nav class="admin-pills" aria-label="Content sections">
+  <a class="btn btn-secondary" href="{{ route('admin.content.edit') }}" @if(!$group) aria-current="page" @endif>Site settings</a>
+  @foreach($groups as $name => $rows)
+    <a class="btn btn-secondary" href="{{ route('admin.content.edit', ['group' => $name]) }}" @if($group === $name) aria-current="page" @endif>{{ $name }} <span class="badge">{{ count($rows) }}</span></a>
+  @endforeach
+</nav>
+
+@if($group)
 <form method="post" action="{{ route('admin.content.update') }}">
   @csrf
   <div class="card">
-    <h3>Profile & social</h3>
-    <div class="row">
-      <div><label>Profile name</label><input name="profile[name]" value="{{ $profile['name'] ?? '' }}"></div>
-      <div><label>Profile photo path</label><input name="profile[photo]" value="{{ $profile['photo'] ?? '' }}"></div>
-      <div><label>Email</label><input name="social[email]" value="{{ $social['email'] ?? '' }}"></div>
-      <div><label>LinkedIn</label><input name="social[linkedin]" value="{{ $social['linkedin'] ?? '' }}"></div>
-      <div><label>GitHub</label><input name="social[github]" value="{{ $social['github'] ?? '' }}"></div>
-      <div><label>Telegram</label><input name="social[telegram]" value="{{ $social['telegram'] ?? '' }}"></div>
-      <div><label>Featured project slugs (comma-separated)</label><input name="featured_slugs" value="{{ implode(',', $featured ?? []) }}"></div>
-    </div>
+    <h3>{{ $group }} · English and Persian</h3>
+    <label for="content-search">Find a field by its key or current text</label>
+    <input id="content-search" type="search" data-admin-filter placeholder="e.g. title, booking, تماس">
+    <p class="admin-hint">Clear a field to use its default text. Keep placeholders like <code>{name}</code> in translations.</p>
   </div>
-
-  <div class="card" id="booking">
-    <h3>Booking (Book a Call)</h3>
-    <p style="color:var(--muted);font-size:13px;margin:0 0 12px">
-      Scheduling is <strong>self-hosted</strong> on this site (no Cal.com / Calendly).
-      Manage weekly hours, blocked dates, and appointments in
-      <a href="{{ route('admin.bookings.settings') }}">Admin → Bookings</a>.
-      Button labels and modal copy are edited in the <a href="#content-booking">Booking</a> text group below.
-      Toggle the public button here, then <strong>Publish live</strong> for text changes.
-    </p>
-    <div class="row">
-      <div>
-        <label>Book a Call button</label>
-        <input type="hidden" name="booking[enabled]" value="0">
-        <label style="display:flex;gap:8px;align-items:center;color:var(--text);font-size:14px;margin-top:8px">
-          <input type="checkbox" name="booking[enabled]" value="1" style="width:auto" @checked(old('booking.enabled', $booking['enabled'] ?? true))>
-          Show “Book a Call” as the primary contact button (off = show “Email me” instead)
-        </label>
+  @foreach($groups[$group] as $i => $entry)
+    <div class="card" data-admin-filter-row>
+      <h3>{{ $entry['key'] }}</h3>
+      <input type="hidden" name="texts[{{ $i }}][key]" value="{{ $entry['key'] }}">
+      <div class="row">
+        <label>English<textarea name="texts[{{ $i }}][en]" placeholder="{{ $entry['default_en'] }}">{{ old("texts.$i.en", $entry['en']) }}</textarea></label>
+        <label>فارسی<textarea name="texts[{{ $i }}][fa]" placeholder="{{ $entry['default_fa'] }}" dir="rtl">{{ old("texts.$i.fa", $entry['fa']) }}</textarea></label>
       </div>
-      <div>
-        <label>Duration shown in UI (minutes)</label>
-        <input name="booking[duration]" type="number" min="5" max="480" step="5" value="{{ old('booking.duration', $booking['duration'] ?? 30) }}">
-        <p style="color:var(--muted);font-size:12px;margin:6px 0 0">Also editable under Bookings → settings (source of truth for slots).</p>
-      </div>
-    </div>
-  </div>
-
-  @foreach ($grouped as $group => $entries)
-    <div class="card" id="content-{{ \Illuminate\Support\Str::slug($group) }}">
-      <h3>{{ $group }}</h3>
-      @foreach ($entries as $entry)
-        <div class="row" style="margin-bottom:10px">
-          <div>
-            <label>{{ $entry->key }} (EN) @if(!filled($entry->value_en))<span class="badge warn">missing</span>@endif</label>
-            <textarea name="entries[{{ $entry->id }}][en]" class="{{ !filled($entry->value_en) ? 'missing' : '' }}">{{ $entry->value_en }}</textarea>
-          </div>
-          <div>
-            <label>{{ $entry->key }} (FA) @if(!filled($entry->value_fa))<span class="badge warn">missing</span>@endif</label>
-            <textarea name="entries[{{ $entry->id }}][fa]" dir="rtl" class="{{ !filled($entry->value_fa) ? 'missing' : '' }}">{{ $entry->value_fa }}</textarea>
-          </div>
-        </div>
-      @endforeach
     </div>
   @endforeach
-
-  <button type="submit">Save draft</button>
+  <div class="admin-save"><button type="submit">Save draft</button></div>
 </form>
+<script>
+  document.querySelector('[data-admin-filter]').addEventListener('input', function (event) {
+    const query = event.target.value.trim().toLocaleLowerCase();
+    document.querySelectorAll('[data-admin-filter-row]').forEach(function (row) {
+      const fields = Array.from(row.querySelectorAll('textarea'), field => field.value);
+      row.hidden = ![row.querySelector('h3').textContent, ...fields].some(value => value.toLocaleLowerCase().includes(query));
+    });
+  });
+</script>
+@else
+<form method="post" action="{{ route('admin.content.update') }}">
+  @csrf
+  <datalist id="published-images">
+    @foreach($imagePaths as $image)
+      <option value="{{ $image->public_path }}">{{ $image->original_name }}</option>
+    @endforeach
+  </datalist>
+  <section class="card">
+    <h3>Profile, team &amp; contact</h3>
+    <p class="admin-hint">Edit your name and bio in Home and About. Choose a published image or enter its local path. Upload and publish new images in <a href="{{ route('admin.media.index') }}">Media</a>.</p>
+    <div class="row">
+      <label>Profile photo path<input list="published-images" name="profile[photo]" value="{{ old('profile.photo', $settings['profile']['photo'] ?? '') }}" placeholder="assets/img/amir/profile.webp"></label>
+      <label>Site logo path<input list="published-images" name="profile[logo]" value="{{ old('profile.logo', $settings['profile']['logo'] ?? '') }}" placeholder="assets/img/amir/az-monogram-display.webp"></label>
+      <label>Team website<input name="team[url]" type="url" value="{{ old('team.url', $settings['team']['url'] ?? config('novin.url')) }}"></label>
+      @foreach(['email' => 'Email', 'linkedin' => 'LinkedIn', 'github' => 'GitHub', 'telegram' => 'Telegram', 'telegram_handle' => 'Telegram handle'] as $key => $label)
+        <label>{{ $label }}<input name="social[{{ $key }}]" value="{{ old('social.'.$key, $settings['social'][$key] ?? '') }}"></label>
+      @endforeach
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Homepage backgrounds</h3>
+    <p class="admin-hint">Set a desktop and mobile image for each slide. Empty fields use the bundled images.</p>
+    <div class="row">
+      @for($slide = 1; $slide <= 4; $slide++)
+        @foreach(['desktop' => 'Desktop', 'mobile' => 'Mobile'] as $device => $label)
+          <label>Slide {{ $slide }} · {{ $label }}<input list="published-images" name="home_backgrounds[{{ $slide }}][{{ $device }}]" value="{{ old("home_backgrounds.$slide.$device", $settings['home_backgrounds'][$slide][$device] ?? '') }}" placeholder="{{ sprintf('assets/img/amir/home/home-%sbg-%02d.webp', $device === 'mobile' ? 'mobile-' : '', $slide) }}"></label>
+        @endforeach
+      @endfor
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>About skills</h3>
+    <div class="row">
+      @foreach(config('portfolio.about_skills') as $key => $default)
+        <label>{{ ucfirst($key) }} <span class="admin-hint">· comma-separated</span><input name="about_skills[{{ $key }}]" value="{{ old('about_skills.'.$key, implode(', ', $settings['about_skills'][$key] ?? $default)) }}"></label>
+      @endforeach
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Miro’s knowledge</h3>
+    <p class="admin-hint">Add public facts about yourself that Miro can use in answers. These fields become part of the published content.</p>
+    <div class="row">
+      <label>English<textarea name="assistant_knowledge[en]" maxlength="450">{{ old('assistant_knowledge.en', $settings['assistant_knowledge']['en'] ?? '') }}</textarea></label>
+      <label>فارسی<textarea name="assistant_knowledge[fa]" maxlength="450" dir="rtl">{{ old('assistant_knowledge.fa', $settings['assistant_knowledge']['fa'] ?? '') }}</textarea></label>
+      <label>Projects Miro should mention first
+        <small id="featured-help" class="admin-hint">Select up to 30 projects. On desktop, hold Ctrl or Command to select more than one.</small>
+        <input type="hidden" name="featured_slugs_present" value="1">
+        <select name="featured_slugs[]" multiple size="6" aria-describedby="featured-help">
+          @foreach($projects as $project)
+            <option value="{{ $project['slug'] }}" @selected(in_array($project['slug'], old('featured_slugs', $settings['featured_slugs'] ?? []), true))>{{ $project['title'] }}</option>
+          @endforeach
+        </select>
+      </label>
+    </div>
+  </section>
+  <section class="card">
+    <h3>Booking settings</h3>
+    <p class="admin-hint"><a href="{{ route('admin.bookings.settings') }}">Manage availability, booking visibility and SMS notifications</a>. <a href="{{ route('admin.content.edit', ['group' => 'Booking']) }}">Edit booking copy</a>.</p>
+  </section>
+  <div class="admin-save"><button type="submit">Save draft</button></div>
+</form>
+@endif
 @endsection

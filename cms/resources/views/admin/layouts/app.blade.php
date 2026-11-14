@@ -7,7 +7,7 @@
   <title>@yield('title', 'Admin') — AZ Portfolio</title>
   <link rel="stylesheet" href="{{ asset('css/typography.css') }}">
   <style>
-    :root { --bg:#0f1115; --panel:#171a21; --line:#2a3140; --text:#eef2f7; --muted:#9aa6b2; --accent:#d7b57a; --danger:#c45c5c; --ok:#3d9a6a; }
+    :root { --bg:#0f1115; --panel:#171a21; --line:#2a3140; --text:#eef2f7; --muted:#9aa6b2; --accent:#91dcf6; --danger:#c45c5c; --ok:#3d9a6a; }
     * { box-sizing: border-box; }
     body { margin:0; font-family: var(--font-en); background:var(--bg); color:var(--text); }
     textarea[dir="rtl"], input[dir="rtl"] { font-family: var(--font-fa); }
@@ -17,9 +17,10 @@
     aside h1 { font-size:15px; margin:0 0 18px; letter-spacing:.04em; }
     aside nav a { display:block; padding:9px 10px; border-radius:8px; color:var(--muted); margin-bottom:4px; }
     aside nav a:hover, aside nav a.active { background:#1d2330; color:var(--text); }
-    main { padding:24px; }
+    main { min-width:0; padding:clamp(14px,3vw,32px); }
+    main > * { max-width:1200px; }
     .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:16px; }
-    .row { display:grid; gap:12px; grid-template-columns:1fr 1fr; }
+    .row { display:grid; gap:12px; grid-template-columns:repeat(2,minmax(0,1fr)); }
     label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
     input, textarea, select { width:100%; background:#0e1218; border:1px solid var(--line); color:var(--text); border-radius:8px; padding:9px 10px; }
     textarea { min-height:88px; }
@@ -34,7 +35,30 @@
     .badge.warn { background:#3a2d14; color:#e6c78b; }
     .missing { outline:1px solid #8a5a2b; }
     .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
-    @media (max-width:900px){ .shell{grid-template-columns:1fr;} aside{border-right:0;border-bottom:1px solid var(--line);} .row{grid-template-columns:1fr;} }
+    :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    input[type="checkbox"], input[type="radio"] { width:auto; }
+    .admin-pills { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:14px; }
+    .card .admin-pills { margin:12px 0 0; }
+    .admin-pills [aria-current="page"] { border-color:var(--accent); color:var(--accent); }
+    .admin-hint { color:var(--muted); font-size:13px; line-height:1.55; }
+    .admin-table { overflow:auto; }
+    .admin-save { position:sticky; bottom:0; padding:12px 0; background:var(--bg); z-index:2; }
+    .admin-thumbs { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+    .admin-thumbs img { display:block; width:72px; height:48px; object-fit:cover; border-radius:6px; }
+    .admin-shortcuts { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr)); gap:10px; margin-bottom:16px; }
+    .admin-shortcuts a { display:grid; gap:4px; margin:0; }
+    .admin-shortcuts a:hover { border-color:var(--accent); }
+    .admin-shortcuts span { color:var(--muted); font-size:13px; }
+    @media (max-width:900px) {
+      .shell { grid-template-columns:minmax(0,1fr); }
+      aside { border-right:0; border-bottom:1px solid var(--line); }
+      aside nav { display:flex; flex-wrap:wrap; gap:4px; }
+      aside nav a { margin:0; }
+    }
+    @media (max-width:600px) {
+      .row { grid-template-columns:minmax(0,1fr); }
+      .topbar { flex-wrap:wrap; }
+    }
   </style>
 </head>
 <body>
@@ -69,10 +93,10 @@
       </form>
     </div>
     @if (session('status'))
-      <div class="flash">{{ session('status') }}</div>
+      <div class="flash" role="status">{{ session('status') }}</div>
     @endif
     @if ($errors->any())
-      <div class="flash flash-error">
+      <div class="flash flash-error" role="alert">
         <ul>@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
       </div>
     @endif

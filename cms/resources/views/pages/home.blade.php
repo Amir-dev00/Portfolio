@@ -4,21 +4,19 @@
           <section id="selected-work" class="section section-fullheight section-projects section-projects-slider bg-dark-1 overflow" data-arts-theme-text="light">
             <div class="section-fullheight__inner section-fullheight__inner_mobile text-center">
               <div class="az-home-photo" aria-hidden="true" data-az-home-mobile-bg>
-                @for ($slide = 1; $slide <= 4; $slide++)
-                  @php
-                    $desktop = asset(sprintf('assets/img/amir/home/home-bg-%02d.webp', $slide));
-                    $mobile = asset(sprintf('assets/img/amir/home/home-mobile-bg-%02d.webp', $slide));
-                  @endphp
-                  @if ($slide === 1)
+                @foreach ($homeBackgrounds as $background)
+                  @if ($loop->first)
                     <picture class="az-home-mobile-bg__slide is-active">
-                      <source media="(max-width: 520px)" srcset="{{ $assetV('assets/img/amir/home/home-mobile-bg-01-640.webp') }}"/>
-                      <source media="(max-width: 767px)" srcset="{{ $mobile }}"/>
-                      <img src="{{ $desktop }}" alt="" fetchpriority="high" decoding="async"/>
+                      @unless($background['customMobile'])
+                        <source media="(max-width: 520px)" srcset="{{ $assetV('assets/img/amir/home/home-mobile-bg-01-640.webp') }}"/>
+                      @endunless
+                      <source media="(max-width: 767px)" srcset="{{ $background['mobile'] }}"/>
+                      <img src="{{ $background['desktop'] }}" alt="" fetchpriority="high" decoding="async"/>
                     </picture>
                   @else
-                    <span class="az-home-mobile-bg__slide" data-mobile="{{ $mobile }}" data-desktop="{{ $desktop }}"></span>
+                    <span class="az-home-mobile-bg__slide" data-mobile="{{ $background['mobile'] }}" data-desktop="{{ $background['desktop'] }}"></span>
                   @endif
-                @endfor
+                @endforeach
               </div>
               @include('components.site.profile')
               @include('components.site.assistant')
@@ -37,22 +35,22 @@
                   <div class="swiper-wrapper">
                     <div class="swiper-slide overflow">
                       <div class="slider__images-slide-inner js-transition-img overflow" data-swiper-parallax="90%">
-                        <div class="slider__bg lazy-bg js-transition-img__transformed-el az-home-bg az-home-bg--01" data-texture-src="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" style="--az-home-bg-pos: 50% 42%;"></div>
+                        <div class="slider__bg lazy-bg js-transition-img__transformed-el az-home-bg az-home-bg--01" data-texture-src="{{ $homeBackgrounds[0]['desktop'] }}" style="--az-home-bg-pos: 50% 42%;"></div>
                       </div>
                     </div>
                     <div class="swiper-slide overflow">
                       <div class="slider__images-slide-inner js-transition-img overflow" data-swiper-parallax="90%">
-                        <div class="slider__bg lazy-bg js-transition-img__transformed-el az-home-bg az-home-bg--02" data-texture-src="{{ asset('assets/img/amir/home/home-bg-02.webp') }}" data-az-defer-texture="1" style="--az-home-bg-pos: 50% 40%;"></div>
+                        <div class="slider__bg lazy-bg js-transition-img__transformed-el az-home-bg az-home-bg--02" data-texture-src="{{ $homeBackgrounds[1]['desktop'] }}" data-az-defer-texture="1" style="--az-home-bg-pos: 50% 40%;"></div>
                       </div>
                     </div>
                     <div class="swiper-slide overflow">
                       <div class="slider__images-slide-inner js-transition-img overflow" data-swiper-parallax="90%">
-                        <div class="slider__bg lazy-bg js-transition-img__transformed-el az-home-bg az-home-bg--03" data-texture-src="{{ asset('assets/img/amir/home/home-bg-03.webp') }}" data-az-defer-texture="1" style="--az-home-bg-pos: 50% 38%;"></div>
+                        <div class="slider__bg lazy-bg js-transition-img__transformed-el az-home-bg az-home-bg--03" data-texture-src="{{ $homeBackgrounds[2]['desktop'] }}" data-az-defer-texture="1" style="--az-home-bg-pos: 50% 38%;"></div>
                       </div>
                     </div>
                     <div class="swiper-slide overflow">
                       <div class="slider__images-slide-inner js-transition-img overflow" data-swiper-parallax="90%">
-                        <div class="slider__bg lazy-bg js-transition-img__transformed-el az-home-bg az-home-bg--04" data-texture-src="{{ asset('assets/img/amir/home/home-bg-04.webp') }}" data-az-defer-texture="1" style="--az-home-bg-pos: 50% 44%;"></div>
+                        <div class="slider__bg lazy-bg js-transition-img__transformed-el az-home-bg az-home-bg--04" data-texture-src="{{ $homeBackgrounds[3]['desktop'] }}" data-az-defer-texture="1" style="--az-home-bg-pos: 50% 44%;"></div>
                       </div>
                     </div>
                   </div>

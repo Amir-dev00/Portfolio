@@ -130,11 +130,17 @@ class PortfolioAssistantContext
             }
         }
 
-        $skills = $this->skillsFromStrings($strings, $locale);
+        $skills = isset($payload['settings']['about_skills'])
+            ? array_merge(...array_values($payload['settings']['about_skills']))
+            : $this->skillsFromStrings($strings, $locale);
 
         $lines = [];
         $lines[] = 'Subject: '.$name.' — '.$role;
-        $lines[] = 'Team: '.config('novin.'.$locale.'.name').' — '.config('novin.'.$locale.'.role');
+        $lines[] = 'Team: '.($strings['about.team.name'] ?? config('novin.'.$locale.'.name')).' — '.($strings['about.team.role'] ?? config('novin.'.$locale.'.role'));
+        $knowledge = trim((string) ($payload['settings']['assistant_knowledge'][$locale] ?? ''));
+        if ($knowledge !== '') {
+            $lines[] = 'Additional public facts: '.$this->clip($knowledge, 450);
+        }
         if ($about !== '') {
             $lines[] = 'Bio: '.$this->clip($about, 280);
         }
@@ -187,7 +193,11 @@ class PortfolioAssistantContext
 
         $lines = [];
         $lines[] = 'Subject: '.$name.' — '.$role;
-        $lines[] = 'Team: '.config('novin.'.$locale.'.name').' — '.config('novin.'.$locale.'.role');
+        $lines[] = 'Team: '.($strings['about.team.name'] ?? config('novin.'.$locale.'.name')).' — '.($strings['about.team.role'] ?? config('novin.'.$locale.'.role'));
+        $knowledge = trim((string) ($payload['settings']['assistant_knowledge'][$locale] ?? ''));
+        if ($knowledge !== '') {
+            $lines[] = 'Additional public facts: '.$this->clip($knowledge, 450);
+        }
         $lines[] = 'Portfolio site: public personal site for this engineer (EN/FA).';
         if ($about !== '') {
             $lines[] = 'Bio: '.$this->clip($about, 900);
@@ -203,7 +213,9 @@ class PortfolioAssistantContext
             $lines[] = 'Facts: '.$this->clip(implode(' | ', $facts), 500);
         }
 
-        $skills = $this->skillsFromStrings($strings, $locale);
+        $skills = isset($payload['settings']['about_skills'])
+            ? array_merge(...array_values($payload['settings']['about_skills']))
+            : $this->skillsFromStrings($strings, $locale);
         $lines[] = 'Skills: '.$this->clip(implode(', ', $skills), 500);
         $lines[] = 'Projects:';
 
