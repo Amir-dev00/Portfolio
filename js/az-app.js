@@ -737,8 +737,55 @@
     updateWorkSpotlight(false);
   }
 
+  function bindProjectPhotos(root, photos) {
+    var viewer = root.querySelector(".az-project-viewer");
+    if (!viewer || typeof viewer.showModal !== "function") return;
+
+    var image = viewer.querySelector("img");
+    var count = viewer.querySelector("[data-photo-count]");
+    var error = viewer.querySelector("[data-photo-error]");
+    var previous = viewer.querySelector("[data-photo-step='-1']");
+    var next = viewer.querySelector("[data-photo-step='1']");
+    var close = viewer.querySelector("[data-photo-close]");
+    var active = 0;
+
+    function showPhoto(index) {
+      active = (index + photos.length) % photos.length;
+      image.alt = photos[active].alt;
+      error.hidden = true;
+      image.hidden = false;
+      image.src = photos[active].url;
+      count.textContent = tt("project.gallery.count", { n: active + 1, total: photos.length });
+    }
+
+    image.addEventListener("error", function () {
+      image.hidden = true;
+      error.hidden = false;
+    });
+
+    root.querySelectorAll("[data-project-photo]").forEach(function (trigger) {
+      trigger.addEventListener("click", function (event) {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        showPhoto(Number(trigger.dataset.projectPhoto));
+        viewer.showModal();
+      });
+    });
+
+    close.addEventListener("click", function () { viewer.close(); });
+    previous.addEventListener("click", function () { showPhoto(active - 1); });
+    next.addEventListener("click", function () { showPhoto(active + 1); });
+    viewer.addEventListener("keydown", function (event) {
+      if (photos.length < 2 || (event.key !== "ArrowLeft" && event.key !== "ArrowRight")) return;
+      event.preventDefault();
+      showPhoto(active + (event.key === "ArrowLeft" ? -1 : 1));
+    });
+  }
+
   function renderProject(slug) {
     if (!projectRoot) return false;
+    var openViewer = projectRoot.querySelector(".az-project-viewer[open]");
+    if (openViewer) openViewer.close();
     var raw = serverRouted ? activeRouteData.projects[0] : window.AZ_getProjectBySlug && window.AZ_getProjectBySlug(slug);
     var project = localizeProject(raw);
     if (!project) {
@@ -779,12 +826,26 @@
           '" target="_blank" rel="noopener">' + escapeHtml(tt("project.source")) + "</a>"
         : "") +
       "</div>";
-    var gallery = (project.gallery || []).map(function (url, index) {
+    var galleryPhotos = (project.gallery || []).filter(function (url) { return url !== project.image; });
+    var photos = project.image ? [{ url: project.image, alt: project.title }] : [];
+    var gallery = galleryPhotos.map(function (url, index) {
+      var alt = tt("project.gallery.image", { title: project.title, n: index + 1 });
+      var position = photos.push({ url: url, alt: alt }) - 1;
       var path = escapeHtml(url);
-      var alt = escapeHtml(tt("project.gallery.image", { title: project.title, n: index + 1 }));
-      return '<li><a href="' + path + '" target="_blank" rel="noopener">' +
-        '<img src="' + path + '" alt="' + alt + '" loading="lazy" decoding="async"/></a></li>';
+      return '<li><a href="' + path + '" data-project-photo="' + position + '">' +
+        '<img src="' + path + '" alt="' + escapeHtml(alt) + '" loading="lazy" decoding="async"/></a></li>';
     }).join("");
+    var viewer = photos.length
+      ? '<dialog class="az-project-viewer" aria-label="' + escapeHtml(tt("project.gallery")) + '">' +
+        '<div class="az-project-viewer__toolbar">' +
+        '<span data-photo-count aria-live="polite" aria-atomic="true"></span>' +
+        '<button type="button" data-photo-close autofocus aria-label="' + escapeHtml(tt("project.gallery.close")) + '">×</button></div>' +
+        '<div class="az-project-viewer__stage" dir="ltr">' +
+        '<button type="button" data-photo-step="-1" aria-label="' + escapeHtml(tt("project.gallery.previous")) + '"' + (photos.length < 2 ? ' hidden' : '') + '>‹</button>' +
+        '<div class="az-project-viewer__frame"><img alt="" decoding="async"/>' +
+        '<p data-photo-error role="status" dir="auto" hidden>' + escapeHtml(tt("project.gallery.error")) + '</p></div>' +
+        '<button type="button" data-photo-step="1" aria-label="' + escapeHtml(tt("project.gallery.next")) + '"' + (photos.length < 2 ? ' hidden' : '') + '>›</button></div></dialog>'
+      : "";
     var tech = (project.technologies || [])
       .map(function (item) {
         return "<li>" + escapeHtml(item) + "</li>";
@@ -807,11 +868,10 @@
       '<p class="az-panel__lead">' +
       escapeHtml(project.fullDescription) +
       "</p>" +
-      '<div class="az-project__hero"><img src="' +
-      escapeHtml(project.image) +
-      '" alt="' +
-      escapeHtml(project.title) +
-      '" decoding="async"/></div>' +
+      (project.image
+        ? '<a class="az-project__hero" href="' + escapeHtml(project.image) + '" data-project-photo="0">' +
+          '<img src="' + escapeHtml(project.image) + '" alt="' + escapeHtml(project.title) + '" decoding="async"/></a>'
+        : "") +
       '<ul class="az-about__meta">' +
       "<li><strong>" +
       escapeHtml(tt("project.role")) +
@@ -827,7 +887,8 @@
         ? '<section class="az-project__gallery"><h2>' + escapeHtml(tt("project.gallery")) +
           '</h2><ul>' + gallery + '</ul></section>'
         : "") +
-      "</article>";
+      "</article>" + viewer;
+    bindProjectPhotos(projectRoot, photos);
     return true;
   }
 
@@ -883,6 +944,10 @@
 
   function afterShow(route) {
     var isHome = route.name === "home";
+    if (route.name !== "project" && projectRoot) {
+      var viewer = projectRoot.querySelector(".az-project-viewer[open]");
+      if (viewer) viewer.close();
+    }
     document.documentElement.dataset.azRoute = route.name === "project" ? "work" : route.name;
     document.documentElement.classList.toggle("az-route-home", isHome);
     // Work/project/about/contact: release Rhye smooth-scrollbar so the document scrolls natively.
