@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Services\Assistant\AssistantService;
+use App\Services\Assistant\OpenAiResponsesClient;
 use App\Services\Assistant\PortfolioAssistantContext;
 use App\Services\PortfolioContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -413,7 +414,7 @@ class AssistantChatTest extends TestCase
 
         // First ask: schema attempt + plain retry.
         Http::assertSentCount(2);
-        $this->assertTrue((bool) Cache::get(\App\Services\Assistant\OpenAiResponsesClient::SCHEMA_UNSUPPORTED_CACHE_KEY));
+        $this->assertTrue((bool) Cache::get(OpenAiResponsesClient::SCHEMA_UNSUPPORTED_CACHE_KEY));
 
         RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
 
@@ -503,6 +504,53 @@ class AssistantChatTest extends TestCase
         $this->postJson('/api/assistant/chat', ['reset' => true, 'locale' => 'en'])
             ->assertOk()
             ->assertJson(['ok' => true, 'reset' => true, 'history' => []]);
+    }
+
+    #[DataProvider('biographyQuestions')]
+    public function test_biography_questions_supply_relevant_facts_in_the_question_language(
+        string $question,
+        string $siteLocale,
+        string $replyLocale,
+        array $expectedFacts,
+        array $unrelatedFacts
+    ): void {
+        Http::fake([
+            'api.openai.com/*' => Http::response([
+                'output_text' => json_encode(['action' => 'answer', 'reply' => 'Example', 'destination' => '']),
+            ], 200),
+        ]);
+
+        $this->postJson('/api/assistant/chat', ['message' => $question, 'locale' => $siteLocale])
+            ->assertOk()
+            ->assertJsonPath('locale', $replyLocale);
+
+        Http::assertSentCount(1);
+        Http::assertSent(function ($request) use ($expectedFacts, $unrelatedFacts) {
+            $instructions = (string) $request->data()['instructions'];
+            foreach ($expectedFacts as $fact) {
+                $this->assertStringContainsString($fact, $instructions);
+            }
+            foreach ($unrelatedFacts as $fact) {
+                $this->assertStringNotContainsString($fact, $instructions);
+            }
+
+            return true;
+        });
+    }
+
+    public static function biographyQuestions(): array
+    {
+        return [
+            'Persian entrance exam rank' => ['رتبهٔ کنکور امیرحسین چند بود؟', 'en', 'fa', ['رتبهٔ ۷۹۰ منطقهٔ ۳'], ['رتبهٔ ۶۷']],
+            'English entrance exam rank' => ['What was his rank in the university entrance exam?', 'fa', 'en', ['790th in Region 3'], ['Quera leaderboard']],
+            'Persian question on English site' => ['رتبهٔ امیرحسین در کوئرا چند بود؟', 'en', 'fa', ['رتبهٔ ۶۷', 'پارسا'], ['Hasti', 'اسم شریک عاطفی']],
+            'English question on Persian site' => ['What was his first paid project?', 'fa', 'en', ['first paid project, CourseScan', 'with Amir'], ['Hasti', 'رتبهٔ ۶۷']],
+            'Persian with English company name' => ['پروژهٔ MedPip چیه؟', 'en', 'fa', ['پل ایده‌آل پارس', 'این مهاجرت در حد برنامه است'], ['Hasti', 'اسم شریک عاطفی']],
+            'Explicit relationship question' => ['Who is his girlfriend?', 'en', 'en', ['in a relationship with Hasti'], ['Quera leaderboard']],
+            'General biography' => ['Tell me his career journey', 'en', 'en', ['childhood interests in hardware and robotics', 'became a C teaching assistant'], ['Hasti']],
+            'Business partner question' => ['Who is his business partner at Novin Coders?', 'en', 'en', ['revived Novin Coders'], ['Hasti']],
+            'Unrelated project question' => ['Which Laravel projects has he built?', 'en', 'en', ['Clinic Booking Portal'], ['Relevant personal background:', 'Hasti']],
+        ];
     }
 
     public function test_compact_context_is_smaller_than_full_dump_for_sample_question(): void

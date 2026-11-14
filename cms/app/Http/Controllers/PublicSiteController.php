@@ -122,6 +122,7 @@ class PublicSiteController extends Controller
                 'gallery' => $view === 'project' ? array_map(fn (string $path) => $this->assetUrl($path), $item['gallery'] ?? []) : [],
                 'sourceUrl' => $view === 'project' ? ($item['sourceUrl'] ?? null) : null,
                 'liveUrl' => $item['liveUrl'] ?? null,
+                'websiteUrl' => $view === 'project' ? ($item['websiteUrl'] ?? null) : null,
                 'githubUrl' => $item['githubUrl'] ?? null,
                 'date' => $item['date'] ?? null,
             ];
@@ -238,8 +239,8 @@ class PublicSiteController extends Controller
                 'company' => $entry['company_'.$locale],
                 'role' => $entry['role_'.$locale],
                 'description' => $entry['description_'.$locale] ?? '',
-                'type_label' => SiteSetting::EXPERIENCE_TYPES[$entry['type']][$locale] ?? '',
-                'start_label' => $this->workMonthLabel($start, $locale),
+                'type_label' => SiteSetting::EXPERIENCE_TYPES[$entry['type'] ?? ''][$locale] ?? '',
+                'start_label' => ($locale === 'fa' ? ($entry['start_label_fa'] ?? null) : null) ?? $this->workMonthLabel($start, $locale),
                 'end_label' => $end ? $this->workMonthLabel($end, $locale) : ($locale === 'fa' ? 'تا امروز' : 'Present'),
                 'duration' => implode(' · ', $duration),
                 'logo_url' => $preview && !empty($entry['logo_id'])

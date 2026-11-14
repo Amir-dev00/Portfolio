@@ -24,8 +24,9 @@ class AssistantController extends Controller
 
     public function chat(Request $request): JsonResponse
     {
-        $locale = $request->input('locale') === 'fa' ? 'fa' : 'en';
         $message = trim(strip_tags((string) $request->input('message', '')));
+        $siteLocale = $request->input('locale') === 'fa' ? 'fa' : 'en';
+        $locale = $this->messageLocale($message, $siteLocale);
         $reset = $request->boolean('reset');
         $clientKey = 'assistant.req.'.sha1($request->ip().'|'.$request->session()->getId());
 
@@ -77,6 +78,22 @@ class AssistantController extends Controller
             // Client keeps a mirrored transcript; server session is the source of truth for continuity.
             'turns' => count($result['history']),
         ]);
+    }
+
+    protected function messageLocale(string $message, string $fallback): string
+    {
+        $persianLetters = preg_match_all('/(?=\p{L})\p{Arabic}/u', $message);
+        $latinLetters = preg_match_all('/[a-z]/i', $message);
+
+        if ($persianLetters > 0 && $persianLetters >= min($latinLetters, 4)) {
+            return 'fa';
+        }
+
+        if ($persianLetters === 0 && $latinLetters > 2) {
+            return 'en';
+        }
+
+        return $fallback;
     }
 
     protected function statusFor(string $code): int

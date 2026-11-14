@@ -43,6 +43,44 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/work/'.$slug)->assertNotFound();
     }
 
+    public function test_project_order_is_saved_as_a_draft_and_published_in_both_languages(): void
+    {
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->post(route('admin.projects.import'))->assertRedirect();
+        $this->get(route('admin.projects.index'))->assertOk()->assertSee('Save project order');
+        $projects = Project::query()->orderBy('sort_order')->orderBy('id')->get();
+        $ids = $projects->modelKeys();
+        $slugs = $projects->pluck('slug')->all();
+        $headers = ['X-AZ-Fragment' => '1'];
+
+        $this->post(route('admin.projects.reorder'), ['order' => [end($ids)]])->assertSessionHasErrors('order');
+        $this->post(route('admin.projects.reorder'), ['order' => array_reverse($ids)])->assertRedirect()->assertSessionHasNoErrors();
+        $this->getJson('/work', $headers)->assertJsonPath('projects.0.slug', $slugs[0]);
+        $this->getJson('/work?preview=1', $headers)->assertJsonPath('projects.0.slug', end($slugs));
+
+        $this->post(route('admin.publish'))->assertRedirect();
+        foreach (['/work', '/fa/work'] as $path) {
+            $actual = $this->getJson($path, $headers)->assertOk()->json('projects');
+            $this->assertSame(array_reverse($slugs), array_column($actual, 'slug'));
+        }
+    }
+
+    public function test_imported_project_with_no_live_link_uses_verified_fallback(): void
+    {
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->post(route('admin.projects.import'))->assertRedirect();
+        $project = Project::query()->where('slug', 'novin-coursescan')->firstOrFail();
+        $project->update(['live_url' => null]);
+        $this->post(route('admin.publish'))->assertRedirect();
+
+        $headers = ['X-AZ-Fragment' => '1'];
+        $this->getJson('/work/novin-coursescan', $headers)->assertOk()
+            ->assertJsonPath('projects.0.liveUrl', 'https://coursescan.ir/');
+        $this->getJson('/fa/work/novin-fitnet', $headers)->assertOk()
+            ->assertJsonPath('projects.0.websiteUrl', 'https://fitnetsport.ir/')
+            ->assertJsonPath('projects.0.liveUrl', 'https://demo.fitnetsport.ir/');
+    }
+
     public function test_new_showcases_render_in_both_languages_and_keep_live_links_after_import(): void
     {
         $projects = [

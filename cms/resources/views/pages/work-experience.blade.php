@@ -19,7 +19,9 @@
           @endif
         </p>
         <div class="az-experience__meta">
-          <span class="az-experience__type">{{ $entry['type_label'] }}</span>
+          @if ($entry['type_label'])
+            <span class="az-experience__type">{{ $entry['type_label'] }}</span>
+          @endif
           <span><time datetime="{{ $entry['start_month'] }}">{{ $entry['start_label'] }}</time>
             <span aria-hidden="true">–</span>
             @if (!empty($entry['end_month']))

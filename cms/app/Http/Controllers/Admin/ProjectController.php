@@ -41,6 +41,7 @@ class ProjectController extends Controller
 
         return view('admin.projects.index', [
             'projects' => $projects->get(),
+            'orderableProjects' => Project::query()->active()->orderBy('sort_order')->orderBy('id')->get(['id', 'title']),
             'unmanaged' => array_diff(array_column($content->bundledProjects(), 'slug'), Project::query()->pluck('slug')->all(),
                 SiteSetting::query()->where('key', 'like', SiteSetting::PROJECT_PREFIX.'%')->get()->pluck('value.bundled_slug')->filter()->all()),
         ]);
@@ -88,17 +89,46 @@ class ProjectController extends Controller
         return back()->with('status', __('Project saved (draft). Publish to go live.'));
     }
 
-    public function reorder(Request $request): RedirectResponse
+    public function reorder(Request $request, PortfolioContent $content): RedirectResponse
     {
         $data = $request->validate([
-            'order' => ['required', 'array'],
-            'order.*' => ['integer', 'exists:projects,id'],
+            'order' => ['required', 'array', 'list'],
+            'order.*' => ['required', 'integer', 'distinct'],
         ]);
-        foreach ($data['order'] as $i => $id) {
-            Project::query()->where('id', $id)->update(['sort_order' => $i, 'is_dirty' => true]);
-        }
+        $order = array_map('intval', $data['order']);
 
-        return back()->with('status', __('Order updated (draft).'));
+        DB::transaction(function () use ($order, $content) {
+            $state = SiteState::query()->lockForUpdate()->findOrFail(SiteState::current()->id);
+            $active = Project::query()->active()->orderBy('sort_order')->orderBy('id')->lockForUpdate()->get();
+            $ids = $active->modelKeys();
+
+            if (array_diff($order, $ids) || array_diff($ids, $order)) {
+                throw ValidationException::withMessages(['order' => __('The project list changed. Refresh and try again.')]);
+            }
+
+            if ($order === $ids) {
+                return;
+            }
+
+            if (! $state->current_publication_id) {
+                $snapshot = Publication::query()->create([
+                    'label' => __('Site before first project reorder'),
+                    'payload' => $content->payload(),
+                    'published_at' => now(),
+                ]);
+                $state->publication()->associate($snapshot)->save();
+            }
+
+            $projects = $active->keyBy('id');
+            foreach ($order as $position => $id) {
+                $project = $projects->get($id);
+                if ($project->sort_order !== $position) {
+                    $project->update(['sort_order' => $position, 'is_dirty' => true]);
+                }
+            }
+        });
+
+        return redirect()->route('admin.projects.index')->with('status', __('Order updated (draft).'));
     }
 
     public function archive(Project $project): RedirectResponse

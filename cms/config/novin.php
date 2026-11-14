@@ -41,11 +41,13 @@ return [
             'category' => 'pwa',
             'technologies' => ['PHP', 'Laravel', 'Next.js'],
             'live_url' => 'https://demo.fitnetsport.ir/',
+            'website_url' => 'https://fitnetsport.ir/',
             'en' => ['A mobile-first PWA for finding gyms and booking workouts with credits.', 'Fitnet lets users discover gyms and classes, compare locations and credit costs, and choose an available time slot. A companion landing page introduces how credits, booking and check-in work.'],
             'fa' => ['وب‌اپ موبایل‌محور برای پیدا کردن باشگاه و رزرو تمرین با اعتبار.', 'در فیت‌نت کاربر می‌تواند باشگاه و کلاس پیدا کند، موقعیت و اعتبار لازم را مقایسه کند و از میان سانس‌های موجود انتخاب کند. لندینگ هم مسیر استفاده از اعتبار، رزرو و ورود به باشگاه را معرفی می‌کند.'],
             'gallery' => 4,
         ],
         'aras-books' => [
+            'live_url' => 'https://arasbooks.ir/',
             'title' => 'Aras Books',
             'title_fa' => 'ارس بوک | فروشگاه و چاپ کتاب',
             'category' => 'website',
@@ -55,6 +57,7 @@ return [
             'gallery' => 3,
         ],
         'coursescan' => [
+            'live_url' => 'https://coursescan.ir/',
             'title' => 'CourseScan',
             'title_fa' => 'کورس‌اسکن | کشف دوره‌های آموزشی',
             'category' => 'website',
@@ -109,6 +112,7 @@ return [
             'gallery' => 3,
         ],
         'saatia-tech' => [
+            'live_url' => 'https://www.saatiaa.com/',
             'title' => 'Saatia Tech',
             'title_fa' => 'وب‌سایت صنعتی ساتیا تک',
             'category' => 'website',

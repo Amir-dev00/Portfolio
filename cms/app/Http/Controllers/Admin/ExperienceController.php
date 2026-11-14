@@ -20,7 +20,15 @@ class ExperienceController extends Controller
     public function index(): View
     {
         $entries = SiteSetting::query()->where('key', 'like', SiteSetting::EXPERIENCE_PREFIX.'%')
-            ->get()->sortByDesc(fn (SiteSetting $entry) => $entry->value['start_month']);
+            ->get()->keyBy('key');
+        foreach (config('work-experience', []) as $id => $value) {
+            $key = SiteSetting::EXPERIENCE_PREFIX.$id;
+            if (! $entries->has($key) && ! $entries->contains(fn (SiteSetting $entry) => strcasecmp(rtrim($entry->value['website'] ?? '', '/'), rtrim($value['website'], '/')) === 0)) {
+                $entries->put($key, new SiteSetting(['key' => $key, 'value' => $value]));
+            }
+        }
+        $entries = $entries->reject(fn (SiteSetting $entry) => ! empty($entry->value['removed']))
+            ->sortByDesc(fn (SiteSetting $entry) => $entry->value['start_month']);
 
         return view('admin.experience.index', compact('entries'));
     }
@@ -47,14 +55,32 @@ class ExperienceController extends Controller
 
     public function destroy(string $experience): RedirectResponse
     {
-        $this->find($experience)->delete();
+        $entry = $this->find($experience);
+        if (array_key_exists($experience, config('work-experience', []))) {
+            $entry->value = ['removed' => true];
+            $entry->save();
+        } else {
+            $entry->delete();
+        }
 
         return redirect()->route('admin.experience.index')->with('status', __('Experience removed from draft. Publish live to update the site.'));
     }
 
     private function find(string $experience): SiteSetting
     {
-        return SiteSetting::query()->where('key', SiteSetting::EXPERIENCE_PREFIX.$experience)->firstOrFail();
+        $key = SiteSetting::EXPERIENCE_PREFIX.$experience;
+        $entry = SiteSetting::query()->where('key', $key)->first();
+        if ($entry) {
+            abort_if(! empty($entry->value['removed']), 404);
+
+            return $entry;
+        }
+
+        $defaults = config('work-experience', []);
+        abort_unless(isset($defaults[$experience]), 404);
+
+        return new SiteSetting(['key' => $key, 'value' => $defaults[$experience]]);
+
     }
 
     private function form(?SiteSetting $entry): View
@@ -77,7 +103,7 @@ class ExperienceController extends Controller
             'company_fa' => ['required', 'string', 'max:150'],
             'role_en' => ['required', 'string', 'max:150'],
             'role_fa' => ['required', 'string', 'max:150'],
-            'type' => ['required', Rule::in(array_keys(SiteSetting::EXPERIENCE_TYPES))],
+            'type' => ['nullable', Rule::in(array_keys(SiteSetting::EXPERIENCE_TYPES))],
             'start_month' => ['required', 'date_format:Y-m'],
             'end_month' => ['nullable', 'date_format:Y-m', 'after_or_equal:start_month'],
             'website' => ['nullable', 'url:http,https', 'max:500'],
@@ -96,6 +122,12 @@ class ExperienceController extends Controller
             DB::transaction(function () use ($entry, $data, $file, $removeLogo, &$path) {
                 $record = $entry->exists ? SiteSetting::query()->lockForUpdate()->findOrFail($entry->id) : $entry;
                 $data['logo_id'] = $removeLogo ? null : ($record->value['logo_id'] ?? null);
+                if (! $removeLogo && ! $file && ! empty($record->value['logo_path'])) {
+                    $data['logo_path'] = $record->value['logo_path'];
+                }
+                if (($record->value['start_month'] ?? null) === $data['start_month'] && ! empty($record->value['start_label_fa'])) {
+                    $data['start_label_fa'] = $record->value['start_label_fa'];
+                }
                 if ($file) {
                     $path = $file->store('media/drafts/img', 'local');
                     if ($path === false) {

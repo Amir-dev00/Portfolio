@@ -837,6 +837,10 @@
           escapeHtml(tt("project.live")) +
           "</a>"
         : "") +
+      (project.websiteUrl
+        ? '<a class="az-btn" href="' + escapeHtml(project.websiteUrl) +
+          '" target="_blank" rel="noopener">' + escapeHtml(tt("project.website")) + "</a>"
+        : "") +
       (project.sourceUrl
         ? '<a class="az-btn" href="' + escapeHtml(project.sourceUrl) +
           '" target="_blank" rel="noopener">' + escapeHtml(tt("project.source")) + "</a>"

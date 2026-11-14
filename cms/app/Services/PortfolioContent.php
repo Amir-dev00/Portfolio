@@ -18,9 +18,25 @@ class PortfolioContent
             }
         }
 
-        $projects = $payload['projects'] ?? [];
+        $experience = $payload['experience'] ?? [];
+        $managedExperience = $payload['managed_bundled_experience'] ?? [];
+        foreach (config('work-experience', []) as $id => $entry) {
+            if (! in_array($id, $managedExperience, true) && ! collect($experience)->contains(fn (array $record) => strcasecmp(rtrim($record['website'] ?? '', '/'), rtrim($entry['website'], '/')) === 0)) {
+                $experience[] = $entry;
+            }
+        }
+        $payload['experience'] = collect($experience)->sortByDesc('start_month')->values()->all();
+
+        $bundled = array_column($this->bundledProjects(), null, 'slug');
+        $projects = array_map(static function (array $project) use ($bundled): array {
+            $default = $bundled[$project['bundledSlug'] ?? $project['slug']] ?? [];
+            $project['liveUrl'] = ($project['liveUrl'] ?? null) ?: ($default['liveUrl'] ?? null);
+            $project['websiteUrl'] = $default['websiteUrl'] ?? null;
+
+            return $project;
+        }, $payload['projects'] ?? []);
         $existingSlugs = array_fill_keys(array_column($projects, 'slug'), true);
-        foreach ($this->bundledProjects() as $project) {
+        foreach ($bundled as $project) {
             if (! isset($existingSlugs[$project['slug']]) &&
                 ! in_array($project['slug'], $payload['managed_bundled_projects'] ?? [], true)) {
                 $projects[] = $project;
@@ -52,6 +68,7 @@ class PortfolioContent
                 'image' => '/'.$directory.'/cover.webp',
                 'gallery' => array_map(fn (int $index) => sprintf('/%s/gallery-%02d.webp', $directory, $index), range(1, $entry['gallery'])),
                 'liveUrl' => $entry['live_url'] ?? null,
+                'websiteUrl' => $entry['website_url'] ?? null,
                 'sourceUrl' => isset($entry['live_url'])
                     ? null
                     : config('novin.url').'projects/show/?'.http_build_query(['slug' => $sourceSlug]),

@@ -29,7 +29,7 @@
       </div>
       <div>
         <label for="type">{{ __('Employment type') }}</label>
-        <select id="type" name="type" required>
+        <select id="type" name="type">
           <option value="">{{ __('Select a type') }}</option>
           @foreach ($types as $key => $labels)
             <option value="{{ $key }}" @selected(old('type', $experience['type'] ?? '') === $key)>{{ $labels[app()->getLocale()] }}</option>
@@ -43,8 +43,8 @@
       <div>
         <label for="logo">{{ __('Company logo (PNG, JPG or WebP, up to 2 MB)') }}</label>
         <input type="file" id="logo" name="logo" accept="image/png,image/jpeg,image/webp">
-        @if ($logo)
-          <img src="{{ route('admin.media.raw', $logo) }}" width="48" height="48" alt="" style="object-fit:contain;margin-top:8px">
+        @if ($logo || !empty($experience['logo_path']))
+          <img src="{{ $logo ? route('admin.media.raw', $logo) : asset($experience['logo_path']) }}" width="48" height="48" alt="" style="object-fit:contain;margin-top:8px">
           <label><input type="checkbox" name="remove_logo" value="1" @checked(old('remove_logo')) style="width:auto"> {{ __('Remove current logo') }}</label>
         @endif
       </div>

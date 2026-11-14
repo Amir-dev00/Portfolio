@@ -56,8 +56,7 @@ class PublicationService
         }
 
         $experience = collect($settings)
-            ->filter(fn ($value, $key) => str_starts_with($key, SiteSetting::EXPERIENCE_PREFIX))
-            ->sortByDesc('start_month');
+            ->filter(fn ($value, $key) => str_starts_with($key, SiteSetting::EXPERIENCE_PREFIX));
         $logos = MediaAsset::query()->whereIn('id', $experience->pluck('logo_id')->filter()->unique())->get()->keyBy('id');
         $settings = array_diff_key($settings, $experience->all());
         $resume = ResumeVersion::query()->where('is_current', true)->with('pdf')->first();
@@ -68,8 +67,9 @@ class PublicationService
             'strings' => $strings,
             'projects' => $projects,
             'managed_bundled_projects' => array_values(array_filter(array_column($projectDetails, 'bundled_slug'))),
-            'experience' => $experience->map(function (array $entry) use ($logos) {
-                $entry['logo_path'] = $logos->get($entry['logo_id'] ?? 0)?->public_path;
+            'managed_bundled_experience' => $experience->keys()->map(fn (string $key) => substr($key, strlen(SiteSetting::EXPERIENCE_PREFIX)))->all(),
+            'experience' => $experience->reject(fn (array $entry) => ! empty($entry['removed']))->sortByDesc('start_month')->map(function (array $entry) use ($logos) {
+                $entry['logo_path'] = $logos->get($entry['logo_id'] ?? 0)?->public_path ?? $entry['logo_path'] ?? null;
 
                 return $entry;
             })->values()->all(),
@@ -101,6 +101,7 @@ class PublicationService
 
         return [
             'slug' => $project->slug,
+            'bundledSlug' => $details['bundled_slug'] ?? null,
             'title' => $project->title,
             'category' => $project->category,
             'date' => $project->year,

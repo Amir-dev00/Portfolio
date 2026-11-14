@@ -168,7 +168,48 @@ class PortfolioAssistantContext
         ]);
         $lines[] = 'Public contact: '.implode(' | ', $contactBits);
 
-        return $this->clip(implode("\n", $lines), 2200);
+        $context = $this->clip(implode("\n", $lines), 2200);
+        $biography = $this->relevantBiography($locale, $question, $priorExchange);
+
+        return $biography === [] ? $context : "Relevant personal background:\n".implode("\n", $biography)."\n\n".$context;
+    }
+
+    /**
+     * @param  list<array{role:string,content:string}>  $priorExchange
+     * @return list<string>
+     */
+    protected function relevantBiography(string $locale, string $question, array $priorExchange): array
+    {
+        $question = ' '.$this->fold($question).' ';
+        $followUp = preg_match('/^ *(and\b|why\b|how so\b|what about\b|tell me more\b|و |چرا |خب |بعدش |بیشتر |ادامه )/u', $question);
+        $history = '';
+        if ($followUp) {
+            foreach ($priorExchange as $message) {
+                if ($message['role'] === 'user') {
+                    $history = ' '.$this->fold($message['content']).' ';
+                }
+            }
+        }
+
+        $matches = [];
+        foreach (config('assistant-biography', []) as $topic => $entry) {
+            $score = 0;
+            foreach ($entry['match'] as $term) {
+                $phrase = ' '.$this->fold($term).' ';
+                if (str_contains($question, $phrase)) {
+                    $score += str_contains(trim($phrase), ' ') ? 6 : 3;
+                } elseif ($topic !== 'relationship' && str_contains($history, $phrase)) {
+                    $score++;
+                }
+            }
+            if ($score > 0) {
+                $matches[] = ['score' => $score, 'text' => $entry[$locale]];
+            }
+        }
+
+        usort($matches, static fn (array $a, array $b): int => $b['score'] <=> $a['score']);
+
+        return array_column(array_slice($matches, 0, 3), 'text');
     }
 
     protected function buildFull(array $payload, string $locale, bool $preview = false): string
