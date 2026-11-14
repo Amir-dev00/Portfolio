@@ -201,17 +201,12 @@ html[dir="rtl"] .az-assistant__composer,
 }
 
 .az-assistant__avatar {
-  --az-avatar-gaze: 2px;
   display: grid;
   place-items: center;
   width: 38px;
   height: 38px;
   perspective: 90px;
   pointer-events: none;
-}
-
-.az-assistant[dir="rtl"] .az-assistant__avatar {
-  --az-avatar-gaze: -2px;
 }
 
 .az-assistant__avatar--flying {
@@ -279,10 +274,6 @@ html[dir="rtl"] .az-assistant__composer,
   background: #a5ddff;
   opacity: 0.65;
   transition: height 180ms ease;
-}
-
-.az-assistant__composer:focus-within [data-az-assistant-avatar="idle"] .az-assistant__avatar-face {
-  transform: translateX(var(--az-avatar-gaze));
 }
 
 [data-az-assistant-avatar="thinking"] .az-assistant__avatar-shell {
@@ -827,12 +818,19 @@ html.az-preloader-open .az-assistant {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .az-assistant__composer [data-az-assistant-avatar="idle"]:not(.is-guiding) .az-assistant__avatar-shell {
-    animation: az-avatar-idle-float 4.8s ease-in-out infinite;
+  .az-assistant__composer [data-az-assistant-avatar="idle"]:not(.is-guiding) .az-assistant__avatar-eye {
+    animation: az-avatar-idle-blink 4.8s ease-in-out infinite;
   }
 
-  .az-assistant__composer [data-az-assistant-avatar="idle"]:not(.is-guiding) .az-assistant__avatar-eye:first-child {
-    animation: az-avatar-idle-wink 5.6s ease-in-out infinite;
+  @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+    .az-assistant__composer [data-az-assistant-avatar="idle"]:not(.is-guiding) .az-assistant__avatar-eye {
+      translate: var(--az-avatar-look-x, 0px) var(--az-avatar-look-y, 0px);
+      transition: height 160ms ease, background-color 160ms ease, translate 120ms ease-out;
+    }
+
+    .az-assistant__composer [data-az-assistant-avatar="idle"].is-tracking-pointer:not(.is-guiding) .az-assistant__avatar-eye {
+      animation: none;
+    }
   }
 
   [data-az-tour-pose="wave"] .az-assistant__avatar-limbs {
@@ -879,14 +877,9 @@ html.az-preloader-open .az-assistant {
   }
 }
 
-@keyframes az-avatar-idle-float {
-  0%, 100% { transform: translateY(0) rotate(-1deg); }
-  50% { transform: translateY(-2px) rotate(2deg); }
-}
-
-@keyframes az-avatar-idle-wink {
-  0%, 82%, 88%, 100% { transform: scaleY(1); }
-  85% { transform: scaleY(.15); }
+@keyframes az-avatar-idle-blink {
+  0%, 96%, 100% { transform: scaleY(1); }
+  98% { transform: scaleY(.15); }
 }
 
 @keyframes az-avatar-unfold {

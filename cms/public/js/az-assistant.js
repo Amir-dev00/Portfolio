@@ -484,6 +484,49 @@
     return state.root ? state.root.querySelector(sel) : null;
   }
 
+  var mouseGaze = window.matchMedia(
+    "(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)"
+  );
+  var gazeAvatar = null;
+  var gazeFrame = 0;
+  var gazeTimeout = 0;
+
+  function clearGaze() {
+    window.cancelAnimationFrame(gazeFrame);
+    window.clearTimeout(gazeTimeout);
+    gazeFrame = 0;
+    if (!gazeAvatar) return;
+    gazeAvatar.classList.remove("is-tracking-pointer");
+    gazeAvatar.style.removeProperty("--az-avatar-look-x");
+    gazeAvatar.style.removeProperty("--az-avatar-look-y");
+    gazeAvatar = null;
+  }
+
+  function trackGaze(event) {
+    if (event.pointerType !== "mouse" || !mouseGaze.matches || document.hidden) return;
+    window.cancelAnimationFrame(gazeFrame);
+    gazeFrame = window.requestAnimationFrame(function () {
+      gazeFrame = 0;
+      var route = document.documentElement.dataset.azRoute;
+      var container = route === "home" ? state.home : route === "ask" ? state.root : null;
+      var avatar = container && container.querySelector('[data-az-assistant-avatar="idle"]:not(.is-guiding)');
+      var face = avatar && avatar.querySelector(".az-assistant__avatar-face");
+      var rect = face && face.getBoundingClientRect();
+      if (gazeAvatar !== avatar) clearGaze();
+      if (!rect || !rect.width || !rect.height) return;
+
+      var x = event.clientX - (rect.left + rect.width / 2);
+      var y = event.clientY - (rect.top + rect.height / 2);
+      var distance = Math.max(36, Math.hypot(x, y));
+      avatar.style.setProperty("--az-avatar-look-x", (2.6 * x / distance).toFixed(2) + "px");
+      avatar.style.setProperty("--az-avatar-look-y", (1.8 * y / distance).toFixed(2) + "px");
+      avatar.classList.add("is-tracking-pointer");
+      gazeAvatar = avatar;
+      window.clearTimeout(gazeTimeout);
+      gazeTimeout = window.setTimeout(clearGaze, 1200);
+    });
+  }
+
   function resizeChat() {
     var viewport = window.visualViewport;
     if (!viewport || viewport.scale !== 1) return;
@@ -518,6 +561,12 @@
     setBusy(state.sending);
     resizeChat();
   }
+
+  window.addEventListener("pointermove", trackGaze, { passive: true });
+  document.documentElement.addEventListener("pointerleave", clearGaze);
+  document.addEventListener("visibilitychange", clearGaze);
+  window.addEventListener("blur", clearGaze);
+  mouseGaze.addEventListener("change", clearGaze);
 
   if (window.visualViewport) {
     window.visualViewport.addEventListener("resize", resizeChat);
