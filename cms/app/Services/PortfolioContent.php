@@ -38,6 +38,7 @@ class PortfolioContent
             'website' => ['en' => 'Website', 'fa' => 'طراحی سایت'],
             'design' => ['en' => 'UI/UX Design', 'fa' => 'طراحی رابط و تجربهٔ کاربری'],
             'app' => ['en' => 'Mobile App', 'fa' => 'اپلیکیشن موبایل'],
+            'pwa' => ['en' => 'Progressive Web App', 'fa' => 'وب‌اپ پیش‌رونده'],
         ];
 
         $caseStudies = config('novin-case-studies', []);
@@ -50,7 +51,10 @@ class PortfolioContent
                 'title' => $entry['title'],
                 'image' => '/'.$directory.'/cover.webp',
                 'gallery' => array_map(fn (int $index) => sprintf('/%s/gallery-%02d.webp', $directory, $index), range(1, $entry['gallery'])),
-                'sourceUrl' => config('novin.url').'projects/show/?'.http_build_query(['slug' => $sourceSlug]),
+                'liveUrl' => $entry['live_url'] ?? null,
+                'sourceUrl' => isset($entry['live_url'])
+                    ? null
+                    : config('novin.url').'projects/show/?'.http_build_query(['slug' => $sourceSlug]),
                 'technologies' => $entry['technologies'],
             ];
 

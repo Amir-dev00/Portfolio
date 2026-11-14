@@ -23,7 +23,13 @@ class BundledProjectImporter
                 }
                 $project = Project::query()->firstOrCreate(
                     ['slug' => $entry['slug']],
-                    ['title' => $entry['title'], 'category' => $entry['en']['category'], 'sort_order' => ++$order, 'is_dirty' => true],
+                    [
+                        'title' => $entry['title'],
+                        'category' => $entry['en']['category'],
+                        'live_url' => $entry['liveUrl'],
+                        'sort_order' => ++$order,
+                        'is_dirty' => true,
+                    ],
                 );
 
                 if (! $project->wasRecentlyCreated) {

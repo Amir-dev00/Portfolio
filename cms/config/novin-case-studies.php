@@ -1,6 +1,92 @@
 <?php
 
 return [
+    'sarva-dental-clinic' => [
+        'en' => [
+            'overview' => 'For a visitor who already knows which treatment they need, the path starts in the service catalogue. Visitors who need more context can explore treatments and the clinic before heading into online appointments.',
+            'features' => [
+                'Browse treatment pages, including implants, orthodontics and cosmetic dentistry.',
+                'Start online appointment booking from the homepage or the services section.',
+                'Manage service descriptions, media and appointments from the staff dashboard.',
+            ],
+            'approach' => 'I built the public site and staff views with PHP and Blade. The responsive RTL interface pairs navy and teal branding with a prominent booking action, while HTML, CSS and JavaScript support the page layouts and interactions.',
+        ],
+        'fa' => [
+            'overview' => 'مراجعی که از قبل نوع درمانش را می‌داند می‌تواند مستقیم سراغ فهرست خدمات برود. کسی که هنوز در حال بررسی است هم می‌تواند دربارهٔ درمان‌ها و کلینیک بخواند و بعد وارد مسیر نوبت‌گیری شود.',
+            'features' => [
+                'مرور صفحه‌های درمان، از ایمپلنت و ارتودنسی تا خدمات ترمیمی و زیبایی.',
+                'شروع نوبت‌گیری آنلاین از صفحهٔ اصلی یا بخش خدمات.',
+                'مدیریت توضیحات خدمات، تصاویر و نوبت‌ها در پنل کارکنان.',
+            ],
+            'approach' => 'سایت عمومی و پنل کارکنان را با PHP و Blade ساختم. رابط راست‌چین و واکنش‌گرا از سرمه‌ای و فیروزه‌ای برند استفاده می‌کند و مسیر نوبت‌گیری را در دید نگه می‌دارد. HTML، CSS و JavaScript چیدمان و تعاملات صفحه‌ها را شکل می‌دهند.',
+        ],
+    ],
+    'alwin-windows' => [
+        'en' => [
+            'overview' => 'Alwin gives visitors two ways to decide which window or door fits their project: browsing the catalogue by model, and seeing how the products look in completed installations. The estimator uses their own selections to produce an initial price.',
+            'features' => [
+                'Search and filter window, door and screen models in the product catalogue.',
+                'Browse completed installations to see products in context.',
+                'Choose a profile material, model and dimensions in the step-by-step estimator.',
+                'Manage catalogue items and publication status from the admin panel.',
+            ],
+            'approach' => 'I used PHP and Blade for the site and the catalogue workspace. HTML and CSS keep the product photography, specifications and blue accents prominent, and JavaScript drives the interactive catalogue and estimator.',
+        ],
+        'fa' => [
+            'overview' => 'آلوین دو مسیر برای انتخاب در و پنجره پیش روی بازدیدکننده می‌گذارد. می‌تواند مدل‌ها را در کاتالوگ مقایسه کند یا محصول را در نمونه‌کارهای اجراشده ببیند. ابزار برآورد هم بر اساس انتخاب‌های خودش قیمت اولیه را نشان می‌دهد.',
+            'features' => [
+                'جست‌وجو و فیلتر مدل‌های در، پنجره و توری در کاتالوگ.',
+                'مرور پروژه‌های اجراشده و دیدن محصول در فضای واقعی.',
+                'انتخاب جنس پروفیل، مدل و ابعاد در ابزار مرحله‌به‌مرحلهٔ برآورد.',
+                'مدیریت محصولات و وضعیت انتشار آن‌ها در پنل ادمین.',
+            ],
+            'approach' => 'سایت و بخش مدیریت کاتالوگ را با PHP و Blade پیاده‌سازی کردم. HTML و CSS عکس‌ها، مشخصات محصولات و رنگ آبی برند را برجسته نگه می‌دارند و JavaScript تعاملات کاتالوگ و ابزار برآورد را کنترل می‌کند.',
+        ],
+    ],
+    'rb-cafe' => [
+        'en' => [
+            'overview' => 'At the table, guests can scan the menu by category, check prices and see a photo before choosing. The same site offers a separate entrance to the customer club, while staff get views tailored to their roles.',
+            'features' => [
+                'Browse or search photographed menu items by category.',
+                'Enter the customer club from the café landing page.',
+                'Edit menu items and categories in the management panel.',
+                'Update item availability from the waiter workspace.',
+            ],
+            'approach' => 'I used Next.js for the guest and staff interfaces and PHP with Laravel on the back end. Black and yellow tie the homepage, menu and staff workspace together, while each view gives its main action a different place in the layout.',
+        ],
+        'fa' => [
+            'overview' => 'مهمانِ سر میز می‌تواند دسته‌های منو را مرور کند، عکس و قیمت هر آیتم را ببیند و انتخاب کند. همین سایت ورودی جداگانه‌ای برای باشگاه مشتریان دارد و نمای کارکنان هم بر اساس نقش آن‌ها چیده شده است.',
+            'features' => [
+                'مرور و جست‌وجوی آیتم‌های منو همراه با عکس و دسته‌بندی.',
+                'ورود به باشگاه مشتریان از لندینگ کافه.',
+                'ویرایش آیتم‌ها و دسته‌ها در پنل مدیریت منو.',
+                'به‌روزرسانی موجودی آیتم‌ها از پنل ویتر.',
+            ],
+            'approach' => 'رابط مهمان و کارکنان را با Next.js و بک‌اند را با PHP و Laravel ساختم. مشکی و زرد هویت مشترک لندینگ، منو و پنل‌اند و در هر نما، عملی که کاربر بیشتر به آن نیاز دارد جای مشخصی دارد.',
+        ],
+    ],
+    'fitnet' => [
+        'en' => [
+            'overview' => 'Fitnet makes it possible to fit a workout around the rest of the day. Users can find a nearby gym, check what it offers, see the credits a visit needs and pick an available entry window before reviewing the booking.',
+            'features' => [
+                'Search or filter gyms and compare facilities, locations and starting credit costs.',
+                'Open a gym profile to review services and select an available time slot.',
+                'See credit balance and upcoming bookings from the PWA dashboard.',
+                'Learn how the credit and booking flow works from the public landing page.',
+            ],
+            'approach' => 'I built a mobile-first PWA with Next.js and a PHP and Laravel back end. The public landing introduces the service, and the app keeps gym discovery, time selection and the booking review together.',
+        ],
+        'fa' => [
+            'overview' => 'فیت‌نت کمک می‌کند کاربر تمرین را در برنامهٔ روزش جا بدهد. می‌تواند باشگاه نزدیکش را پیدا کند، امکانات و اعتبار لازم را ببیند، یک بازهٔ ورود انتخاب کند و قبل از ثبت، رزرو را مرور کند.',
+            'features' => [
+                'جست‌وجو و فیلتر باشگاه‌ها و مقایسهٔ امکانات، موقعیت و اعتبار لازم.',
+                'مرور خدمات هر باشگاه و انتخاب سانس موجود از صفحهٔ جزئیات.',
+                'دیدن موجودی اعتبار و رزرو بعدی در داشبورد وب‌اپ.',
+                'آشنایی با مراحل اعتبار و رزرو از طریق لندینگ عمومی.',
+            ],
+            'approach' => 'وب‌اپ پیش‌رونده را با رویکرد موبایل‌محور در Next.js پیاده‌سازی کردم و برای بک‌اند از PHP و Laravel استفاده کردم. لندینگ مسیر کلی را معرفی می‌کند و در وب‌اپ کشف باشگاه، انتخاب ساعت و مرور رزرو در یک جریان انجام می‌شود.',
+        ],
+    ],
     'aras-books' => [
         'en' => [
             'overview' => 'Aras Books gives readers a single place to browse books, place an order and request a custom print run. The storefront gives new releases, bestsellers and featured collections dedicated entry points, while the catalogue supports more deliberate searches.',

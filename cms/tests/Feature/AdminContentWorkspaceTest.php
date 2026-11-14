@@ -15,10 +15,10 @@ class AdminContentWorkspaceTest extends TestCase
     {
         $this->actingAs(User::factory()->create(['is_owner' => true]));
         $slug = 'novin-inova';
-        $this->get('/admin/projects')->assertOk()->assertSee('Import 10');
+        $this->get('/admin/projects')->assertOk()->assertSee('Import 14');
         $this->post('/admin/projects/import')->assertRedirect();
         $this->post('/admin/projects/import')->assertRedirect();
-        $this->assertDatabaseCount('projects', 10);
+        $this->assertDatabaseCount('projects', 14);
         $project = Project::query()->where('slug', $slug)->firstOrFail();
         $this->get(route('admin.projects.edit', $project))->assertOk()->assertSee('English case study');
         $this->put(route('admin.projects.update', $project), [
@@ -43,6 +43,41 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/work/'.$slug)->assertNotFound();
     }
 
+    public function test_new_showcases_render_in_both_languages_and_keep_live_links_after_import(): void
+    {
+        $projects = [
+            'sarva-dental-clinic' => ['https://sarvadentalclinic.ir/', ['PHP', 'Blade', 'HTML', 'CSS', 'JavaScript'], 3],
+            'alwin-windows' => ['https://alwinco.ir/', ['PHP', 'Blade', 'HTML', 'CSS', 'JavaScript'], 4],
+            'rb-cafe' => ['https://rbcaferestaurant.ir/', ['Next.js', 'PHP', 'Laravel'], 4],
+            'fitnet' => ['https://demo.fitnetsport.ir/', ['PHP', 'Laravel', 'Next.js'], 4],
+        ];
+        $headers = ['X-AZ-Fragment' => '1'];
+
+        foreach ($projects as $slug => [$liveUrl, $technologies, $count]) {
+            $path = '/work/novin-'.$slug;
+            $response = $this->getJson($path, $headers)->assertOk()
+                ->assertJsonPath('projects.0.liveUrl', $liveUrl)
+                ->assertJsonPath('projects.0.technologies', $technologies)
+                ->assertJsonCount($count, 'projects.0.gallery');
+            $project = $response->json('projects.0');
+            $this->assertNotEmpty($project['caseStudy']['features']);
+            foreach ([$project['image'], ...$project['gallery']] as $imageUrl) {
+                $this->assertFileExists(public_path(ltrim(parse_url($imageUrl, PHP_URL_PATH), '/')));
+            }
+        }
+
+        $this->getJson('/fa/work/novin-fitnet', $headers)->assertOk()
+            ->assertJsonPath('projects.0.title', 'فیت‌نت | کشف و رزرو باشگاه')
+            ->assertJsonPath('projects.0.category', 'وب‌اپ پیش‌رونده');
+
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->post('/admin/projects/import')->assertRedirect();
+        $this->post('/admin/publish')->assertRedirect();
+        $this->getJson('/work/novin-fitnet', $headers)->assertOk()
+            ->assertJsonPath('projects.0.liveUrl', 'https://demo.fitnetsport.ir/')
+            ->assertJsonCount(4, 'projects.0.gallery');
+    }
+
     public function test_owner_can_publish_new_text_and_settings_and_export_bundled_projects(): void
     {
         $this->actingAs(User::factory()->create(['is_owner' => true]));
@@ -58,7 +93,7 @@ class AdminContentWorkspaceTest extends TestCase
                 2 => ['desktop' => null], 3 => ['desktop' => null], 4 => ['desktop' => null],
             ],
         ])->assertRedirect()->assertSessionHasNoErrors();
-        $this->getJson('/admin/export.json')->assertOk()->assertJsonCount(10, 'projects')
+        $this->getJson('/admin/export.json')->assertOk()->assertJsonCount(14, 'projects')
             ->assertJsonPath('settings.assistant_knowledge.en', 'Public portfolio fact');
         $this->post('/admin/publish')->assertRedirect();
         $this->get('/about')->assertOk()->assertSee('Studio Example')->assertSee('https://example.com/team');
@@ -89,7 +124,7 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/work/novin-inova')->assertOk();
         $this->get('/work/novin-inova?preview=1')->assertNotFound();
         $this->post('/admin/projects/import')->assertRedirect();
-        $this->assertDatabaseCount('projects', 9);
+        $this->assertDatabaseCount('projects', 13);
         $this->post('/admin/publish')->assertRedirect();
         $this->get('/work/novin-inova')->assertNotFound();
         $this->get('/fa/work/novin-inova')->assertNotFound();
