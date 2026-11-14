@@ -5,6 +5,18 @@ return [
     'en' => ['name' => 'Novin Coders', 'role' => 'CTO & Co-founder'],
     'fa' => ['name' => 'نوین کدرز', 'role' => 'مدیر ارشد فناوری و هم‌بنیان‌گذار'],
     'projects' => [
+        'document-studio' => [
+            'slug' => 'document-studio',
+            'asset_directory' => 'assets/img/amir/document-studio',
+            'title' => 'Document Studio',
+            'title_fa' => 'داکیومنت استودیو',
+            'category' => 'tool',
+            'github_url' => 'https://github.com/Amir-dev00/Document-Studio',
+            'technologies' => ['HTML', 'CSS', 'JavaScript', 'Web Storage API'],
+            'en' => ['A browser-based document editor that turns HTML into print-ready A4 pages.', 'Document Studio brings page layout, editing and print preview into one workspace. Draft a document with the included AI guides, refine it in the browser, then export editable HTML or save an A4 PDF through Chrome or Edge.'],
+            'fa' => ['ویرایشگر تحت وب برای طراحی سند HTML و چاپ در اندازهٔ A4.', 'داکیومنت استودیو صفحه‌آرایی، ویرایش و آماده‌سازی سند برای چاپ را در یک محیط جمع می‌کند. می‌شود با راهنماهای پروژه پیش‌نویس را با کمک هوش مصنوعی ساخت، در مرورگر ویرایشش کرد و خروجی HTML قابل‌ویرایش یا PDF در اندازهٔ A4 گرفت.'],
+            'gallery' => 3,
+        ],
         'sarva-dental-clinic' => [
             'title' => 'Sarva Dental Clinic',
             'title_fa' => 'کلینیک دندانپزشکی سروا',

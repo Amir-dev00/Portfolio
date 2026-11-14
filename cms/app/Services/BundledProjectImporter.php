@@ -27,6 +27,7 @@ class BundledProjectImporter
                         'title' => $entry['title'],
                         'category' => $entry['en']['category'],
                         'live_url' => $entry['liveUrl'],
+                        'github_url' => $entry['githubUrl'],
                         'sort_order' => ++$order,
                         'is_dirty' => true,
                     ],

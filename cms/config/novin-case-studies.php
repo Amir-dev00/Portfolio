@@ -1,6 +1,28 @@
 <?php
 
 return [
+    'document-studio' => [
+        'en' => [
+            'overview' => 'Document Studio is a reusable HTML workspace for proposals, reports and other paged documents. The repository separates the editor from the document styles and includes two guides for working with a coding assistant. The gallery shows the editor with the sample proposal included in the repository.',
+            'features' => [
+                'Navigate a multipage document with thumbnail previews, page controls and zoom.',
+                'Edit text in place, adjust typography and theme colors, and add or duplicate pages.',
+                'Keep drafts in browser storage and export an editable HTML copy.',
+                'Review print issues and use the browser print dialog to save an A4 PDF.',
+            ],
+            'approach' => 'The editor uses plain HTML, CSS and JavaScript with local fonts and browser storage. Print-specific CSS defines the A4 layout. The project runs directly in Chromium browsers without a build step or back end.',
+        ],
+        'fa' => [
+            'overview' => 'داکیومنت استودیو یک محیط HTML قابل‌استفادهٔ دوباره برای پروپوزال، گزارش و سندهای چندصفحه‌ای است. کد ویرایشگر از ظاهر سند جداست و ریپو دو راهنما برای کار با دستیار کدنویسی دارد. گالری، خود ویرایشگر را با پروپوزال نمونهٔ داخل ریپو نشان می‌دهد.',
+            'features' => [
+                'مرور سند چندصفحه‌ای با پیش‌نمایش بندانگشتی، کنترل صفحات و بزرگ‌نمایی.',
+                'ویرایش مستقیم متن، تنظیم تایپوگرافی و رنگ‌ها و افزودن یا تکثیر صفحه.',
+                'ذخیرهٔ پیش‌نویس در مرورگر و دریافت HTML قابل‌ویرایش.',
+                'بررسی مشکلات چاپ و ذخیرهٔ PDF در اندازهٔ A4 از طریق مرورگر.',
+            ],
+            'approach' => 'ویرایشگر با HTML، CSS و جاوااسکریپت خام، فونت‌های محلی و حافظهٔ مرورگر کار می‌کند. CSS مخصوص چاپ چیدمان A4 را تعریف می‌کند. پروژه در مرورگرهای مبتنی بر Chromium مستقیماً و بدون مرحلهٔ ساخت یا بک‌اند اجرا می‌شود.',
+        ],
+    ],
     'sarva-dental-clinic' => [
         'en' => [
             'overview' => 'For a visitor who already knows which treatment they need, the path starts in the service catalogue. Visitors who need more context can explore treatments and the clinic before heading into online appointments.',

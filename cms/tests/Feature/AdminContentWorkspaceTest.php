@@ -15,10 +15,10 @@ class AdminContentWorkspaceTest extends TestCase
     {
         $this->actingAs(User::factory()->create(['is_owner' => true]));
         $slug = 'novin-inova';
-        $this->get('/admin/projects')->assertOk()->assertSee('Import 14');
+        $this->get('/admin/projects')->assertOk()->assertSee('Import 15');
         $this->post('/admin/projects/import')->assertRedirect();
         $this->post('/admin/projects/import')->assertRedirect();
-        $this->assertDatabaseCount('projects', 14);
+        $this->assertDatabaseCount('projects', 15);
         $project = Project::query()->where('slug', $slug)->firstOrFail();
         $this->get(route('admin.projects.edit', $project))->assertOk()->assertSee('English case study');
         $this->put(route('admin.projects.update', $project), [
@@ -63,6 +63,30 @@ class AdminContentWorkspaceTest extends TestCase
             $actual = $this->getJson($path, $headers)->assertOk()->json('projects');
             $this->assertSame(array_reverse($slugs), array_column($actual, 'slug'));
         }
+    }
+
+    public function test_document_studio_has_a_local_gallery_and_a_repository_link_after_import(): void
+    {
+        $headers = ['X-AZ-Fragment' => '1'];
+        $repo = 'https://github.com/Amir-dev00/Document-Studio';
+        $this->getJson('/work', $headers)->assertJsonFragment(['slug' => 'document-studio']);
+        $response = $this->getJson('/fa/work/document-studio', $headers)->assertOk()
+            ->assertJsonPath('projects.0.title', 'داکیومنت استودیو')
+            ->assertJsonPath('projects.0.githubUrl', $repo)
+            ->assertJsonPath('projects.0.sourceUrl', null)
+            ->assertJsonCount(3, 'projects.0.gallery');
+        $project = $response->json('projects.0');
+        foreach ([$project['image'], ...$project['gallery']] as $imageUrl) {
+            $this->assertFileExists(public_path(ltrim(parse_url($imageUrl, PHP_URL_PATH), '/')));
+        }
+
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->post(route('admin.projects.import'))->assertRedirect();
+        $this->post(route('admin.publish'))->assertRedirect();
+        $this->getJson('/work/document-studio', $headers)->assertOk()
+            ->assertJsonPath('projects.0.githubUrl', $repo)
+            ->assertJsonPath('projects.0.technologies', ['HTML', 'CSS', 'JavaScript', 'Web Storage API'])
+            ->assertJsonCount(4, 'projects.0.caseStudy.features');
     }
 
     public function test_imported_project_with_no_live_link_uses_verified_fallback(): void
@@ -131,7 +155,7 @@ class AdminContentWorkspaceTest extends TestCase
                 2 => ['desktop' => null], 3 => ['desktop' => null], 4 => ['desktop' => null],
             ],
         ])->assertRedirect()->assertSessionHasNoErrors();
-        $this->getJson('/admin/export.json')->assertOk()->assertJsonCount(14, 'projects')
+        $this->getJson('/admin/export.json')->assertOk()->assertJsonCount(15, 'projects')
             ->assertJsonPath('settings.assistant_knowledge.en', 'Public portfolio fact');
         $this->post('/admin/publish')->assertRedirect();
         $this->get('/about')->assertOk()->assertSee('Studio Example')->assertSee('https://example.com/team');
@@ -162,7 +186,7 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/work/novin-inova')->assertOk();
         $this->get('/work/novin-inova?preview=1')->assertNotFound();
         $this->post('/admin/projects/import')->assertRedirect();
-        $this->assertDatabaseCount('projects', 13);
+        $this->assertDatabaseCount('projects', 14);
         $this->post('/admin/publish')->assertRedirect();
         $this->get('/work/novin-inova')->assertNotFound();
         $this->get('/fa/work/novin-inova')->assertNotFound();

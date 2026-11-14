@@ -54,14 +54,15 @@ class PortfolioContent
             'website' => ['en' => 'Website', 'fa' => 'طراحی سایت'],
             'design' => ['en' => 'UI/UX Design', 'fa' => 'طراحی رابط و تجربهٔ کاربری'],
             'app' => ['en' => 'Mobile App', 'fa' => 'اپلیکیشن موبایل'],
+            'tool' => ['en' => 'Web Tool', 'fa' => 'ابزار تحت وب'],
             'pwa' => ['en' => 'Progressive Web App', 'fa' => 'وب‌اپ پیش‌رونده'],
         ];
 
         $caseStudies = config('novin-case-studies', []);
 
         foreach (config('novin.projects', []) as $sourceSlug => $entry) {
-            $slug = 'novin-'.$sourceSlug;
-            $directory = 'assets/img/novin-coders/'.$sourceSlug;
+            $slug = $entry['slug'] ?? 'novin-'.$sourceSlug;
+            $directory = $entry['asset_directory'] ?? 'assets/img/novin-coders/'.$sourceSlug;
             $project = [
                 'slug' => $slug,
                 'title' => $entry['title'],
@@ -69,7 +70,8 @@ class PortfolioContent
                 'gallery' => array_map(fn (int $index) => sprintf('/%s/gallery-%02d.webp', $directory, $index), range(1, $entry['gallery'])),
                 'liveUrl' => $entry['live_url'] ?? null,
                 'websiteUrl' => $entry['website_url'] ?? null,
-                'sourceUrl' => isset($entry['live_url'])
+                'githubUrl' => $entry['github_url'] ?? null,
+                'sourceUrl' => isset($entry['live_url']) || isset($entry['github_url'])
                     ? null
                     : config('novin.url').'projects/show/?'.http_build_query(['slug' => $sourceSlug]),
                 'technologies' => $entry['technologies'],
