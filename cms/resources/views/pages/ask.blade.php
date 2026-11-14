@@ -24,13 +24,16 @@
       <div class="az-ask__suggestions" data-az-assistant-suggestions hidden>
         <div class="az-ask__suggestions-inner" role="group" aria-label="{{ $locale === 'fa' ? 'سؤال‌های پیشنهادی' : 'Suggested questions' }}" data-i18n-attr="aria-label:assistant.suggestions.label">
           @foreach ([
-            'work' => ['What has Amirhossein worked on?', 'امیرحسین روی چه پروژه‌هایی کار کرده؟'],
-            'about' => ['What are his skills?', 'امیرحسین چه مهارت‌هایی داره؟'],
-            'contact' => ['How can I book a call?', 'چطور می‌تونم تماس رزرو کنم؟'],
-          ] as $destination => [$questionEn, $questionFa])
-            @continue($destination === 'contact' && !($booking['enabled'] ?? true))
-            <button type="button" class="az-ask__suggestion" data-az-assistant-suggestion="{{ $destination }}">
-              <span data-i18n="assistant.suggestions.{{ $destination }}.question">{{ $locale === 'fa' ? $questionFa : $questionEn }}</span>
+            'work' => ['work', 'What has Amirhossein worked on?', 'امیرحسین روی چه پروژه‌هایی کار کرده؟'],
+            'about' => ['about', 'What are his skills?', 'امیرحسین چه مهارت‌هایی داره؟'],
+            'experience' => ['work', 'What’s his professional experience?', 'امیرحسین چه سابقهٔ کاری‌ای داره؟'],
+            'education' => ['about', 'What did he study?', 'امیرحسین چی خونده؟'],
+            ...(($booking['enabled'] ?? true)
+              ? ['contact' => ['contact', 'How can I book a call?', 'چطور می‌تونم تماس رزرو کنم؟']]
+              : ['reachOut' => ['contact', 'How can I contact him?', 'چطور می‌تونم باهاش ارتباط بگیرم؟']]),
+          ] as $suggestion => [$destination, $questionEn, $questionFa])
+            <button type="button" class="az-ask__suggestion" data-az-assistant-suggestion="{{ $suggestion }}" data-az-assistant-destination="{{ $destination }}">
+              <span data-i18n="assistant.suggestions.{{ $suggestion }}.question">{{ $locale === 'fa' ? $questionFa : $questionEn }}</span>
               <span aria-hidden="true">↗</span>
             </button>
           @endforeach

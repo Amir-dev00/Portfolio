@@ -165,9 +165,9 @@
     try {
       animation = copy.animate([
         { transform: "translate(0, 0) scale(1)" },
-        { transform: "translate(" + x * 0.68 + "px," + (y * 0.60 - 14) + "px) scale(0.9)", offset: 0.6 },
-        { transform: "translate(" + x + "px," + y + "px) scale(0.58)" },
-      ], { duration: 300, easing: "cubic-bezier(0.22, 0.61, 0.36, 1)", fill: "forwards" });
+        { transform: "translate(" + x * 0.68 + "px," + (y * 0.60 - Math.min(52, Math.hypot(x, y) * 0.25)) + "px) scale(0.9)", offset: 0.55 },
+        { transform: "translate(" + x + "px," + y + "px) scale(0.78)" },
+      ], { duration: 760, easing: "cubic-bezier(0.3, 0, 0.3, 1)", fill: "forwards" });
     } catch (err) {
       copy.remove();
       return Promise.resolve();
@@ -255,13 +255,14 @@
     var button = event.target.closest("[data-az-assistant-suggestion]");
     if (!button || state.sending || state.askedCustom) return;
 
-    var destination = button.getAttribute("data-az-assistant-suggestion");
+    var suggestion = button.getAttribute("data-az-assistant-suggestion");
+    var destination = button.getAttribute("data-az-assistant-destination");
     if (["work", "about", "contact"].indexOf(destination) === -1) return;
     var link = destinationLink(destination);
     var url = link && link.getAttribute("href");
     if (!url) return;
 
-    var key = "assistant.suggestions." + destination;
+    var key = "assistant.suggestions." + suggestion;
     var fromUrl = window.location.href;
     setBusy(true);
     showStatus("");

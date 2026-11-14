@@ -1205,6 +1205,52 @@ html[dir="rtl"] #view-about .az-about__title { letter-spacing: normal; line-heig
 .az-about__action:hover { box-shadow: 0 0 20px var(--az-accent-soft); }
 .az-about__action:focus-visible { outline: 2px solid var(--az-accent); outline-offset: 3px; }
 
+.az-about__copy .az-about__miro {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(9px, 2vw, 14px);
+  max-inline-size: 29rem;
+  margin-block-start: 20px;
+  padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--az-accent) 32%, transparent);
+  border-radius: 17px;
+  background: linear-gradient(115deg, #1c3653, #14213b 66%, #1d2546);
+  box-shadow: inset 0 1px 0 #ffffff14;
+  color: var(--az-text);
+  text-decoration: none;
+}
+.az-about__miro-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 42px;
+  block-size: 42px;
+  border-radius: 13px;
+  background: #12253b;
+  color: var(--az-accent);
+  box-shadow: inset 0 0 0 1px #87d9fb42;
+}
+.az-about__miro-copy {
+  display: grid;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+.az-about__miro-copy strong { font-size: .94rem; }
+.az-about__miro-copy > span { color: var(--az-text-secondary); font-size: .78rem; }
+.az-about__miro-arrow { color: var(--az-accent); }
+html[dir="rtl"] .az-about__miro-arrow { scale: -1 1; }
+.az-about__copy .az-about__miro:is(:hover, :focus-visible) {
+  border-color: var(--az-accent);
+  box-shadow: 0 5px 22px #6ee7ff24;
+}
+.az-about__miro:focus-visible { outline: 2px solid var(--az-accent); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .az-about__miro { transition: border-color .25s ease, box-shadow .25s ease; }
+  .az-about__miro-icon { transition: transform .3s var(--az-ease, ease); }
+  .az-about__miro:is(:hover, :focus-visible) .az-about__miro-icon { transform: translateY(-2px) rotate(-7deg); }
+}
+
 .az-about__facts {
   display: grid;
   gap: 1px;

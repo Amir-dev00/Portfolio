@@ -26,6 +26,18 @@
                     </a>
                     <a class="az-about__action" href="{{ $navPaths['contact'] }}" data-nav="contact" data-i18n="nav.contact">{{ $strings['nav.contact'] ?? ($locale === 'fa' ? 'ارتباط' : 'Contact') }}</a>
                   </div>
+                  <a class="az-about__miro" href="{{ $navPaths['ask'] }}" data-nav="ask">
+                    <span class="az-about__miro-icon" aria-hidden="true">
+                      <svg viewBox="0 0 28 28" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+                        <rect x="4" y="7" width="20" height="15" rx="6"/><path d="M14 7V4M10 13.5v2m8-2v2"/>
+                      </svg>
+                    </span>
+                    <span class="az-about__miro-copy">
+                      <strong data-i18n="about.askMiro">{{ $locale === 'fa' ? 'از میرو درباره‌م بپرس' : 'Ask Miro about me' }}</strong>
+                      <span data-i18n="about.askMiroDetail">{{ $locale === 'fa' ? 'با دستیار هوش مصنوعی من گپ بزن' : 'Chat with my AI assistant' }}</span>
+                    </span>
+                    <svg class="az-about__miro-arrow" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11m-5-5 5 5-5 5"/></svg>
+                  </a>
                 </div>
               </div>
 
