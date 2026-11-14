@@ -834,6 +834,40 @@
     });
   }
 
+  var aboutSkillsObserver = null;
+
+  function observeAboutSkills() {
+    if (aboutSkillsObserver) {
+      aboutSkillsObserver.disconnect();
+      aboutSkillsObserver = null;
+    }
+    if (!activeRoute || activeRoute.name !== "about" ||
+        document.documentElement.classList.contains("az-loading") ||
+        typeof window.IntersectionObserver !== "function") return;
+
+    var view = views.about;
+    if (!view) return;
+    var cards = view.querySelectorAll(".az-about-skills__card");
+    if (!cards.length) return;
+
+    aboutSkillsObserver = new window.IntersectionObserver(function (entries, observer) {
+      if (observer !== aboutSkillsObserver) return;
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.08 });
+    cards.forEach(function (card) {
+      card.classList.remove("is-revealed");
+      aboutSkillsObserver.observe(card);
+    });
+  }
+
+  window.addEventListener("az:preloader-end", function () {
+    if (activeRoute && activeRoute.name === "about") observeAboutSkills();
+  }, { once: true });
+
   function afterShow(route) {
     var isHome = route.name === "home";
     document.documentElement.dataset.azRoute = route.name === "project" ? "work" : route.name;
@@ -846,6 +880,7 @@
     if (window.AZ_HOME_ARROWS && window.AZ_HOME_ARROWS.sync) window.AZ_HOME_ARROWS.sync();
     if (!isHome && window.AZ_booking && route.name !== "contact") window.AZ_booking.close();
     window.scrollTo(0, 0);
+    observeAboutSkills();
     if (route.name === "ask" && document.documentElement.classList.contains("az-app-ready")) {
       var title = document.getElementById("az-ask-title");
       if (title) title.focus({ preventScroll: true });
