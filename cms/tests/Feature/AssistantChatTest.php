@@ -25,7 +25,6 @@ class AssistantChatTest extends TestCase
         config([
             'assistant.enabled' => true,
             'assistant.api_key' => 'test-key',
-            'assistant.model' => 'gpt-4.1-mini',
             'assistant.endpoint' => 'https://api.openai.com/v1/responses',
             'assistant.rate_limit' => 20,
             'assistant.daily_global_cap' => 400,
@@ -357,12 +356,36 @@ class AssistantChatTest extends TestCase
         Http::assertSentCount(1);
         Http::assertSent(function ($request) use ($question) {
             $data = $request->data();
-            $this->assertSame('gpt-4.1-mini', $data['model']);
+            $this->assertSame('gpt-6-luna', $data['model']);
+            $this->assertSame(['effort' => 'none'], $data['reasoning']);
             $this->assertSame(400, $data['max_output_tokens']);
             $this->assertCount(1, $data['input']);
             $this->assertSame($question, $data['input'][0]['content']);
             $this->assertArrayHasKey('text', $data);
             $this->assertStringContainsString('Clinic Booking Portal', (string) $data['instructions']);
+
+            return true;
+        });
+    }
+
+    public function test_age_question_gets_casual_persian_guidance_and_respects_a_model_override(): void
+    {
+        config(['assistant.model' => 'gpt-4.1-mini']);
+        Http::fake([
+            'api.openai.com/*' => Http::response(['output_text' => 'تا جایی که می‌دونم، ۲۱ سالشه.']),
+        ]);
+
+        $this->postJson('/api/assistant/chat', ['message' => 'امیرحسین چند سالشه؟', 'locale' => 'en'])
+            ->assertOk()
+            ->assertJsonPath('locale', 'fa')
+            ->assertJsonPath('reply', 'تا جایی که می‌دونم، ۲۱ سالشه.');
+
+        Http::assertSent(function ($request) {
+            $data = $request->data();
+            $this->assertSame('gpt-4.1-mini', $data['model']);
+            $this->assertArrayNotHasKey('reasoning', $data);
+            $this->assertStringContainsString('everyday Iranian Persian', $data['instructions']);
+            $this->assertStringContainsString('۲۱ ساله است', $data['instructions']);
 
             return true;
         });

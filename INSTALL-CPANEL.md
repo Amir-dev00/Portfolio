@@ -272,10 +272,10 @@ The homepage frosted composer talks to OpenAI’s **Responses** API from Laravel
 ```env
 ASSISTANT_ENABLED=true
 OPENAI_API_KEY=sk-your-key-here
-OPENAI_MODEL=gpt-4.1-mini
+OPENAI_MODEL=gpt-6-luna
 ```
 
-3. Save `.env`. No database migration is required (conversation history uses the PHP session; rate limits use the existing cache store).
+3. Save `.env`. If your provider uses a custom Responses endpoint, set `OPENAI_MODEL` to the exact model ID it lists. No database migration is required (conversation history uses the PHP session; rate limits use the existing cache store).
 4. Hosting must allow **outbound HTTPS** to `https://api.openai.com`. If the host firewalls external API calls, the UI shows a localized error and Contact / Book a call still work.
 5. Open `/` → ask a quick question. Leave `OPENAI_API_KEY` blank to keep the composer visible but report “not configured”.
 

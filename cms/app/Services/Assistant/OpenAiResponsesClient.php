@@ -52,7 +52,7 @@ class OpenAiResponsesClient
         }
 
         $payload = [
-            'model' => (string) config('assistant.model', 'gpt-4.1-mini'),
+            'model' => (string) config('assistant.model'),
             'instructions' => $instructions,
             'input' => array_map(static function (array $m) {
                 return [
@@ -63,6 +63,10 @@ class OpenAiResponsesClient
             'store' => (bool) config('assistant.store', false),
             'max_output_tokens' => $budget,
         ];
+
+        if ($payload['model'] === 'gpt-6-luna') {
+            $payload['reasoning'] = ['effort' => 'none'];
+        }
 
         if ($useSchema) {
             $payload['text'] = [
