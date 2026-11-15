@@ -347,6 +347,11 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   transition: background-color 160ms ease, border-color 160ms ease;
 }
 
+[data-work-autoplay][data-playing] [data-work-play-icon],
+[data-work-autoplay]:not([data-playing]) [data-work-pause-icon] {
+  display: none;
+}
+
 .az-work-wheel {
   --az-work-row: 48px;
   --az-work-visible: 5;
@@ -875,20 +880,62 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
   .az-panel_contact {
     width: min(560px, calc(100% - 32px));
-    padding-bottom: calc(128px + env(safe-area-inset-bottom));
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
+  .az-contact-eyebrow,
+  .az-panel_contact .az-panel__title {
+    margin-bottom: 8px;
+  }
+
+  .az-contact-intro {
+    margin-bottom: 12px;
+    line-height: 1.45;
   }
 
   .az-contact-actions {
     gap: 8px;
+    margin-bottom: 12px;
   }
 
   .az-contact-link {
-    gap: 12px;
-    padding: 18px 10px;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    gap: 10px;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 6px 8px;
+  }
+
+  .az-contact-link__icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .az-contact-link__icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .az-contact-link__copy {
+    gap: 2px;
+    line-height: 1.22;
   }
 
   .az-contact-link__copy strong {
     font-size: 14px;
+  }
+
+  .az-contact-link__copy small,
+  .az-contact-note {
+    font-size: 12px;
+  }
+
+  .az-contact-link__arrow {
+    font-size: 13px;
+  }
+
+  .az-contact-note {
+    margin-top: 12px;
   }
 
   .az-work-spotlight__cover {

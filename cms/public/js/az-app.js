@@ -128,6 +128,10 @@
   var workLastSlug = "";
   var workBound = false;
   var workFadeTimer = 0;
+  var workAutoTimer = 0;
+  var workAutoEnabled = !REDUCE;
+  var workInView = !("IntersectionObserver" in window);
+  var WORK_AUTO_MS = 6500;
   var WORK_ROW_H = 48;
   var WORK_VISIBLE = 5;
 
@@ -534,6 +538,12 @@
       '">' +
       '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9.5L12 15.5l6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
       "</button>" +
+      (projects.length > 1
+        ? '<button type="button" class="az-work-browse" data-work-autoplay>' +
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<path data-work-pause-icon d="M9 6v12m6-12v12"/><path data-work-play-icon d="m9 6 9 6-9 6z"/>' +
+          "</svg></button>"
+        : "") +
       "</div>" +
       "</div>" +
       '<div class="az-work-wheel" role="listbox" tabindex="0" aria-label="' +
@@ -543,7 +553,31 @@
       rows +
       "</div>" +
       "</div>";
+    updateWorkAutoControl();
   }
+
+  function updateWorkAutoControl() {
+    var button = workBrowser && workBrowser.querySelector("[data-work-autoplay]");
+    if (!button) return;
+    button.toggleAttribute("data-playing", workAutoEnabled);
+    var label = tt(workAutoEnabled ? "work.autoplay.pause" : "work.autoplay.play");
+    button.setAttribute("aria-label", label);
+    button.title = label;
+  }
+
+  function scheduleWorkAuto() {
+    window.clearTimeout(workAutoTimer);
+    var focus = document.activeElement;
+    var focusedControl = workBrowser && focus && workBrowser.contains(focus) && focus.matches(":focus-visible:not([data-work-autoplay])");
+    if (!workAutoEnabled || !activeRoute || activeRoute.name !== "work" || document.hidden ||
+        !workInView || focusedControl || getProjects().length < 2) return;
+
+    workAutoTimer = window.setTimeout(function () {
+      setWorkIndex((workIndex + 1) % getProjects().length, true, true);
+    }, WORK_AUTO_MS);
+  }
+
+  document.addEventListener("visibilitychange", scheduleWorkAuto);
 
   function updateWorkWheel() {
     if (!workBrowser) return;
@@ -567,7 +601,7 @@
     });
   }
 
-  function updateWorkSpotlight(animate) {
+  function updateWorkSpotlight(animate, automatic) {
     if (!workBrowser) return;
     var projects = getProjects();
     var project = projects[workIndex];
@@ -577,6 +611,8 @@
 
     workLastSlug = project.slug;
     spotlight.setAttribute("aria-label", project.title);
+    spotlight.setAttribute("aria-live", automatic ? "off" : "polite");
+    window.clearTimeout(workFadeTimer);
 
     if (!animate || REDUCE) {
       spotlight.innerHTML = spotlightHtml(project);
@@ -585,7 +621,6 @@
     }
 
     spotlight.classList.add("is-fading");
-    if (workFadeTimer) window.clearTimeout(workFadeTimer);
     workFadeTimer = window.setTimeout(function () {
       spotlight.innerHTML = spotlightHtml(project);
       window.requestAnimationFrame(function () {
@@ -594,27 +629,46 @@
     }, 140);
   }
 
-  function setWorkIndex(nextIndex, animate) {
+  function setWorkIndex(nextIndex, animate, automatic) {
     var projects = getProjects();
     if (!projects.length) return;
     var clamped = Math.max(0, Math.min(projects.length - 1, nextIndex));
     var changed = clamped !== workIndex;
     workIndex = clamped;
     updateWorkWheel();
-    if (changed || animate === "force") updateWorkSpotlight(animate !== false);
+    if (changed || animate === "force") updateWorkSpotlight(animate !== false, automatic);
+    scheduleWorkAuto();
   }
 
   function bindWorkBrowser() {
     if (!workBrowser || workBound) return;
     workBound = true;
-    var touchStartY = 0;
-    var touchActive = false;
+    var touchStart = null;
+    var touchDirection = 0;
     var wheelLockUntil = 0;
     var wheelAccum = 0;
     var WHEEL_STEP = 48;
     var WHEEL_COOLDOWN_MS = 320;
 
+    if ("IntersectionObserver" in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        workInView = entries[0].intersectionRatio >= 0.2;
+        scheduleWorkAuto();
+      }, { threshold: 0.2 });
+      observer.observe(workBrowser);
+    }
+    workBrowser.addEventListener("focusin", scheduleWorkAuto);
+    workBrowser.addEventListener("focusout", function () {
+      window.requestAnimationFrame(scheduleWorkAuto);
+    });
+
     workBrowser.addEventListener("click", function (event) {
+      if (event.target.closest("[data-work-autoplay]")) {
+        workAutoEnabled = !workAutoEnabled;
+        updateWorkAutoControl();
+        scheduleWorkAuto();
+        return;
+      }
       var browse = event.target.closest(".az-work-browse");
       if (browse) {
         event.preventDefault();
@@ -647,7 +701,7 @@
       "wheel",
       function (event) {
         // Only hijack wheel while the pointer is over the project list itself.
-        if (!event.target.closest(".az-work-wheel")) return;
+        if (event.ctrlKey || !event.target.closest(".az-work-wheel")) return;
 
         var projects = getProjects();
         if (!projects.length) return;
@@ -698,30 +752,45 @@
       { passive: false }
     );
 
-    workBrowser.addEventListener(
-      "touchstart",
-      function (event) {
-        if (!event.target.closest(".az-work-wheel")) return;
-        if (!event.touches || !event.touches.length) return;
-        touchActive = true;
-        touchStartY = event.touches[0].clientY;
-      },
-      { passive: true }
-    );
+    workBrowser.addEventListener("touchstart", function (event) {
+      touchStart = event.touches.length === 1 && event.target.closest(".az-work-wheel") ? event.touches[0] : null;
+      touchDirection = 0;
+      if (touchStart) window.clearTimeout(workAutoTimer);
+    }, { passive: true });
 
-    workBrowser.addEventListener(
-      "touchend",
-      function (event) {
-        if (!touchActive) return;
-        touchActive = false;
-        if (!event.changedTouches || !event.changedTouches.length) return;
-        if (!event.target.closest(".az-work-wheel")) return;
-        var dy = event.changedTouches[0].clientY - touchStartY;
-        if (Math.abs(dy) < 28) return;
-        setWorkIndex(workIndex + (dy < 0 ? 1 : -1), true);
-      },
-      { passive: true }
-    );
+    workBrowser.addEventListener("touchmove", function (event) {
+      if (!touchStart || event.touches.length !== 1) return;
+      var touch = event.touches[0];
+      var dy = touch.clientY - touchStart.clientY;
+      var dx = touch.clientX - touchStart.clientX;
+      if (!touchDirection) {
+        if (Math.max(Math.abs(dy), Math.abs(dx)) < 4) return;
+        var nextIndex = workIndex + (dy < 0 ? 1 : -1);
+        if (!event.cancelable || Math.abs(dx) > Math.abs(dy) || nextIndex < 0 || nextIndex >= getProjects().length) {
+          touchStart = null;
+          scheduleWorkAuto();
+          return;
+        }
+        touchDirection = dy < 0 ? 1 : -1;
+      }
+      event.preventDefault();
+    }, { passive: false });
+
+    workBrowser.addEventListener("touchend", function (event) {
+      var touch = event.changedTouches[0];
+      if (touchStart && touchDirection && touch && (touchStart.clientY - touch.clientY) * touchDirection >= 28) {
+        setWorkIndex(workIndex + touchDirection, true);
+      }
+      touchStart = null;
+      touchDirection = 0;
+      scheduleWorkAuto();
+    }, { passive: true });
+
+    workBrowser.addEventListener("touchcancel", function () {
+      touchStart = null;
+      touchDirection = 0;
+      scheduleWorkAuto();
+    }, { passive: true });
   }
 
   function renderWorkGrid() {
@@ -735,6 +804,7 @@
     if (restoreSlug) workIndex = indexForSlug(restoreSlug);
     updateWorkWheel();
     updateWorkSpotlight(false);
+    scheduleWorkAuto();
   }
 
   function bindProjectPhotos(root, photos) {
@@ -974,6 +1044,7 @@
     // Work/project/about/contact: release Rhye smooth-scrollbar so the document scrolls natively.
     // Home: restore smooth-scrollbar + Swiper mousewheel/touch.
     setNativePageScroll(!isHome);
+    scheduleWorkAuto();
     setHomeSliderLive(isHome && (!serverRouted || desktopHome.matches));
     if (serverRouted && isHome) startHomeFeatures();
     if (window.AZ_HOME_ARROWS && window.AZ_HOME_ARROWS.sync) window.AZ_HOME_ARROWS.sync();
