@@ -347,11 +347,6 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   transition: background-color 160ms ease, border-color 160ms ease;
 }
 
-[data-work-autoplay][data-playing] [data-work-play-icon],
-[data-work-autoplay]:not([data-playing]) [data-work-pause-icon] {
-  display: none;
-}
-
 .az-work-wheel {
   --az-work-row: 48px;
   --az-work-visible: 5;

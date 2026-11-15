@@ -129,7 +129,6 @@
   var workBound = false;
   var workFadeTimer = 0;
   var workAutoTimer = 0;
-  var workAutoEnabled = !REDUCE;
   var workInView = !("IntersectionObserver" in window);
   var WORK_AUTO_MS = 6500;
   var WORK_ROW_H = 48;
@@ -538,12 +537,6 @@
       '">' +
       '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9.5L12 15.5l6-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
       "</button>" +
-      (projects.length > 1
-        ? '<button type="button" class="az-work-browse" data-work-autoplay>' +
-          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-          '<path data-work-pause-icon d="M9 6v12m6-12v12"/><path data-work-play-icon d="m9 6 9 6-9 6z"/>' +
-          "</svg></button>"
-        : "") +
       "</div>" +
       "</div>" +
       '<div class="az-work-wheel" role="listbox" tabindex="0" aria-label="' +
@@ -553,23 +546,13 @@
       rows +
       "</div>" +
       "</div>";
-    updateWorkAutoControl();
-  }
-
-  function updateWorkAutoControl() {
-    var button = workBrowser && workBrowser.querySelector("[data-work-autoplay]");
-    if (!button) return;
-    button.toggleAttribute("data-playing", workAutoEnabled);
-    var label = tt(workAutoEnabled ? "work.autoplay.pause" : "work.autoplay.play");
-    button.setAttribute("aria-label", label);
-    button.title = label;
   }
 
   function scheduleWorkAuto() {
     window.clearTimeout(workAutoTimer);
     var focus = document.activeElement;
-    var focusedControl = workBrowser && focus && workBrowser.contains(focus) && focus.matches(":focus-visible:not([data-work-autoplay])");
-    if (!workAutoEnabled || !activeRoute || activeRoute.name !== "work" || document.hidden ||
+    var focusedControl = workBrowser && focus && workBrowser.contains(focus) && focus.matches(":focus-visible");
+    if (REDUCE || !activeRoute || activeRoute.name !== "work" || document.hidden ||
         !workInView || focusedControl || getProjects().length < 2) return;
 
     workAutoTimer = window.setTimeout(function () {
@@ -663,12 +646,6 @@
     });
 
     workBrowser.addEventListener("click", function (event) {
-      if (event.target.closest("[data-work-autoplay]")) {
-        workAutoEnabled = !workAutoEnabled;
-        updateWorkAutoControl();
-        scheduleWorkAuto();
-        return;
-      }
       var browse = event.target.closest(".az-work-browse");
       if (browse) {
         event.preventDefault();
