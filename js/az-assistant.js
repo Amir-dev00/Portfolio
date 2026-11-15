@@ -462,11 +462,37 @@
       });
   }
 
+  var typingComposer = null;
+  var typingTimeout = 0;
+
+  function stopTyping() {
+    window.clearTimeout(typingTimeout);
+    if (!typingComposer) return;
+    typingComposer.classList.remove("is-typing");
+    typingComposer = null;
+  }
+
+  document.addEventListener("input", function (event) {
+    if (!event.target.matches("[data-az-assistant-input]")) return;
+    var composer = event.target.closest("[data-az-assistant-form]");
+    if (!composer) return;
+    if (typingComposer !== composer) stopTyping();
+    typingComposer = composer;
+    composer.classList.add("is-typing");
+    window.clearTimeout(typingTimeout);
+    typingTimeout = window.setTimeout(stopTyping, 550);
+  });
+
+  document.addEventListener("focusout", function (event) {
+    if (event.target.matches("[data-az-assistant-input]")) stopTyping();
+  });
+
   function onSubmit(e) {
     e.preventDefault();
     var input = e.currentTarget.querySelector("[data-az-assistant-input]");
     if (!input || !input.value.trim() || state.sending) return;
     var message = input.value;
+    stopTyping();
     input.value = "";
     send(message).then(function (sent) { if (!sent && !input.value) input.value = message; });
   }

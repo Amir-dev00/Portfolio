@@ -34,7 +34,7 @@
                     </span>
                     <span class="az-about__miro-copy">
                       <strong data-i18n="about.askMiro">{{ $locale === 'fa' ? 'از میرو درباره‌م بپرس' : 'Ask Miro about me' }}</strong>
-                      <span data-i18n="about.askMiroDetail">{{ $locale === 'fa' ? 'با دستیار هوش مصنوعی من گپ بزن' : 'Chat with my AI assistant' }}</span>
+                      <span data-i18n="about.askMiroDetail">{{ $strings['about.askMiroDetail'] ?? ($locale === 'fa' ? 'با دستیار هوش مصنوعی من چت بزن' : 'Chat with my AI assistant') }}</span>
                     </span>
                     <svg class="az-about__miro-arrow" viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11m-5-5 5 5-5 5"/></svg>
                   </a>

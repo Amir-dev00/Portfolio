@@ -18,7 +18,7 @@ class PortfolioContent
             }
         }
 
-        $payload['strings'] = $this->withContactCopy($payload['strings'] ?? []);
+        $payload['strings'] = $this->withPublicCopy($payload['strings'] ?? []);
         $payload['social'] = $this->withContactDefaults($payload['social'] ?? []);
 
         $experience = $payload['experience'] ?? [];
@@ -50,7 +50,7 @@ class PortfolioContent
         return $payload;
     }
 
-    private function withContactCopy(array $strings): array
+    private function withPublicCopy(array $strings): array
     {
         $defaults = json_decode(file_get_contents(config_path('portfolio-strings.json')), true, flags: JSON_THROW_ON_ERROR);
         // Published snapshots can still contain the original seeded captions.
@@ -76,6 +76,12 @@ class PortfolioContent
                 }
             }
         }
+
+        // Previously published UI copy can still use the old Persian term.
+        $strings['fa'] = array_map(
+            static fn (string $value): string => preg_replace('/(?<![\p{L}\p{M}\p{N}])گپ(?![\p{L}\p{M}\p{N}])/u', 'چت', $value) ?? $value,
+            $strings['fa'],
+        );
 
         return $strings;
     }

@@ -177,7 +177,7 @@ class AdminContentWorkspaceTest extends TestCase
             'texts' => [
                 ['key' => 'about.team.name', 'en' => 'Studio Example', 'fa' => 'استودیو نمونه'],
                 ['key' => 'contact.github.sub', 'en' => 'Code & repositories', 'fa' => 'کد و مخازن'],
-                ['key' => 'contact.telegram.sub', 'en' => 'A custom tagline', 'fa' => 'متن دلخواه'],
+                ['key' => 'contact.telegram.sub', 'en' => 'A custom tagline', 'fa' => 'برای یه گپ کوتاه'],
             ],
             'team' => ['url' => 'https://example.com/team'],
         ])->assertRedirect()->assertSessionHasNoErrors();
@@ -191,7 +191,7 @@ class AdminContentWorkspaceTest extends TestCase
         $this->getJson('/fa/contact', ['X-AZ-Fragment' => '1'])->assertOk()
             ->assertJsonPath('html', fn (string $html) => str_contains($html, 'ایدهٔ پروژه‌ات رو برام بنویس')
                 && str_contains($html, 'کدها و تجربه‌های برنامه‌نویسی من')
-                && str_contains($html, 'متن دلخواه')
+                && str_contains($html, 'برای یه چت کوتاه')
                 && str_contains($html, 'استودیو نمونه')
                 && str_contains($html, 'با تیمی که باهاش کار می‌کنم آشنا شو')
                 && str_contains($html, 'href="https://example.com/team"'));
@@ -215,7 +215,7 @@ class AdminContentWorkspaceTest extends TestCase
             ->assertDontSee($defaults['telegram_id']);
         $this->get('/fa/contact')->assertOk()
             ->assertSee('مستقیم باهام تماس بگیر')
-            ->assertSee('<small data-i18n="contact.telegram.sub">برای یه گپ کوتاه</small>', false);
+            ->assertSee('<small data-i18n="contact.telegram.sub">برای یه چت کوتاه</small>', false);
 
         $this->post('/admin/content', [
             'social' => ['telegram' => 'https://t.me/+989124778210', 'telegram_handle' => $defaults['telegram_id']],

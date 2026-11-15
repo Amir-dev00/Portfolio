@@ -839,13 +839,24 @@ html.az-preloader-open .az-assistant {
   }
 
   .az-assistant__composer:has([data-az-assistant-input]:focus) [data-az-assistant-avatar="idle"]:not(.is-guiding) .az-assistant__avatar-shell {
-    transform: rotateZ(3deg);
-    animation: az-avatar-input-focus 2.4s ease-in-out infinite;
+    transform: rotateY(10deg) rotateZ(3deg);
   }
 
   .az-assistant__composer:has([data-az-assistant-input]:focus) [data-az-assistant-avatar="idle"]:not(.is-guiding) .az-assistant__avatar-eye {
     translate: 0;
     animation: az-avatar-idle-blink 4.8s ease-in-out infinite;
+  }
+
+  .az-assistant__composer.is-typing [data-az-assistant-avatar="idle"]:not(.is-guiding) .az-assistant__avatar-shell {
+    animation: az-avatar-input-reaction 480ms var(--az-asst-ease) infinite;
+  }
+
+  .az-assistant__composer.is-typing [data-az-assistant-avatar="idle"]:not(.is-guiding) .az-assistant__avatar-eye {
+    background: #e1faff;
+  }
+
+  .az-assistant__composer.is-typing [data-az-assistant-avatar="idle"]:not(.is-guiding) .az-assistant__avatar-mouth {
+    height: 2px;
   }
 
   [data-az-tour-pose="wave"] .az-assistant__avatar-limbs {
@@ -892,9 +903,9 @@ html.az-preloader-open .az-assistant {
   }
 }
 
-@keyframes az-avatar-input-focus {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -2px; }
+@keyframes az-avatar-input-reaction {
+  0%, 100% { transform: rotateY(10deg) rotateZ(3deg); }
+  42% { transform: translateY(-2px) rotateY(16deg) rotateZ(7deg); }
 }
 
 @keyframes az-avatar-idle-blink {
