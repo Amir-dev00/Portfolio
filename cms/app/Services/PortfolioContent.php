@@ -19,6 +19,7 @@ class PortfolioContent
         }
 
         $payload['strings'] = $this->withContactCopy($payload['strings'] ?? []);
+        $payload['social'] = $this->withContactDefaults($payload['social'] ?? []);
 
         $experience = $payload['experience'] ?? [];
         $managedExperience = $payload['managed_bundled_experience'] ?? [];
@@ -67,7 +68,7 @@ class PortfolioContent
         ];
 
         foreach ($previousDefaults as $locale => $captions) {
-            $captions += ['contact.email.sub' => [], 'contact.team.sub' => []];
+            $captions += ['contact.email.sub' => [], 'contact.team.sub' => [], 'contact.phone.sub' => []];
             foreach ($captions as $key => $previousValues) {
                 $value = $strings[$locale][$key] ?? null;
                 if ($value === null || in_array($value, $previousValues, true)) {
@@ -77,6 +78,22 @@ class PortfolioContent
         }
 
         return $strings;
+    }
+
+    public function withContactDefaults(array $social): array
+    {
+        $defaults = config('portfolio.contact');
+        $legacyTelegram = 'https://t.me/Amir_dev00';
+
+        if (strcasecmp(rtrim($social['telegram'] ?? '', '/'), $legacyTelegram) === 0) {
+            unset($social['telegram']);
+        }
+
+        if (strcasecmp($social['telegram_handle'] ?? '', '@Amir_dev00') === 0) {
+            unset($social['telegram_handle']);
+        }
+
+        return array_replace($defaults, array_filter($social, fn ($value) => is_string($value) && trim($value) !== ''));
     }
 
     public function bundledProjects(): array

@@ -44,6 +44,20 @@
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>
+                @php
+                  $phone = $social['phone'];
+                  $dialPhone = preg_replace('/^0(?=9[0-9]{9}$)/', '+98', $phone);
+                @endphp
+                <a class="az-contact-link" href="tel:{{ $dialPhone }}">
+                  <span class="az-contact-link__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A18 18 0 0 1 4.1 6.2 2 2 0 0 1 6.1 4h3a2 2 0 0 1 2 1.7l.5 3a2 2 0 0 1-.6 2l-1.3 1.2a14 14 0 0 0 4.5 4.5l1.2-1.3a2 2 0 0 1 2-.6l3 .5a2 2 0 0 1 1.6 1.9Z"/></svg>
+                  </span>
+                  <span class="az-contact-link__copy">
+                    <strong class="az-ltr" dir="ltr">{{ $phone }}</strong>
+                    <small data-i18n="contact.phone.sub">{{ $strings['contact.phone.sub'] }}</small>
+                  </span>
+                  <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
+                </a>
                 <a class="az-contact-link" href="{{ $social['linkedin'] }}" target="_blank" rel="noopener">
                   <span class="az-contact-link__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 11v5M8 8v.01M12 16v-5c0-1.5 1.2-2 2.5-2s2.5.5 2.5 2v5"/></svg>
@@ -70,7 +84,7 @@
                   </span>
                   <span class="az-contact-link__copy">
                     <strong data-i18n="contact.telegram">Telegram</strong>
-                    <small data-i18n="contact.telegram.sub">{{ $strings['contact.telegram.sub'] }}</small>
+                    <small><span data-i18n="contact.telegram.sub">{{ $strings['contact.telegram.sub'] }}</span> · <bdi dir="ltr">{{ $social['telegram_handle'] }}</bdi></small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>

@@ -46,10 +46,13 @@ class ContentController extends Controller
         $group = $request->query('group');
         $group = is_string($group) && isset($groups[$group]) ? $group : null;
 
+        $settings = SiteSetting::query()->whereIn('key', ['profile', 'social', 'team', 'assistant_knowledge', 'featured_slugs', 'home_backgrounds', 'about_skills'])->pluck('value', 'key')->all();
+        $settings['social'] = $content->withContactDefaults($settings['social'] ?? []);
+
         return view('admin.content.edit', [
             'groups' => $groups,
             'group' => $group,
-            'settings' => SiteSetting::query()->whereIn('key', ['profile', 'social', 'team', 'assistant_knowledge', 'featured_slugs', 'home_backgrounds', 'about_skills'])->pluck('value', 'key')->all(),
+            'settings' => $settings,
             'projects' => $group ? [] : $content->projectsFor('en', true),
             'imagePaths' => $group ? [] : MediaAsset::query()->where('mime', 'like', 'image/%')
                 ->whereNotNull('public_path')->orderBy('original_name')->get(['public_path', 'original_name']),
@@ -69,8 +72,9 @@ class ContentController extends Controller
             'profile' => ['array:photo,logo'],
             'profile.logo' => $path,
             'profile.photo' => $path,
-            'social' => ['array:email,linkedin,github,telegram,telegram_handle'],
+            'social' => ['array:email,phone,linkedin,github,telegram,telegram_handle'],
             'social.email' => ['nullable', 'email', 'max:255'],
+            'social.phone' => ['nullable', 'string', 'regex:/^\+?[0-9]{7,15}$/D'],
             'social.linkedin' => $url,
             'social.github' => $url,
             'social.telegram' => $url,

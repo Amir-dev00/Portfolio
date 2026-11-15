@@ -197,6 +197,31 @@ class AdminContentWorkspaceTest extends TestCase
                 && str_contains($html, 'href="https://example.com/team"'));
     }
 
+    public function test_contact_replaces_the_old_telegram_link_and_renders_a_dialable_phone(): void
+    {
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->post('/admin/content', [
+            'social' => ['telegram' => 'https://t.me/Amir_dev00', 'telegram_handle' => '@Amir_dev00'],
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->post('/admin/publish')->assertRedirect();
+
+        $defaults = config('portfolio.contact');
+        $this->get('/contact')->assertOk()
+            ->assertSee('href="tel:+98'.substr($defaults['phone'], 1).'"', false)
+            ->assertSee($defaults['phone'])->assertSee('Give me a call')
+            ->assertSee('href="'.$defaults['telegram'].'"', false)
+            ->assertSee($defaults['telegram_handle'])->assertDontSee('href="https://t.me/Amir_dev00"', false);
+        $this->get('/fa/contact')->assertOk()->assertSee('مستقیم باهام تماس بگیر');
+
+        $this->post('/admin/content', [
+            'social' => ['phone' => '+12025550123', 'telegram' => 'https://t.me/studio_example'],
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->post('/admin/publish')->assertRedirect();
+        $this->get('/contact')->assertOk()
+            ->assertSee('href="tel:+12025550123"', false)
+            ->assertSee('href="https://t.me/studio_example"', false);
+    }
+
     public function test_owner_can_delete_a_project_without_reimporting_it(): void
     {
         $this->actingAs(User::factory()->create(['is_owner' => true]));

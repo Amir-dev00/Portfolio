@@ -180,8 +180,7 @@ class PublicSiteController extends Controller
                 'email' => 'itsamirzamani@gmail.com',
                 'linkedin' => 'https://linkedin.com/in/amirhossein-zamanzade',
                 'github' => 'https://github.com/Amir-dev00',
-                'telegram' => 'https://t.me/Amir_dev00',
-                'telegram_handle' => '@Amir_dev00',
+                ...config('portfolio.contact'),
             ], array_filter((array) ($payload['social'] ?? []), fn ($value) => is_string($value) && trim($value) !== '')),
             'profile' => $profile,
             'homeBackgrounds' => array_map(function (int $slide) use ($payload) {

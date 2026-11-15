@@ -54,8 +54,8 @@
       <label>{{ __('Profile photo path') }}<input list="published-images" name="profile[photo]" value="{{ old('profile.photo', $settings['profile']['photo'] ?? '') }}" placeholder="assets/img/amir/profile.webp"></label>
       <label>{{ __('Site logo path') }}<input list="published-images" name="profile[logo]" value="{{ old('profile.logo', $settings['profile']['logo'] ?? '') }}" placeholder="assets/img/amir/az-monogram-display.webp"></label>
       <label>{{ __('Team website') }}<input name="team[url]" type="url" value="{{ old('team.url', $settings['team']['url'] ?? config('novin.url')) }}"></label>
-      @foreach(['email' => 'Email', 'linkedin' => 'LinkedIn', 'github' => 'GitHub', 'telegram' => 'Telegram', 'telegram_handle' => 'Telegram handle'] as $key => $label)
-        <label>{{ __($label) }}<input name="social[{{ $key }}]" value="{{ old('social.'.$key, $settings['social'][$key] ?? '') }}"></label>
+      @foreach(['email' => 'Email', 'phone' => 'Phone number', 'linkedin' => 'LinkedIn', 'github' => 'GitHub', 'telegram' => 'Telegram', 'telegram_handle' => 'Telegram ID or username'] as $key => $label)
+        <label>{{ __($label) }}<input name="social[{{ $key }}]" @if($key === 'phone') type="tel" @endif value="{{ old('social.'.$key, $settings['social'][$key] ?? '') }}"></label>
       @endforeach
     </div>
   </section>

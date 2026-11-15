@@ -45,8 +45,7 @@ class PortfolioSeeder extends Seeder
                 'email' => 'itsamirzamani@gmail.com',
                 'linkedin' => 'https://linkedin.com/in/amirhossein-zamanzade',
                 'github' => 'https://github.com/Amir-dev00',
-                'telegram' => 'https://t.me/Amir_dev00',
-                'telegram_handle' => '@Amir_dev00',
+                ...config('portfolio.contact'),
             ],
         ]);
 
