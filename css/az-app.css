@@ -872,8 +872,18 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   }
 
   .az-panel_contact {
+    display: flex;
+    flex-direction: column;
     width: min(560px, calc(100% - 32px));
-    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .az-contact-links {
+    flex: 1 0 auto;
+    margin-inline: 0;
+    padding-inline: 0;
   }
 
   .az-contact-eyebrow,
@@ -892,21 +902,22 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   }
 
   .az-contact-link {
-    grid-template-columns: 20px minmax(0, 1fr) auto;
-    gap: 10px;
+    flex: 1 0 auto;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    gap: 12px;
     box-sizing: border-box;
-    min-height: 44px;
-    padding: 6px 8px;
+    min-height: 48px;
+    padding: 6px 10px;
   }
 
   .az-contact-link__icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
   }
 
   .az-contact-link__icon svg {
-    width: 17px;
-    height: 17px;
+    width: 20px;
+    height: 20px;
   }
 
   .az-contact-link__copy {
