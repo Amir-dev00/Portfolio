@@ -140,15 +140,13 @@ html[dir="rtl"] .az-contact-link__copy strong.az-ltr {
   direction: ltr;
 }
 
-/* Persian: right-align the mailto row; keep the address glyphs LTR. */
-html.az-lang-fa .az-contact-link_email .az-contact-link__copy,
-html.az-lang-fa .az-contact-link[href^="mailto:"] .az-contact-link__copy {
+/* Align email and phone copy to the RTL start edge while keeping the values LTR. */
+html[dir="rtl"] .az-contact-link:is([href^="mailto:"], [href^="tel:"]) .az-contact-link__copy {
   align-items: flex-start;
   text-align: start;
 }
 
-html.az-lang-fa .az-contact-link_email .az-contact-link__copy strong.az-ltr,
-html.az-lang-fa .az-contact-link[href^="mailto:"] .az-contact-link__copy strong.az-ltr {
+html[dir="rtl"] .az-contact-link:is([href^="mailto:"], [href^="tel:"]) .az-contact-link__copy strong.az-ltr {
   display: inline-block;
   max-width: 100%;
   direction: ltr;
