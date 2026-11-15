@@ -77,6 +77,16 @@ class PortfolioContent
             }
         }
 
+        // Normalize headings already present in published snapshots or imported data.
+        foreach ($strings as &$copy) {
+            foreach ($copy as $key => $value) {
+                if (preg_match('/(?:^title\.|\.(?:title|heading|eyebrow)$|^home\.profile\.(?:name|role)$)/', $key)) {
+                    $copy[$key] = preg_replace('/(?<!\.)\.\s*$/u', '', $value) ?? $value;
+                }
+            }
+        }
+        unset($copy);
+
         // Previously published UI copy can still use the old Persian term.
         $strings['fa'] = array_map(
             static fn (string $value): string => preg_replace('/(?<![\p{L}\p{M}\p{N}])گپ(?![\p{L}\p{M}\p{N}])/u', 'چت', $value) ?? $value,

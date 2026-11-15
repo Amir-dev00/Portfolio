@@ -5,7 +5,7 @@
                 <header class="az-about__intro">
                   <p class="az-about__eyebrow" data-i18n="about.eyebrow">{{ $strings['about.eyebrow'] ?? ($locale === 'fa' ? 'درباره' : 'About') }}</p>
                   <h1 class="az-about__title" data-i18n="home.profile.name">{{ $strings['home.profile.name'] ?? ($locale === 'fa' ? 'امیرحسین زمان‌زاده' : 'Amirhossein Zamanzade') }}</h1>
-                  <p class="az-about__role" data-i18n="about.title">{{ $strings['about.title'] ?? ($locale === 'fa' ? 'مهندس نرم‌افزار' : 'Software engineer.') }}</p>
+                  <p class="az-about__role" data-i18n="about.title">{{ $strings['about.title'] ?? ($locale === 'fa' ? 'مهندس نرم‌افزار' : 'Software engineer') }}</p>
                 </header>
 
                 <figure class="az-about__portrait">

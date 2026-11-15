@@ -234,6 +234,27 @@ class AdminContentWorkspaceTest extends TestCase
             ->assertSee('href="https://t.me/studio_example"', false);
     }
 
+    public function test_public_headings_drop_the_trailing_period_from_stored_copy(): void
+    {
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->post('/admin/content', [
+            'texts' => [
+                ['key' => 'about.title', 'en' => 'ASP.NET engineer.', 'fa' => 'مهندس نرم‌افزار.'],
+                ['key' => 'work.title', 'en' => 'Selected projects.', 'fa' => 'پروژه‌های منتخب.'],
+                ['key' => 'contact.title', 'en' => 'Let’s talk.', 'fa' => 'صحبت کنیم.'],
+                ['key' => 'contact.intro', 'en' => 'The next line is a sentence.'],
+            ],
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->post('/admin/publish')->assertRedirect();
+
+        $this->get('/about')->assertOk()->assertSee('>ASP.NET engineer</p>', false);
+        $this->get('/fa/work')->assertOk()->assertSee('>پروژه‌های منتخب</h1>', false);
+        $this->get('/contact')->assertOk()
+            ->assertSee('>Let’s talk</h1>', false)
+            ->assertSee('The next line is a sentence.');
+        $this->get('/fa/contact')->assertOk()->assertSee('>صحبت کنیم</h1>', false);
+    }
+
     public function test_owner_can_delete_a_project_without_reimporting_it(): void
     {
         $this->actingAs(User::factory()->create(['is_owner' => true]));
