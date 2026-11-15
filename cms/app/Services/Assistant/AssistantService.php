@@ -48,6 +48,15 @@ class AssistantService
         $history = $this->normalizeHistory($history);
 
         $local = $this->localIntent->resolve($message, $locale, $preview);
+        if ($local === null && $this->context->isRelationshipQuestion($message, $history)) {
+            $local = $this->localIntent->relationshipFollowUp($message, $locale, $history);
+        }
+        if ($local === null && $this->asksForProjectCatalogue($message)) {
+            $catalogue = $this->context->publishedProjectCatalogue($locale, $preview);
+            $local = $this->decisions->answer($catalogue !== '' ? $catalogue : ($locale === 'fa'
+                ? 'هنوز پروژه‌ای در پورتفولیو منتشر نشده.'
+                : 'No projects have been published in the portfolio yet.'));
+        }
         if ($local !== null) {
             if (! $this->localIntent->isGreeting($message)) {
                 $history = $this->recordExchange($history, $message, $local);
@@ -66,10 +75,19 @@ class AssistantService
         $messages[] = ['role' => 'user', 'content' => $message];
 
         $instructions = $this->instructions($locale, $message, $history, $preview);
+        $catalogue = $this->asksForIntroduction($message)
+            ? $this->context->publishedProjectCatalogue($locale, $preview)
+            : '';
+        if ($catalogue !== '') {
+            $instructions .= "\nFor this introduction, write a short biography. Leave project names and examples out of the biography because the app will append the complete portfolio project list.";
+        }
 
         try {
             $payload = $this->client->createDecision($messages, $instructions);
             $decision = $this->decisions->fromModelPayload($payload, $locale, $preview);
+            if ($catalogue !== '' && $decision['action'] === 'answer') {
+                $decision['reply'] .= "\n\n".$catalogue;
+            }
         } catch (RuntimeException $e) {
             // Count failed provider attempts too so caps cannot be bypassed by forcing errors.
             $this->bumpUsage($clientIp);
@@ -185,6 +203,23 @@ Examples:
 VERIFIED PORTFOLIO FACTS:
 {$facts}
 TXT;
+    }
+
+    protected function asksForProjectCatalogue(string $message): bool
+    {
+        $message = preg_replace('/\p{M}/u', '', str_replace('‌', ' ', $message)) ?? $message;
+        if (preg_match('/صفحه.*(?:باز کن|نشون بده)|\b(?:open|go to|take me to|page)\b/iu', $message)) {
+            return false;
+        }
+
+        return (bool) preg_match('/(?:همه(?: ی)?|تمام|کل)\s+(?:پروژه|نمونه[ -]?کار)|\b(?:all|every|complete list of)\s+(?:(?:his|the|your|published|portfolio)\s+)*(?:projects?|work)\b/iu', $message);
+    }
+
+    protected function asksForIntroduction(string $message): bool
+    {
+        $message = str_replace('‌', ' ', $message);
+
+        return (bool) preg_match('/^(?:(?:لطفا|لطفاً|یه کم|یکم|کمی|مختصر)\s+)*(?:(?:را(?:جع|جب) به|راجب|درباره(?: ی)?)\s+امیرحسین(?:\s+زمان زاده)?\s+(?:توضیح بده|بگو|حرف بزن)|امیرحسین(?:\s+زمان زاده)?\s+(?:کیه|کیست|رو معرفی کن)|(?:please\s+)?(?:tell me (?:a (?:little|bit) )?about|introduce|who is)\s+amirhossein(?:\s+zamanzadeh?)?)[\s؟?!.]*$/iu', $message);
     }
 
     protected function sanitizeMessage(string $message): string

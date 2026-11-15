@@ -679,6 +679,33 @@ class AssistantChatTest extends TestCase
         $this->assertCount(8, session(AssistantService::SESSION_KEY));
     }
 
+    public function test_miro_keeps_hasti_as_the_subject_for_age_and_corrections(): void
+    {
+        config(['assistant.api_key' => '', 'assistant.max_history_turns' => 4]);
+        Http::fake();
+        $relationship = config('assistant-biography.relationship.fa');
+
+        foreach ([
+            'دوس دختر داره؟' => $relationship,
+            'یکم فکر کن' => $relationship,
+            'اسمش چیه؟' => 'اسمش هستیه.',
+            'چند سالش هست؟' => 'سن هستی رو نمی‌دونم.',
+            'نه هستی رو میگم' => 'سن هستی رو نمی‌دونم.',
+            'دوس دخترش چند سالشه؟' => 'سن هستی رو نمی‌دونم.',
+            'دوس دخترش' => $relationship,
+        ] as $question => $reply) {
+            $this->postJson('/api/assistant/chat', ['message' => $question, 'locale' => 'fa'])
+                ->assertOk()->assertJsonPath('reply', $reply);
+            RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+        }
+
+        Http::assertNothingSent();
+        $this->assertFalse(app(PortfolioAssistantContext::class)->isRelationshipQuestion(
+            'امیرحسین چند سالشه؟',
+            session(AssistantService::SESSION_KEY),
+        ));
+    }
+
     #[DataProvider('directBiographyQuestions')]
     public function test_direct_biography_shortcuts_keep_the_question_language(
         string $question,
@@ -751,6 +778,47 @@ class AssistantChatTest extends TestCase
             'Business partner question' => ['Who is his business partner at Novin Coders?', 'en', 'en', ['revived Novin Coders'], ['Relationship fixture']],
             'Unrelated project question' => ['Which Laravel projects has he built?', 'en', 'en', ['Clinic Booking Portal'], ['Verified biographical facts from the owner:', 'Relationship fixture']],
         ];
+    }
+
+    public function test_introduction_and_explicit_catalogue_include_every_published_project(): void
+    {
+        $payload = $this->samplePayload();
+        $titles = [
+            'RB Café' => 'کافه آربی',
+            'CourseScan' => 'کورس‌اسکن',
+            'Sarva Dental Clinic' => 'کلینیک دندانپزشکی سروا',
+            'Fitnet' => 'فیت‌نت',
+            'Document Studio' => 'داکیومنت استودیو',
+        ];
+        $payload['projects'] = [];
+        foreach ($titles as $english => $persian) {
+            $payload['projects'][] = [
+                'slug' => str($english)->slug()->toString(),
+                'title' => $english,
+                'en' => ['title' => $english],
+                'fa' => ['title' => $persian],
+            ];
+        }
+        $this->bindPortfolioPayload($payload);
+
+        $intro = 'امیرحسین مهندس نرم‌افزار و دانشجوی علوم کامپیوتره.';
+        Http::fake(['api.openai.com/*' => Http::response([
+            'output_text' => json_encode(['action' => 'answer', 'reply' => $intro, 'destination' => '']),
+        ])]);
+        $list = 'پروژه‌های پورتفولیو: '.implode('، ', array_values($titles));
+        $this->postJson('/api/assistant/chat', ['message' => 'یکم راجب امیرحسین توضیح بده', 'locale' => 'fa'])
+            ->assertOk()->assertJsonPath('reply', $intro."\n\n".$list);
+
+        RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+        $this->postJson('/api/assistant/chat', ['message' => 'اسم همهٔ پروژه‌هام رو بگو', 'locale' => 'fa'])
+            ->assertOk()->assertJsonPath('reply', $list);
+
+        RateLimiter::clear('assistant.req.'.sha1('127.0.0.1|'.$this->app['session']->getId()));
+        $this->postJson('/api/assistant/chat', ['message' => 'List all his projects', 'locale' => 'en'])
+            ->assertOk()->assertJsonPath('reply', 'Portfolio projects: '.implode(', ', array_keys($titles)));
+
+        Http::assertSentCount(1);
+        Http::assertSent(fn ($request) => str_contains($request->data()['instructions'], 'Leave project names and examples out'));
     }
 
     public function test_compact_context_is_smaller_than_full_dump_for_sample_question(): void

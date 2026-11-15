@@ -44,6 +44,23 @@ class PortfolioAssistantContext
         return $this->buildCompact($payload, $locale, $question, $priorExchange, $preview);
     }
 
+    public function publishedProjectCatalogue(string $locale, bool $preview = false): string
+    {
+        $projects = $this->content->payload($preview)['projects'] ?? [];
+        $titles = array_unique(array_filter(array_map(
+            static fn (array $project): string => trim($project[$locale]['title'] ?? $project['en']['title'] ?? $project['title'] ?? ''),
+            $projects,
+        )));
+
+        if ($titles === []) {
+            return '';
+        }
+
+        return $locale === 'fa'
+            ? 'پروژه‌های پورتفولیو: '.implode('، ', $titles)
+            : 'Portfolio projects: '.implode(', ', $titles);
+    }
+
     /**
      * Legacy full dump kept for size comparisons / debugging — not used by ask().
      */
@@ -187,12 +204,7 @@ class PortfolioAssistantContext
         $details = config('assistant-biography-details', []);
         $matched = collect($topics)->filter(fn (array $entry) => $this->matchesBiographyTopic($query, $entry['match']));
         $relationship = $topics['relationship'] ?? null;
-        if ($relationship !== null && $matched->isEmpty() && $this->isBiographyFollowUp($query)
-            && $this->followsRelationship($priorExchange, $topics)) {
-            $matched->put('relationship', $relationship);
-        }
-
-        if ($matched->keys()->all() === ['relationship']) {
+        if ($relationship !== null && $this->isRelationshipQuestion($question, $priorExchange)) {
             return [
                 $relationship[$locale],
                 'These are the only verified facts about this relationship. Answer only the detail asked and distinguish any unknown detail from what is already known.',
@@ -206,11 +218,23 @@ class PortfolioAssistantContext
         }
 
         return collect($topics)
-            ->filter(fn (array $entry, string $topic) => $topic !== 'relationship' || $matched->has($topic))
+            ->except('relationship')
             ->map(fn (array $entry, string $topic) => $entry[$locale].' '
                 .($topic === 'profile' ? $this->birthFacts($entry['birth_date_jalali'], $locale) : ($details[$topic][$locale] ?? '')))
             ->map(trim(...))
             ->values()->all();
+    }
+
+    /** @param list<array{role:string,content:string}> $history */
+    public function isRelationshipQuestion(string $question, array $history): bool
+    {
+        $query = ' '.$this->fold($question).' ';
+        $topics = config('assistant-biography');
+        if ($this->matchesBiographyTopic($query, $topics['relationship']['match'])) {
+            return true;
+        }
+
+        return $this->isBiographyFollowUp($query) && $this->followsRelationship($history, $topics);
     }
 
     /** @param list<string> $terms */
@@ -264,7 +288,7 @@ class PortfolioAssistantContext
 
     protected function isBiographyFollowUp(string $query): bool
     {
-        return (bool) preg_match('/^(?:and |so |خب |پس )?(?:tell me more(?: about (?:him|her|them|it))?|what about (?:him|her|them)|who is she|what (?:is|was) her name|how long(?: have they been together)?|since when|بیشتر بگو|بیشتر توضیح بده|دیگه چی|اون کیه|از کی|چند وقته(?: با هم(?:ن| هستند))?|اسمش (?:چی بود|چیه|چیست)|مگه نگفتی .+|خودت (?:نگفتی|گفتی|نوشتی) .+)$/u', trim($query));
+        return (bool) preg_match('/^(?:and |so |خب |پس )?(?:tell me more(?: about (?:him|her|them|it))?|what about (?:him|her|them)|who is she|what (?:is|was) her name|how old is she|think (?:again|about it)|how long(?: have they been together)?|since when|بیشتر بگو|بیشتر توضیح بده|دیگه چی|اون کیه|(?:یکم |یه کم |دوباره )?فکر کن|چند سالش(?:ه| هست| است)?|از کی|چند وقته(?: با هم(?:ن| هستند))?|اسمش (?:چی بود|چیه|چیست)|مگه نگفتی .+|خودت (?:نگفتی|گفتی|نوشتی) .+)$/u', trim($query));
     }
 
     /** @param array{int,int,int} $jalaliDate */

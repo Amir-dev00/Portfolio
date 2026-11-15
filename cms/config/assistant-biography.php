@@ -58,7 +58,7 @@ return [
         'en' => 'As of November 2026, Amirhossein had recently joined Pol Ideal Pars (medpip.com) as a Software Engineer and was learning in his new role. The company’s current site runs on WordPress, and the team plans to build a new platform with Next.js and PHP/Laravel and migrate the site to it. The migration is planned. His main interest is back-end development.',
     ],
     'relationship' => [
-        'match' => ['girlfriend', 'dating', 'romantic relationship', 'in a relationship', 'romantic partner', 'his girlfriend', 'hasti', 'دوس دختر', 'دوس دخترش', 'دوسدختر', 'دوسدخترش', 'دوست دختر', 'دوستدختر', 'دوست دخترش', 'دوستدخترش', 'پارتنر', 'تو رابطه', 'در رابطه', 'رابطه عاطفی', 'رابطش', 'رابطه ش', 'رابطه اش', 'رابطهش', 'رابطهاش', 'هستی کیه', 'هستی کیست', 'اسمش هستیه', 'شریک عاطفی', 'دوستش داره', 'مجرده', 'مجرد است'],
+        'match' => ['girlfriend', 'dating', 'romantic relationship', 'in a relationship', 'romantic partner', 'his girlfriend', 'hasti', 'دوس دختر', 'دوس دخترش', 'دوسدختر', 'دوسدخترش', 'دوست دختر', 'دوستدختر', 'دوست دخترش', 'دوستدخترش', 'پارتنر', 'تو رابطه', 'در رابطه', 'رابطه عاطفی', 'رابطش', 'رابطه ش', 'رابطه اش', 'رابطهش', 'رابطهاش', 'هستی کیه', 'هستی کیست', 'هستی رو میگم', 'هستی را میگم', 'منظورم هستیه', 'سن هستی', 'هستی چند سال', 'اسمش هستیه', 'شریک عاطفی', 'دوستش داره', 'مجرده', 'مجرد است'],
         'fa' => 'امیرحسین در رابطه است. اسم شریک عاطفی‌اش هستی است. امیرحسین او را خیلی زیبا و دوست‌داشتنی توصیف می‌کند و می‌گوید خیلی دوستش دارد.',
         'en' => 'Amirhossein is in a relationship with Hasti. He describes her as beautiful and sweet and says he loves her very much.',
     ],

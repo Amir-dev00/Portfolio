@@ -67,6 +67,35 @@ class AssistantLocalIntent
         return null;
     }
 
+    /** @param list<array{role:string,content:string}> $history */
+    public function relationshipFollowUp(string $message, string $locale, array $history): ?array
+    {
+        $question = $this->normalize($message);
+        if (preg_match('/^(?:(?:یکم |یه کم |دوباره )?فکر کن|think again|think about it)$/u', $question)) {
+            return $this->decisions->answer(config('assistant-biography.relationship.'.$locale));
+        }
+
+        // A correction such as “I meant Hasti” inherits the kind of detail just asked for.
+        if (preg_match('/^(?:نه )?(?:هستی (?:رو|را) می ?گم|منظورم هستیه|i (?:mean|meant) hasti)$/u', $question)) {
+            foreach (array_reverse($history) as $turn) {
+                if ($turn['role'] === 'user') {
+                    $question = $this->normalize($turn['content']);
+                    break;
+                }
+            }
+        }
+
+        if (preg_match('/چند سال|سالشه|سن |سنش|تولد|متولد|\b(?:how old|age|birth|birthday|born)\b/u', $question)) {
+            return $this->decisions->answer($locale === 'fa' ? 'سن هستی رو نمی‌دونم.' : 'I don’t know Hasti’s age.');
+        }
+
+        if (preg_match('/^(?:اسمش (?:چیه|چیست)|what is her name)$/u', $question)) {
+            return $this->decisions->answer($locale === 'fa' ? 'اسمش هستیه.' : 'Her name is Hasti.');
+        }
+
+        return null;
+    }
+
     protected function normalize(string $message): string
     {
         $message = mb_strtolower(trim($message));
@@ -88,7 +117,7 @@ class AssistantLocalIntent
         }
 
         if (preg_match('/(?:^| )(?:دوس(?:ت)? *دختر(?:ش|اش)?|پارتنر(?:ش|اش)?|مجرده|مجرد است|تو رابطه|در رابطه|رابطه عاطفی)(?= |$)|\b(?:girlfriend|romantic partner|in a relationship|dating anyone|is he single)\b/u', $question)) {
-            if (preg_match('/(?:بیشتر|جزئیات|آدرس|شماره|قد|سن|تولد|کجا|کی آشنا|از کی|چند وقته|چند وقت)|\b(?:more|details|age|how old|where|when|since|how long|phone|address|birthday|birthdate|height|contact|instagram)\b/u', $question)) {
+            if (preg_match('/(?:بیشتر|جزئیات|آدرس|شماره|قد|سن|چند سال|سالشه|تولد|متولد|کجا|کی آشنا|از کی|چند وقته|چند وقت)|\b(?:more|details|age|how old|where|when|since|how long|phone|address|birthday|birthdate|height|contact|instagram)\b/u', $question)) {
                 return null;
             }
 
