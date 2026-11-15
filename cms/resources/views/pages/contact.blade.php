@@ -40,7 +40,7 @@
                   </span>
                   <span class="az-contact-link__copy">
                     <strong class="az-ltr" dir="ltr">{{ $social['email'] }}</strong>
-                    <small data-i18n="contact.emailMe">Email me</small>
+                    <small data-i18n="contact.email.sub">{{ $strings['contact.email.sub'] }}</small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>
@@ -50,7 +50,7 @@
                   </span>
                   <span class="az-contact-link__copy">
                     <strong data-i18n="contact.linkedin">LinkedIn</strong>
-                    <small data-i18n="contact.linkedin.sub">{{ $strings['contact.linkedin.sub'] ?? 'Professional profile' }}</small>
+                    <small data-i18n="contact.linkedin.sub">{{ $strings['contact.linkedin.sub'] }}</small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>
@@ -60,7 +60,7 @@
                   </span>
                   <span class="az-contact-link__copy">
                     <strong data-i18n="contact.github">GitHub</strong>
-                    <small data-i18n="contact.github.sub">{{ $strings['contact.github.sub'] ?? 'Projects and code' }}</small>
+                    <small data-i18n="contact.github.sub">{{ $strings['contact.github.sub'] }}</small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>
@@ -70,7 +70,17 @@
                   </span>
                   <span class="az-contact-link__copy">
                     <strong data-i18n="contact.telegram">Telegram</strong>
-                    <small data-i18n="contact.telegram.sub">{{ $strings['contact.telegram.sub'] ?? 'Send a message' }}</small>
+                    <small data-i18n="contact.telegram.sub">{{ $strings['contact.telegram.sub'] }}</small>
+                  </span>
+                  <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
+                </a>
+                <a class="az-contact-link" href="{{ $teamUrl ?? config('novin.url') }}" target="_blank" rel="noopener">
+                  <span class="az-contact-link__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+                  </span>
+                  <span class="az-contact-link__copy">
+                    <strong data-i18n="about.team.name">{{ $strings['about.team.name'] ?? config('novin.'.$locale.'.name') }}</strong>
+                    <small data-i18n="contact.team.sub">{{ $strings['contact.team.sub'] }}</small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>

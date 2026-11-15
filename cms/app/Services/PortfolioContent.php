@@ -18,6 +18,8 @@ class PortfolioContent
             }
         }
 
+        $payload['strings'] = $this->withContactCopy($payload['strings'] ?? []);
+
         $experience = $payload['experience'] ?? [];
         $managedExperience = $payload['managed_bundled_experience'] ?? [];
         foreach (config('work-experience', []) as $id => $entry) {
@@ -45,6 +47,36 @@ class PortfolioContent
         $payload['projects'] = $projects;
 
         return $payload;
+    }
+
+    private function withContactCopy(array $strings): array
+    {
+        $defaults = json_decode(file_get_contents(config_path('portfolio-strings.json')), true, flags: JSON_THROW_ON_ERROR);
+        // Published snapshots can still contain the original seeded captions.
+        $previousDefaults = [
+            'en' => [
+                'contact.linkedin.sub' => ['Professional profile', 'Start a conversation'],
+                'contact.github.sub' => ['Projects and code', 'Code & repositories'],
+                'contact.telegram.sub' => ['Send a message', 'Quick chat · @Amir_dev00'],
+            ],
+            'fa' => [
+                'contact.linkedin.sub' => ['ارتباط حرفه‌ای', 'شروع گفتگو'],
+                'contact.github.sub' => ['پروژه‌ها و کد', 'کد و مخازن'],
+                'contact.telegram.sub' => ['ارسال پیام', 'گفتگوی سریع · @Amir_dev00'],
+            ],
+        ];
+
+        foreach ($previousDefaults as $locale => $captions) {
+            $captions += ['contact.email.sub' => [], 'contact.team.sub' => []];
+            foreach ($captions as $key => $previousValues) {
+                $value = $strings[$locale][$key] ?? null;
+                if ($value === null || in_array($value, $previousValues, true)) {
+                    $strings[$locale][$key] = $defaults[$locale][$key];
+                }
+            }
+        }
+
+        return $strings;
     }
 
     public function bundledProjects(): array

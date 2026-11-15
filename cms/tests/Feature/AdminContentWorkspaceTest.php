@@ -170,6 +170,33 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/fa/work/novin-inova')->assertOk()->assertSee('عنوان جست‌وجوی اینوا');
     }
 
+    public function test_contact_refreshes_old_published_captions_and_uses_the_shared_team_link(): void
+    {
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->post('/admin/content', [
+            'texts' => [
+                ['key' => 'about.team.name', 'en' => 'Studio Example', 'fa' => 'استودیو نمونه'],
+                ['key' => 'contact.github.sub', 'en' => 'Code & repositories', 'fa' => 'کد و مخازن'],
+                ['key' => 'contact.telegram.sub', 'en' => 'A custom tagline', 'fa' => 'متن دلخواه'],
+            ],
+            'team' => ['url' => 'https://example.com/team'],
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->post('/admin/publish')->assertRedirect();
+
+        $this->get('/contact')->assertOk()
+            ->assertSeeInOrder(['Send me your project brief', 'Explore my repos and experiments', 'A custom tagline', 'Studio Example', 'Meet the team I build with'])
+            ->assertSee('href="https://example.com/team"', false)
+            ->assertDontSee('Code & repositories');
+
+        $this->getJson('/fa/contact', ['X-AZ-Fragment' => '1'])->assertOk()
+            ->assertJsonPath('html', fn (string $html) => str_contains($html, 'ایدهٔ پروژه‌ات رو برام بنویس')
+                && str_contains($html, 'کدها و تجربه‌های برنامه‌نویسی من')
+                && str_contains($html, 'متن دلخواه')
+                && str_contains($html, 'استودیو نمونه')
+                && str_contains($html, 'با تیمی که باهاش کار می‌کنم آشنا شو')
+                && str_contains($html, 'href="https://example.com/team"'));
+    }
+
     public function test_owner_can_delete_a_project_without_reimporting_it(): void
     {
         $this->actingAs(User::factory()->create(['is_owner' => true]));
