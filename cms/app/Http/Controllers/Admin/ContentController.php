@@ -61,8 +61,29 @@ class ContentController extends Controller
 
     public function skills(): View
     {
+        $defaultSkills = config('portfolio.about_skills');
+        $keys = ['section' => 'about.skills'];
+        foreach (array_keys($defaultSkills) as $category) {
+            $keys[$category] = 'about.skills.'.$category;
+        }
+
+        $defaults = $this->defaultStrings();
+        $entries = ContentEntry::query()->where('group', 'ui')->whereIn('key', $keys)->get()->keyBy('key');
+        $headings = array_map(static function (string $key) use ($entries, $defaults): array {
+            $entry = $entries->get($key);
+
+            return [
+                'key' => $key,
+                'en' => $entry?->value_en ?? $defaults['en'][$key],
+                'fa' => $entry?->value_fa ?? $defaults['fa'][$key],
+                'default_en' => $defaults['en'][$key],
+                'default_fa' => $defaults['fa'][$key],
+            ];
+        }, $keys);
+
         return view('admin.content.skills', [
-            'skills' => array_replace(config('portfolio.about_skills'), SiteSetting::query()->where('key', 'about_skills')->first()?->value ?? []),
+            'skills' => array_replace($defaultSkills, SiteSetting::query()->where('key', 'about_skills')->first()?->value ?? []),
+            'headings' => $headings,
         ]);
     }
 

@@ -2,14 +2,19 @@
 @section('title', __('Skills'))
 @section('heading', __('Skills'))
 @section('content')
-<p class="admin-hint">{{ __('Edit each skill individually. Save the draft, then publish it to update About and Miro.') }}</p>
+<p class="admin-hint">{{ __('Edit skill titles and items here. Save the draft, then publish it to update your site.') }}</p>
 
 <form method="post" action="{{ route('admin.content.update') }}" data-skill-editor>
   @csrf
+  <section class="card" aria-labelledby="skills-section-title">
+    <h3 id="skills-section-title">{{ __('Skills section title') }}</h3>
+    @include('admin.content.skill-heading-fields', ['index' => 'section', 'heading' => $headings['section']])
+  </section>
   <div class="row">
     @foreach($skills as $category => $items)
       <section class="card" aria-labelledby="skills-{{ $category }}" data-skill-group>
         <h3 id="skills-{{ $category }}">{{ __(ucfirst($category)) }}</h3>
+        @include('admin.content.skill-heading-fields', ['index' => $category, 'heading' => $headings[$category]])
         {{-- Keep empty categories in the submitted draft so deleted skills stay deleted. --}}
         <input type="hidden" name="about_skill_items[{{ $category }}][]" value="">
         <div data-skill-list>

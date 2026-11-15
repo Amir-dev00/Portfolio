@@ -260,10 +260,16 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/admin/skills')->assertRedirect('/admin/login');
         $this->actingAs(User::factory()->create(['is_owner' => true]));
         $this->get('/admin/skills')->assertOk()
-            ->assertSee('Add skill')->assertSee('Remove')->assertSee('value="Laravel"', false);
+            ->assertSee('Add skill')->assertSee('Remove')->assertSee('value="Laravel"', false)
+            ->assertSee('name="texts[section][en]"', false)
+            ->assertSee('name="texts[backend][fa]"', false);
         $this->post('/admin/publish')->assertRedirect();
 
         $this->from('/admin/skills')->post('/admin/content', [
+            'texts' => [
+                'section' => ['key' => 'about.skills', 'en' => 'Technical toolkit', 'fa' => 'جعبه‌ابزار فنی'],
+                'backend' => ['key' => 'about.skills.backend', 'en' => 'Server engineering', 'fa' => 'مهندسی سمت سرور'],
+            ],
             'about_skill_items' => [
                 'backend' => ['', 'Laravel APIs', 'Observability'],
                 'other' => [''],
@@ -273,8 +279,11 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/admin/skills')->assertOk()
             ->assertSee('value="Laravel APIs"', false)
             ->assertSee('value="Observability"', false)
+            ->assertSee('value="Server engineering"', false)
+            ->assertSee('value="مهندسی سمت سرور"', false)
             ->assertDontSee('value="Scrum"', false);
-        $this->get('/about')->assertOk()->assertDontSee('Observability')->assertSee('Scrum');
+        $this->get('/about')->assertOk()->assertDontSee('Observability')->assertSee('Scrum')
+            ->assertDontSee('Server engineering');
 
         $this->post('/admin/publish')->assertRedirect();
         foreach (['/about', '/fa/about'] as $path) {
@@ -282,6 +291,11 @@ class AdminContentWorkspaceTest extends TestCase
                 ->assertSee('Laravel APIs')->assertSee('Observability')->assertSee('JavaScript')
                 ->assertDontSee('Scrum');
         }
+        $this->get('/about')->assertOk()
+            ->assertSee('>Technical toolkit</h2>', false)->assertSee('>Server engineering</h3>', false);
+        $this->get('/fa/about')->assertOk()
+            ->assertSee('>جعبه‌ابزار فنی</h2>', false)->assertSee('>مهندسی سمت سرور</h3>', false);
+
         $this->post('/admin/language', ['locale' => 'fa'])->assertRedirect();
         $this->get('/admin/skills')->assertOk()->assertSee('افزودن مهارت')->assertSee('حذف');
     }
