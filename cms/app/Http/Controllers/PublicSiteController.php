@@ -160,6 +160,10 @@ class PublicSiteController extends Controller
             return asset($path).(is_file($file) ? '?v='.filemtime($file) : '');
         };
 
+        $bundledProfile = 'assets/img/amir/profile.webp';
+        $profilePhoto = $this->assetUrl($profile['photo'] ?? '', $bundledProfile);
+        $usesBundledProfile = $profilePhoto === asset($bundledProfile);
+
         $pages = ['home', 'work', 'about', 'ask', 'contact'];
         $viewData = [
             'locale' => $locale,
@@ -194,7 +198,8 @@ class PublicSiteController extends Controller
             }, range(1, 4)),
             'aboutSkills' => array_replace(config('portfolio.about_skills'), $payload['settings']['about_skills'] ?? []),
             'teamUrl' => $payload['settings']['team']['url'] ?? config('novin.url'),
-            'profilePhoto' => $this->assetUrl($profile['photo'] ?? '', 'assets/img/amir/profile.webp'),
+            'profilePhoto' => $usesBundledProfile ? $assetV($bundledProfile) : $profilePhoto,
+            'profilePhotoThumbnail' => $usesBundledProfile ? $assetV('assets/img/amir/profile-360.webp') : null,
             'booking' => $booking,
             'bookingAdmin' => (bool) $request->user()?->isOwner(),
         ];
