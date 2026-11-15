@@ -114,6 +114,8 @@ html.az-loading .az-profile:not(.is-visible) {
   height: 100%;
   object-fit: cover;
   object-position: 50% 18%;
+  transform: scale(1.48);
+  transform-origin: 50% 15%;
   border-radius: 50%;
   user-select: none;
   -webkit-user-drag: none;
