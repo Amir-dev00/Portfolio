@@ -210,8 +210,20 @@ class AdminContentWorkspaceTest extends TestCase
             ->assertSee('href="tel:+98'.substr($defaults['phone'], 1).'"', false)
             ->assertSee($defaults['phone'])->assertSee('Give me a call')
             ->assertSee('href="'.$defaults['telegram'].'"', false)
-            ->assertSee($defaults['telegram_handle'])->assertDontSee('href="https://t.me/Amir_dev00"', false);
-        $this->get('/fa/contact')->assertOk()->assertSee('مستقیم باهام تماس بگیر');
+            ->assertSee('<small data-i18n="contact.telegram.sub">For a quick chat</small>', false)
+            ->assertDontSee('href="https://t.me/Amir_dev00"', false)
+            ->assertDontSee($defaults['telegram_id']);
+        $this->get('/fa/contact')->assertOk()
+            ->assertSee('مستقیم باهام تماس بگیر')
+            ->assertSee('<small data-i18n="contact.telegram.sub">برای یه گپ کوتاه</small>', false);
+
+        $this->post('/admin/content', [
+            'social' => ['telegram' => 'https://t.me/+989124778210', 'telegram_handle' => $defaults['telegram_id']],
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->post('/admin/publish')->assertRedirect();
+        $this->get('/contact')->assertOk()
+            ->assertSee('href="https://t.me/itsamirzamani"', false)
+            ->assertDontSee('href="https://t.me/+989124778210"', false);
 
         $this->post('/admin/content', [
             'social' => ['phone' => '+12025550123', 'telegram' => 'https://t.me/studio_example'],

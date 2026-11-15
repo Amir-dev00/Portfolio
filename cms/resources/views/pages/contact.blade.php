@@ -84,7 +84,7 @@
                   </span>
                   <span class="az-contact-link__copy">
                     <strong data-i18n="contact.telegram">Telegram</strong>
-                    <small><span data-i18n="contact.telegram.sub">{{ $strings['contact.telegram.sub'] }}</span> · <bdi dir="ltr">{{ $social['telegram_handle'] }}</bdi></small>
+                    <small data-i18n="contact.telegram.sub">{{ $strings['contact.telegram.sub'] }}</small>
                   </span>
                   <span class="az-contact-link__arrow" aria-hidden="true">↗</span>
                 </a>

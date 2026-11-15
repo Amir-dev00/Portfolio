@@ -83,13 +83,13 @@ class PortfolioContent
     public function withContactDefaults(array $social): array
     {
         $defaults = config('portfolio.contact');
-        $legacyTelegram = 'https://t.me/Amir_dev00';
-
-        if (strcasecmp(rtrim($social['telegram'] ?? '', '/'), $legacyTelegram) === 0) {
+        $telegramUrl = strtolower(rtrim(trim($social['telegram'] ?? ''), '/'));
+        if (in_array($telegramUrl, ['https://t.me/amir_dev00', 'https://t.me/+989124778210'], true)) {
             unset($social['telegram']);
         }
 
-        if (strcasecmp($social['telegram_handle'] ?? '', '@Amir_dev00') === 0) {
+        $telegramHandle = strtolower(trim($social['telegram_handle'] ?? ''));
+        if (in_array($telegramHandle, ['@amir_dev00', $defaults['telegram_id']], true)) {
             unset($social['telegram_handle']);
         }
 
