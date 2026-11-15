@@ -1,6 +1,7 @@
 /* Home composer and dedicated Ask conversation. */
 
 .az-assistant {
+  visibility: visible;
   --az-asst-navy: var(--az-glass-translucent, rgba(20, 34, 56, 0.72));
   --az-asst-edge: var(--az-line, rgba(244, 247, 255, 0.18));
   --az-asst-text: var(--az-text, #f4f7ff);

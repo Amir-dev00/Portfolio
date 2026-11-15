@@ -48,8 +48,11 @@ class AssistantChatTest extends TestCase
     {
         $this->get('/ask')->assertOk();
         $this->get('/fa/ask')->assertOk();
-        $this->get('/')->assertOk();
-        $this->get('/fa')->assertOk();
+        foreach (['/', '/fa'] as $path) {
+            $this->get($path)->assertOk()
+                ->assertSee('data-az-assistant-home hidden', false)
+                ->assertSee('data-az-tour-launch disabled', false);
+        }
     }
 
     public function test_public_shell_and_fragments_render_only_the_requested_view(): void

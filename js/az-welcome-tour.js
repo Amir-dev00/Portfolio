@@ -272,12 +272,12 @@
     });
   }
 
-  launch.hidden = false;
   launch.addEventListener("click", function () {
     if (!ready()) return;
     if (panel.hidden) show(-1, true);
     else dismiss(true, true);
   });
+  launch.disabled = false;
   close.addEventListener("click", function () { dismiss(true, true); });
   next.addEventListener("click", function () { advance(index); });
   document.addEventListener("keydown", function (event) {

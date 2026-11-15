@@ -12,6 +12,9 @@
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 
+/* The deferred assistant stylesheet reveals the fully styled composer. */
+.az-assistant { visibility: hidden; }
+
 body {
   position: relative;
   width: 100%;

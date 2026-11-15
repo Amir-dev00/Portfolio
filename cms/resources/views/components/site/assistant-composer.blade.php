@@ -1,6 +1,6 @@
 <form class="az-assistant__composer" data-az-assistant-form method="post">
   @if($inputId === 'az-assistant-input')
-  <button type="button" class="az-assistant__avatar az-tour-launch" data-az-assistant-avatar="idle" data-az-tour-launch hidden aria-expanded="false" aria-controls="az-welcome-tour" aria-label="{{ $locale === 'fa' ? 'باز کردن راهنمای میرو' : 'Open Miro’s site tour' }}" data-i18n-attr="aria-label:guide.launch">
+  <button type="button" class="az-assistant__avatar az-tour-launch" data-az-assistant-avatar="idle" data-az-tour-launch disabled aria-expanded="false" aria-controls="az-welcome-tour" aria-label="{{ $locale === 'fa' ? 'باز کردن راهنمای میرو' : 'Open Miro’s site tour' }}" data-i18n-attr="aria-label:guide.launch">
   @else
   <span class="az-assistant__avatar" data-az-assistant-avatar="idle" aria-hidden="true">
   @endif
