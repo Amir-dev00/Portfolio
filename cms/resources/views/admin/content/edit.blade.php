@@ -4,6 +4,7 @@
 @section('content')
 <nav class="admin-pills" aria-label="{{ __('Content sections') }}">
   <a class="btn btn-secondary" href="{{ route('admin.content.edit') }}" @if(!$group) aria-current="page" @endif>{{ __('Site settings') }}</a>
+  <a class="btn btn-secondary" href="{{ route('admin.skills.edit') }}">{{ __('Skills') }}</a>
   @foreach($groups as $name => $rows)
     <a class="btn btn-secondary" href="{{ route('admin.content.edit', ['group' => $name]) }}" @if($group === $name) aria-current="page" @endif>{{ __($name) }} <span class="badge">{{ count($rows) }}</span></a>
   @endforeach
@@ -74,11 +75,7 @@
 
   <section class="card">
     <h3>{{ __('About skills') }}</h3>
-    <div class="row">
-      @foreach(config('portfolio.about_skills') as $key => $default)
-        <label>{{ __(ucfirst($key)) }} <span class="admin-hint">{{ __('· comma-separated') }}</span><input name="about_skills[{{ $key }}]" value="{{ old('about_skills.'.$key, implode(', ', $settings['about_skills'][$key] ?? $default)) }}"></label>
-      @endforeach
-    </div>
+    <a class="btn btn-secondary" href="{{ route('admin.skills.edit') }}">{{ __('Manage skills') }}</a>
   </section>
 
   <section class="card">

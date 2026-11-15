@@ -255,6 +255,37 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/fa/contact')->assertOk()->assertSee('>صحبت کنیم</h1>', false);
     }
 
+    public function test_owner_can_add_edit_and_remove_individual_skills(): void
+    {
+        $this->get('/admin/skills')->assertRedirect('/admin/login');
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->get('/admin/skills')->assertOk()
+            ->assertSee('Add skill')->assertSee('Remove')->assertSee('value="Laravel"', false);
+        $this->post('/admin/publish')->assertRedirect();
+
+        $this->from('/admin/skills')->post('/admin/content', [
+            'about_skill_items' => [
+                'backend' => ['', 'Laravel APIs', 'Observability'],
+                'other' => [''],
+            ],
+        ])->assertRedirect('/admin/skills')->assertSessionHasNoErrors();
+
+        $this->get('/admin/skills')->assertOk()
+            ->assertSee('value="Laravel APIs"', false)
+            ->assertSee('value="Observability"', false)
+            ->assertDontSee('value="Scrum"', false);
+        $this->get('/about')->assertOk()->assertDontSee('Observability')->assertSee('Scrum');
+
+        $this->post('/admin/publish')->assertRedirect();
+        foreach (['/about', '/fa/about'] as $path) {
+            $this->get($path)->assertOk()
+                ->assertSee('Laravel APIs')->assertSee('Observability')->assertSee('JavaScript')
+                ->assertDontSee('Scrum');
+        }
+        $this->post('/admin/language', ['locale' => 'fa'])->assertRedirect();
+        $this->get('/admin/skills')->assertOk()->assertSee('افزودن مهارت')->assertSee('حذف');
+    }
+
     public function test_owner_can_delete_a_project_without_reimporting_it(): void
     {
         $this->actingAs(User::factory()->create(['is_owner' => true]));

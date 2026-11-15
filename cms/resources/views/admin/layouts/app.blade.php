@@ -77,6 +77,7 @@
     <nav>
       <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">{{ __('Dashboard') }}</a>
       <a href="{{ route('admin.content.edit') }}" class="{{ request()->routeIs('admin.content.*') ? 'active' : '' }}">{{ __('Site content') }}</a>
+      <a href="{{ route('admin.skills.edit') }}" class="{{ request()->routeIs('admin.skills.edit') ? 'active' : '' }}">{{ __('Skills') }}</a>
       <a href="{{ route('admin.bookings.index') }}" class="{{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">{{ __('Bookings') }}</a>
       <a href="{{ route('admin.projects.index') }}" class="{{ request()->routeIs('admin.projects.*') ? 'active' : '' }}">{{ __('Projects') }}</a>
       <a href="{{ route('admin.experience.index') }}" class="{{ request()->routeIs('admin.experience.*') ? 'active' : '' }}">{{ __('Work experience') }}</a>

@@ -75,11 +75,17 @@ class AssistantLocalIntent
             return $this->decisions->answer(config('assistant-biography.relationship.'.$locale));
         }
 
-        // A correction such as “I meant Hasti” inherits the kind of detail just asked for.
-        if (preg_match('/^(?:نه )?(?:هستی (?:رو|را) می ?گم|منظورم هستیه|i (?:mean|meant) hasti)$/u', $question)) {
+        $clarification = '/^(?:(?:نه )?(?:هستی (?:رو|را) می ?گم|منظورم هستیه|i (?:mean|meant) hasti)|مطمئنی|مطمئن هستی|واقعا|واقعاً|are you sure|really)$/u';
+        $isClarification = preg_match($clarification, $question);
+        if ($isClarification) {
             foreach (array_reverse($history) as $turn) {
-                if ($turn['role'] === 'user') {
-                    $question = $this->normalize($turn['content']);
+                if ($turn['role'] !== 'user') {
+                    continue;
+                }
+
+                $previous = $this->normalize($turn['content']);
+                if (! preg_match($clarification, $previous)) {
+                    $question = $previous;
                     break;
                 }
             }
@@ -93,7 +99,9 @@ class AssistantLocalIntent
             return $this->decisions->answer($locale === 'fa' ? 'اسمش هستیه.' : 'Her name is Hasti.');
         }
 
-        return null;
+        return $isClarification
+            ? $this->decisions->answer(config('assistant-biography.relationship.'.$locale))
+            : null;
     }
 
     protected function normalize(string $message): string

@@ -46,7 +46,7 @@ class ContentController extends Controller
         $group = $request->query('group');
         $group = is_string($group) && isset($groups[$group]) ? $group : null;
 
-        $settings = SiteSetting::query()->whereIn('key', ['profile', 'social', 'team', 'assistant_knowledge', 'featured_slugs', 'home_backgrounds', 'about_skills'])->pluck('value', 'key')->all();
+        $settings = SiteSetting::query()->whereIn('key', ['profile', 'social', 'team', 'assistant_knowledge', 'featured_slugs', 'home_backgrounds'])->pluck('value', 'key')->all();
         $settings['social'] = $content->withContactDefaults($settings['social'] ?? []);
 
         return view('admin.content.edit', [
@@ -56,6 +56,13 @@ class ContentController extends Controller
             'projects' => $group ? [] : $content->projectsFor('en', true),
             'imagePaths' => $group ? [] : MediaAsset::query()->where('mime', 'like', 'image/%')
                 ->whereNotNull('public_path')->orderBy('original_name')->get(['public_path', 'original_name']),
+        ]);
+    }
+
+    public function skills(): View
+    {
+        return view('admin.content.skills', [
+            'skills' => array_replace(config('portfolio.about_skills'), SiteSetting::query()->where('key', 'about_skills')->first()?->value ?? []),
         ]);
     }
 
@@ -91,6 +98,9 @@ class ContentController extends Controller
             'home_backgrounds.*.mobile' => $path,
             'about_skills' => ['array:frontend,languages,backend,other'],
             'about_skills.*' => ['nullable', 'string', 'max:500'],
+            'about_skill_items' => ['array:frontend,languages,backend,other'],
+            'about_skill_items.*' => ['array', 'list', 'max:51'],
+            'about_skill_items.*.*' => ['nullable', 'string', 'max:100'],
         ]);
 
         if ($request->has('featured_slugs_present')) {
@@ -101,6 +111,17 @@ class ContentController extends Controller
                 fn (?string $value) => array_values(array_filter(array_map('trim', explode(',', $value ?? '')))),
                 $data['about_skills'],
             );
+        }
+
+        if (isset($data['about_skill_items'])) {
+            $data['about_skills'] = array_map(
+                static fn (array $items): array => array_values(array_unique(array_filter(
+                    array_map(static fn (?string $item): string => trim($item ?? ''), $items),
+                    static fn (string $item): bool => $item !== '',
+                ))),
+                $data['about_skill_items'],
+            );
+            unset($data['about_skill_items']);
         }
 
         DB::transaction(function () use ($data, $request) {
@@ -135,7 +156,7 @@ class ContentController extends Controller
             foreach ($data as $key => $value) {
                 $setting = SiteSetting::query()->firstOrNew(['key' => $key]);
                 $before = $setting->value ?? [];
-                $after = in_array($key, ['profile', 'social', 'team'], true) ? array_replace($before, $value) : $value;
+                $after = in_array($key, ['profile', 'social', 'team', 'about_skills'], true) ? array_replace($before, $value) : $value;
                 if ($before !== $after) {
                     $setting->value = $after;
                     $setting->save();

@@ -1,6 +1,10 @@
 {
   "AZ Admin": "مدیریت پورتفولیو",
   "About skills": "مهارت‌های بخش درباره من",
+  "Manage skills": "مدیریت مهارت‌ها",
+  "Add skill": "افزودن مهارت",
+  "Skill name": "نام مهارت",
+  "Edit each skill individually. Save the draft, then publish it to update About and Miro.": "هر مهارت را جداگانه ویرایش کنید. پیش‌نویس را ذخیره و سپس منتشر کنید تا بخش درباره و میرو به‌روز شوند.",
   "About text": "متن درباره من",
   "About": "درباره من",
   "Action": "عملیات",

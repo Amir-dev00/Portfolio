@@ -73,6 +73,7 @@ Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminLoc
 
         Route::get('/content', [ContentController::class, 'edit'])->name('content.edit');
         Route::post('/content', [ContentController::class, 'update'])->name('content.update');
+        Route::get('/skills', [ContentController::class, 'skills'])->name('skills.edit');
 
         Route::get('/bookings', [BookingAdminController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/export.csv', [BookingAdminController::class, 'exportCsv'])->name('bookings.export');

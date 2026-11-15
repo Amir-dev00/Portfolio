@@ -5,6 +5,7 @@
 <div class="admin-shortcuts">
   <a class="card" href="{{ route('admin.content.edit') }}"><strong>{{ __('Site settings') }}</strong><span>{{ __('Profile, team, links and backgrounds') }}</span></a>
   <a class="card" href="{{ route('admin.content.edit', ['group' => 'About']) }}"><strong>{{ __('About text') }}</strong><span>{{ __('Bio, education, team and skills labels') }}</span></a>
+  <a class="card" href="{{ route('admin.skills.edit') }}"><strong>{{ __('Skills') }}</strong><span>{{ __('Manage skills') }}</span></a>
   <a class="card" href="{{ route('admin.content.edit', ['group' => 'Miro']) }}"><strong>{{ __('Miro') }}</strong><span>{{ __('Tour, chat and suggested questions') }}</span></a>
   <a class="card" href="{{ route('admin.projects.index') }}"><strong>{{ __('Projects') }}</strong><span>{{ __('Details, galleries and publishing status') }}</span></a>
   <a class="card" href="{{ route('admin.bookings.settings') }}"><strong>{{ __('Bookings') }}</strong><span>{{ __('Availability and notifications') }}</span></a>

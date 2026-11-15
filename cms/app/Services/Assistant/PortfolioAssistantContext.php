@@ -150,7 +150,7 @@ class PortfolioAssistantContext
         }
 
         $skills = isset($payload['settings']['about_skills'])
-            ? array_merge(...array_values($payload['settings']['about_skills']))
+            ? array_merge(...array_values(array_replace(config('portfolio.about_skills'), $payload['settings']['about_skills'])))
             : $this->skillsFromStrings($strings, $locale);
 
         $lines = [];
@@ -268,19 +268,16 @@ class PortfolioAssistantContext
                 return true;
             }
 
-            foreach ($topics as $topic => $entry) {
-                if ($topic !== 'relationship' && $this->matchesBiographyTopic($previous, $entry['match'])) {
-                    return false;
+            if ($this->isBiographyFollowUp($previous)) {
+                if ($this->matchesBiographyTopic($lastReply, $topics['relationship']['match'])) {
+                    return true;
                 }
+
+                continue;
             }
 
-            if ($this->matchesBiographyTopic($lastReply, $topics['relationship']['match'])) {
-                return true;
-            }
-
-            if (! $this->isBiographyFollowUp($previous)) {
-                return false;
-            }
+            // An explicit subject change breaks the relationship thread.
+            return false;
         }
 
         return false;
@@ -288,7 +285,7 @@ class PortfolioAssistantContext
 
     protected function isBiographyFollowUp(string $query): bool
     {
-        return (bool) preg_match('/^(?:and |so |خب |پس )?(?:tell me more(?: about (?:him|her|them|it))?|what about (?:him|her|them)|who is she|what (?:is|was) her name|how old is she|think (?:again|about it)|how long(?: have they been together)?|since when|بیشتر بگو|بیشتر توضیح بده|دیگه چی|اون کیه|(?:یکم |یه کم |دوباره )?فکر کن|چند سالش(?:ه| هست| است)?|از کی|چند وقته(?: با هم(?:ن| هستند))?|اسمش (?:چی بود|چیه|چیست)|مگه نگفتی .+|خودت (?:نگفتی|گفتی|نوشتی) .+)$/u', trim($query));
+        return (bool) preg_match('/^(?:and |so |خب |پس )?(?:tell me more(?: about (?:him|her|them|it))?|what about (?:him|her|them)|who is she|what (?:is|was) her name|how old is she|are you sure|really|think (?:again|about it)|how long(?: have they been together)?|since when|بیشتر بگو|بیشتر توضیح بده|دیگه چی|اون کیه|مطمئنی|مطمئن هستی|واقعا|(?:یکم |یه کم |دوباره )?فکر کن|چند سالش(?:ه| هست| است)?|از کی|چند وقته(?: با هم(?:ن| هستند))?|اسمش (?:چی بود|چیه|چیست)|مگه نگفتی .+|خودت (?:نگفتی|گفتی|نوشتی) .+)$/u', trim($query));
     }
 
     /** @param array{int,int,int} $jalaliDate */
@@ -357,7 +354,7 @@ class PortfolioAssistantContext
         }
 
         $skills = isset($payload['settings']['about_skills'])
-            ? array_merge(...array_values($payload['settings']['about_skills']))
+            ? array_merge(...array_values(array_replace(config('portfolio.about_skills'), $payload['settings']['about_skills'])))
             : $this->skillsFromStrings($strings, $locale);
         $lines[] = 'Skills: '.$this->clip(implode(', ', $skills), 500);
         $lines[] = 'Projects:';
