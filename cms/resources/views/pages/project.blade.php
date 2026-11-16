@@ -9,7 +9,7 @@
                   <p class="az-panel__lead">{{ $caseStudy ? $project['shortDescription'] : ($project['fullDescription'] ?? '') }}</p>
                   @if($caseStudy)
                     <section class="az-project__case-study" aria-labelledby="az-project-case-title">
-                      <h2 id="az-project-case-title">{{ $locale === 'fa' ? 'جزئیات پروژه' : 'Project details' }}</h2>
+                      <h2 id="az-project-case-title">{{ $locale === 'fa' ? 'جزییات پروژه' : 'Project details' }}</h2>
                       <div class="az-project__case-overview">
                         <h3>{{ $locale === 'fa' ? 'نمای کلی' : 'Overview' }}</h3>
                         <p>{{ $caseStudy['overview'] }}</p>

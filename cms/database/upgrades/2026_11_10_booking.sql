@@ -16,11 +16,11 @@ INSERT IGNORE INTO `content_entries` (`group`, `key`, `value_en`, `value_fa`, `i
   ('ui', 'booking.back', 'Back to calendar', 'بازگشت به تقویم', 1, NOW(), NOW()),
   ('ui', 'booking.close', 'Close', 'بستن', 1, NOW(), NOW()),
   ('ui', 'booking.preferEmail', 'Prefer email?', 'ایمیل را ترجیح می‌دهید؟', 1, NOW(), NOW()),
-  ('ui', 'booking.confirmed', 'You’re booked. Check your inbox for the confirmation and calendar invite.', 'جلسه رزرو شد. تأیید و دعوت‌نامه‌ی تقویم را در ایمیل خود ببینید.', 1, NOW(), NOW()),
+  ('ui', 'booking.confirmed', 'You’re booked. Check your inbox for the confirmation and calendar invite.', 'جلسه رزرو شد. تایید و دعوت‌نامه‌ی تقویم را در ایمیل خود ببینید.', 1, NOW(), NOW()),
   ('ui', 'booking.emailInstead', 'Email me instead', 'به جای آن ایمیل بزنید', 1, NOW(), NOW()),
   ('ui', 'booking.openExternal', 'Open scheduling page', 'باز کردن صفحه‌ی رزرو', 1, NOW(), NOW()),
   ('ui', 'booking.setup.title', 'Online booking is almost ready', 'رزرو آنلاین به‌زودی فعال می‌شود', 1, NOW(), NOW()),
-  ('ui', 'booking.setup.body', 'Scheduling isn’t open yet. Send me an email and we’ll find a time that works for both of us.', 'فعلاً امکان رزرو آنلاین باز نیست. ایمیل بزنید تا زمانی مناسب برای هر دو پیدا کنیم.', 1, NOW(), NOW()),
+  ('ui', 'booking.setup.body', 'Scheduling isn’t open yet. Send me an email and we’ll find a time that works for both of us.', 'فعلا امکان رزرو آنلاین باز نیست. ایمیل بزنید تا زمانی مناسب برای هر دو پیدا کنیم.', 1, NOW(), NOW()),
   ('ui', 'booking.setup.admin', 'Admin: add your Cal.com or Calendly link in Admin → Site content → Booking, then click Publish live.', 'مدیر: لینک Cal.com یا Calendly را در Admin → Site content → Booking وارد کنید و سپس Publish live را بزنید.', 1, NOW(), NOW()),
   ('ui', 'booking.error.title', 'The scheduler didn’t load', 'تقویم رزرو بارگذاری نشد', 1, NOW(), NOW()),
   ('ui', 'booking.error.body', 'Your connection or a content blocker may have stopped it. You can open the scheduling page directly or email me.', 'ممکن است اتصال یا افزونه‌ی مسدودکننده مانع آن شده باشد. می‌توانید صفحه‌ی رزرو را مستقیم باز کنید یا ایمیل بزنید.', 1, NOW(), NOW());

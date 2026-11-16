@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'accepted' => 'تأیید :attribute الزامی است.',
+    'accepted' => 'تایید :attribute الزامی است.',
     'after_or_equal' => ':attribute باید در تاریخ :date یا بعد از آن باشد.',
     'alpha_dash' => ':attribute فقط می‌تواند حروف، عدد، خط تیره و زیرخط داشته باشد.',
     'array' => ':attribute باید به‌صورت فهرست باشد.',
@@ -32,11 +32,11 @@ return [
     'regex' => 'قالب :attribute معتبر نیست.',
     'required' => 'وارد کردن :attribute الزامی است.',
     'size' => [
-        'array' => ':attribute باید دقیقاً :size مورد داشته باشد.',
+        'array' => ':attribute باید دقیقا :size مورد داشته باشد.',
     ],
     'string' => ':attribute باید متن باشد.',
     'timezone' => ':attribute باید یک منطقه زمانی معتبر باشد.',
-    'unique' => ':attribute قبلاً استفاده شده است.',
+    'unique' => ':attribute قبلا استفاده شده است.',
     'url' => 'پیوند :attribute معتبر نیست.',
     'attributes' => [
         'confirm delete' => 'حذف پروژه',

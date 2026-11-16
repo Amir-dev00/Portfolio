@@ -96,7 +96,7 @@ class AssistantChatTest extends TestCase
     {
         return [
             'English' => ['Hello!', 'en', 'Hey! What would you like to know about Amirhossein?'],
-            'Persian' => ['سلام!', 'fa', 'سلام! دوست داری دربارهٔ امیرحسین چی بدونی؟'],
+            'Persian' => ['سلام!', 'fa', 'سلام! دوست داری درباره امیرحسین چی بدونی؟'],
         ];
     }
 
@@ -507,7 +507,7 @@ class AssistantChatTest extends TestCase
         $this->postJson('/api/assistant/chat', ['message' => 'راجب امیرحسین بیشتر توضیح بده', 'locale' => 'fa'])
             ->assertStatus(502)
             ->assertJsonPath('code', 'provider_incomplete')
-            ->assertJsonPath('message', 'پاسخ کامل نشد. دوباره امتحان کن یا دربارهٔ یک بخش از داستان بپرس.');
+            ->assertJsonPath('message', 'پاسخ کامل نشد. دوباره امتحان کن یا درباره یک بخش از داستان بپرس.');
 
         Http::assertSentCount(2);
         $this->assertNull(session(AssistantService::SESSION_KEY));
@@ -624,7 +624,7 @@ class AssistantChatTest extends TestCase
 
         foreach ([
             'دوس دختر داری؟' => $relationship,
-            'بیشتر راجب رابطش بگو' => 'امیرحسین گفته خیلی دوستش دارد. جزئیات بیشتری دربارهٔ رابطه نگفته است.',
+            'بیشتر راجب رابطش بگو' => 'امیرحسین گفته خیلی دوستش دارد. جزییات بیشتری درباره رابطه نگفته است.',
             'پس هستی کیه؟' => 'هستی شریک عاطفی امیرحسین است.',
             'چند وقته؟' => 'زمان شروع رابطه مشخص نیست.',
             'کدوم دانشگاه درس می‌خونه؟' => 'او در دانشگاه صنعتی امیرکبیر تحصیل می‌کند.',
@@ -729,7 +729,7 @@ class AssistantChatTest extends TestCase
     public static function directBiographyQuestions(): array
     {
         return [
-            'Persian entrance exam rank' => ['رتبهٔ کنکور امیرحسین چند بود؟', 'fa', '۷۹۰ منطقهٔ ۳'],
+            'Persian entrance exam rank' => ['رتبهٔ کنکور امیرحسین چند بود؟', 'fa', '۷۹۰ منطقه ۳'],
             'English entrance exam rank' => ['What was his rank in the university entrance exam?', 'en', '790th in Region 3'],
             'English girlfriend question' => ['Who is his girlfriend?', 'en', 'Relationship fixture'],
             'Persian girlfriend spelling' => ['دوست‌دخترش کیه؟', 'fa', 'Relationship fixture'],
@@ -772,11 +772,11 @@ class AssistantChatTest extends TestCase
     public static function biographyQuestions(): array
     {
         return [
-            'Persian question on English site' => ['رتبهٔ امیرحسین در کوئرا چند بود؟', 'en', 'fa', ['رتبهٔ ۶۷', 'پارسا'], ['Relationship fixture', 'اسم شریک عاطفی']],
+            'Persian question on English site' => ['رتبهٔ امیرحسین در کوئرا چند بود؟', 'en', 'fa', ['رتبه ۶۷', 'پارسا'], ['Relationship fixture', 'اسم شریک عاطفی']],
             'English question on Persian site' => ['What was his first paid project?', 'fa', 'en', ['first paid project, CourseScan', 'with Amir'], ['Relationship fixture']],
             'Persian with English company name' => ['پروژهٔ MedPip چیه؟', 'en', 'fa', ['پل ایده‌آل پارس', 'این مهاجرت در حد برنامه است'], ['Relationship fixture', 'اسم شریک عاطفی']],
             'General biography' => ['Tell me his career journey', 'en', 'en', ['childhood interests in hardware and robotics', 'became a C teaching assistant', 'built many robots', 'Urmia University', '790th in Region 3', 'CS50X Iran Python', 'practice projects on his laptop', 'were paid for their work', 'getting an office', 'medpip.com'], ['Relationship fixture']],
-            'Informal Persian question without a topic keyword' => ['اون موقع چی شد که جا نزد؟', 'en', 'fa', ['بانک سؤال کوئرا', 'رتبهٔ ۷۹۰ منطقهٔ ۳', 'دستمزدشان را دریافت کردند'], ['Relationship fixture', 'اسم شریک عاطفی']],
+            'Informal Persian question without a topic keyword' => ['اون موقع چی شد که جا نزد؟', 'en', 'fa', ['بانک سوال Quera', 'رتبه ۷۹۰ منطقه ۳', 'دستمزدشان را دریافت کردند'], ['Relationship fixture', 'اسم شریک عاطفی']],
             'Unmarked English follow-up' => ['Did that work out?', 'en', 'en', ['Urmia University', 'were paid for their work', 'medpip.com'], ['Relationship fixture']],
             'English relationship identity' => ['Who is Hasti?', 'en', 'en', ['Relationship fixture'], ['CS50X Iran Python']],
             'Business partner question' => ['Who is his business partner at Novin Coders?', 'en', 'en', ['revived Novin Coders'], ['Relationship fixture']],

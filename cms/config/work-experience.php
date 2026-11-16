@@ -12,6 +12,6 @@ return [
         'website' => 'https://medpip.com/',
         'logo_path' => 'assets/img/experience/medpip.webp',
         'description_en' => 'Pol Ideal Pars manufactures and supplies medical and laboratory equipment. I work on the back end of its new platform as the team prepares to migrate the existing WordPress site to Next.js and PHP/Laravel.',
-        'description_fa' => 'پل ایده‌آل پارس در زمینهٔ تولید و تأمین تجهیزات پزشکی و آزمایشگاهی فعالیت می‌کند. من روی بک‌اند پلتفرم جدید شرکت کار می‌کنم و تیم در حال آماده‌سازی مهاجرت سایت فعلی از وردپرس به Next.js و PHP/Laravel است.',
+        'description_fa' => 'پل ایده‌آل پارس در زمینه تولید و تامین تجهیزات پزشکی و آزمایشگاهی فعالیت می‌کند. من روی بک‌اند پلتفرم جدید شرکت کار می‌کنم و تیم در حال آماده‌سازی مهاجرت سایت فعلی از وردپرس به Next.js و PHP/Laravel است.',
     ],
 ];

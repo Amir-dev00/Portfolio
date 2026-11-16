@@ -14,7 +14,7 @@ return [
             'github_url' => 'https://github.com/Amir-dev00/Document-Studio',
             'technologies' => ['HTML', 'CSS', 'JavaScript', 'Web Storage API'],
             'en' => ['A browser-based document editor that turns HTML into print-ready A4 pages.', 'Document Studio brings page layout, editing and print preview into one workspace. Draft a document with the included AI guides, refine it in the browser, then export editable HTML or save an A4 PDF through Chrome or Edge.'],
-            'fa' => ['ویرایشگر تحت وب برای طراحی سند HTML و چاپ در اندازهٔ A4.', 'داکیومنت استودیو صفحه‌آرایی، ویرایش و آماده‌سازی سند برای چاپ را در یک محیط جمع می‌کند. می‌شود با راهنماهای پروژه پیش‌نویس را با کمک هوش مصنوعی ساخت، در مرورگر ویرایشش کرد و خروجی HTML قابل‌ویرایش یا PDF در اندازهٔ A4 گرفت.'],
+            'fa' => ['ویرایشگر تحت وب برای طراحی سند HTML و چاپ در اندازه A4.', 'داکیومنت استودیو صفحه‌آرایی، ویرایش و آماده‌سازی سند برای چاپ را در یک محیط جمع می‌کند. می‌شود با راهنماهای پروژه پیش‌نویس را با کمک هوش مصنوعی ساخت، در مرورگر ویرایشش کرد و خروجی HTML قابل‌ویرایش یا PDF در اندازه A4 گرفت.'],
             'gallery' => 3,
         ],
         'sarva-dental-clinic' => [
@@ -24,17 +24,17 @@ return [
             'technologies' => ['PHP', 'Blade', 'HTML', 'CSS', 'JavaScript'],
             'live_url' => 'https://sarvadentalclinic.ir/',
             'en' => ['A Persian clinic website with online appointments and a staff dashboard.', 'Sarva helps patients explore dental treatments, learn about the clinic and move from a service page to online appointment booking. A separate management panel gives staff a place to maintain the service catalogue and manage appointments.'],
-            'fa' => ['وب‌سایت فارسی کلینیک با نوبت‌گیری آنلاین و پنل مدیریت.', 'در سایت سروا، مراجعان می‌توانند درمان‌های دندانپزشکی را مرور کنند، با کلینیک آشنا شوند و از صفحهٔ خدمات به نوبت‌گیری آنلاین برسند. کارکنان هم از پنلی جداگانه خدمات و نوبت‌ها را مدیریت می‌کنند.'],
+            'fa' => ['وب‌سایت فارسی کلینیک با نوبت‌گیری آنلاین و پنل مدیریت.', 'در سایت سروا، مراجعان می‌توانند درمان‌های دندانپزشکی را مرور کنند، با کلینیک آشنا شوند و از صفحه خدمات به نوبت‌گیری آنلاین برسند. کارکنان هم از پنلی جداگانه خدمات و نوبت‌ها را مدیریت می‌کنند.'],
             'gallery' => 3,
         ],
         'alwin-windows' => [
             'title' => 'Alwin Windows',
-            'title_fa' => 'آلوین | در و پنجرهٔ دوجداره',
+            'title_fa' => 'آلوین | در و پنجره دوجداره',
             'category' => 'website',
             'technologies' => ['PHP', 'Blade', 'HTML', 'CSS', 'JavaScript'],
             'live_url' => 'https://alwinco.ir/',
             'en' => ['A window and door catalogue with an interactive price estimator.', 'Alwin brings product browsing, installation examples and preliminary price estimates into one site. Visitors can compare models and start an estimate by choosing the material, model and dimensions.'],
-            'fa' => ['کاتالوگ آنلاین در و پنجره با ابزار تعاملی برآورد قیمت.', 'آلوین کاتالوگ محصولات، نمونه‌های اجراشده و برآورد اولیهٔ قیمت را یک‌جا جمع می‌کند. بازدیدکننده می‌تواند مدل‌ها را مقایسه کند و با انتخاب جنس، مدل و ابعاد، برآورد بگیرد.'],
+            'fa' => ['کاتالوگ آنلاین در و پنجره با ابزار تعاملی برآورد قیمت.', 'آلوین کاتالوگ محصولات، نمونه‌های اجراشده و برآورد اولیه قیمت را یک‌جا جمع می‌کند. بازدیدکننده می‌تواند مدل‌ها را مقایسه کند و با انتخاب جنس، مدل و ابعاد، برآورد بگیرد.'],
             'gallery' => 4,
         ],
         'rb-cafe' => [
@@ -44,7 +44,7 @@ return [
             'technologies' => ['Next.js', 'PHP', 'Laravel'],
             'live_url' => 'https://rbcaferestaurant.ir/',
             'en' => ['A digital menu, customer club and staff workspace for RB Café.', 'Guests can browse the menu or enter the customer club from the same landing page. Separate staff views help the team maintain the menu, adjust item availability and handle day-to-day café operations.'],
-            'fa' => ['منوی دیجیتال، باشگاه مشتریان و پنل کارکنان کافه آربی.', 'مهمان‌ها از صفحهٔ اول می‌توانند منو را باز کنند یا وارد باشگاه مشتریان شوند. تیم کافه هم در پنل‌های جداگانه منو و موجودی آیتم‌ها را مدیریت می‌کند و عملیات روزانه را پیش می‌برد.'],
+            'fa' => ['منوی دیجیتال، باشگاه مشتریان و پنل کارکنان کافه آربی.', 'مهمان‌ها از صفحه اول می‌توانند منو را باز کنند یا وارد باشگاه مشتریان شوند. تیم کافه هم در پنل‌های جداگانه منو و موجودی آیتم‌ها را مدیریت می‌کند و عملیات روزانه را پیش می‌برد.'],
             'gallery' => 4,
         ],
         'fitnet' => [
@@ -75,7 +75,7 @@ return [
             'category' => 'website',
             'technologies' => ['Laravel', 'Astro', 'Vue Components', 'HTML', 'CSS'],
             'en' => ['A Persian platform to discover and compare online courses.', 'CourseScan brings course search, browsing and comparison into a single right-to-left interface.'],
-            'fa' => ['پلتفرم فارسی برای پیدا کردن و مقایسهٔ دوره‌های آموزشی.', 'کورس‌اسکن امکان جست‌وجو، مرور و مقایسهٔ دوره‌های آموزشی را در یک رابط راست‌چین فراهم می‌کند.'],
+            'fa' => ['پلتفرم فارسی برای پیدا کردن و مقایسه دوره‌های آموزشی.', 'کورس‌اسکن امکان جست‌وجو، مرور و مقایسه دوره‌های آموزشی را در یک رابط راست‌چین فراهم می‌کند.'],
             'gallery' => 2,
         ],
         'project-m9d3va8ve' => [
@@ -93,7 +93,7 @@ return [
             'category' => 'website',
             'technologies' => ['Bootstrap', 'HTML', 'CSS', 'JavaScript', 'Laravel'],
             'en' => ['A Persian educational and research site with videos, articles and podcasts.', 'Inova presents scientific media to students and researchers through a dark, right-to-left interface organised around video, written articles and podcasts.'],
-            'fa' => ['وب‌سایت آموزشی و پژوهشی با ویدیو، مقاله و پادکست.', 'اینوا رسانه‌های علمی را در یک رابط تیره، راست‌چین و ساختاریافته برای دانشجویان، معلمان و پژوهشگران ارائه می‌کند.'],
+            'fa' => ['وب‌سایت آموزشی و پژوهشی با ویدیو، مقاله و پادکست.', 'اینوا رسانه‌های علمی را در یک رابط تیره، راست‌چین و ساختاریافته برای دانشجویان، معلمان و پژوهشگران ارایه می‌کند.'],
             'gallery' => 5,
         ],
         'project-wm00gotja' => [
@@ -102,7 +102,7 @@ return [
             'category' => 'website',
             'technologies' => ['Kotlin', 'PWA', 'Laravel'],
             'en' => ['A mobile-first digital bookstore and reading app.', 'The dark mobile experience combines book discovery and purchase with title detail pages and reading-progress tracking.'],
-            'fa' => ['تجربهٔ موبایل‌محور برای خرید و مطالعهٔ کتاب.', 'اپلیکیشن کتاب‌خوان با رابط تیره، امکان کشف و خرید کتاب، مشاهدهٔ جزئیات هر عنوان و پیگیری پیشرفت مطالعه را در یک تجربهٔ موبایلی جمع می‌کند.'],
+            'fa' => ['تجربه موبایل‌محور برای خرید و مطالعه کتاب.', 'اپلیکیشن کتاب‌خوان با رابط تیره، امکان کشف و خرید کتاب، مشاهده جزییات هر عنوان و پیگیری پیشرفت مطالعه را در یک تجربه موبایلی جمع می‌کند.'],
             'gallery' => 3,
         ],
         'myris' => [
@@ -139,7 +139,7 @@ return [
             'category' => 'design',
             'technologies' => ['UI/UX'],
             'en' => ['A UI/UX concept for a Persian video-learning platform.', 'The concept covers course discovery, video lessons, enrolled classes and progress tracking in a right-to-left student dashboard.'],
-            'fa' => ['طرح رابط و تجربهٔ کاربری برای پلتفرم فارسی آموزش ویدیویی.', 'طراحی ویدوپاد مسیر کشف دوره، تماشای درس ویدیویی، دسترسی به کلاس‌ها و پیگیری پیشرفت در داشبورد راست‌چین دانشجو را پوشش می‌دهد.'],
+            'fa' => ['طرح رابط و تجربه کاربری برای پلتفرم فارسی آموزش ویدیویی.', 'طراحی ویدوپاد مسیر کشف دوره، تماشای درس ویدیویی، دسترسی به کلاس‌ها و پیگیری پیشرفت در داشبورد راست‌چین دانشجو را پوشش می‌دهد.'],
             'gallery' => 2,
         ],
         'raqet' => [
@@ -148,7 +148,7 @@ return [
             'category' => 'app',
             'technologies' => ['React Native', 'Expo', 'Go'],
             'en' => ['A mobile community for tennis and padel players.', 'Raqet helps players find partners, create or join matches, share updates, and follow match results and activity in a mobile feed.'],
-            'fa' => ['شبکهٔ اجتماعی موبایل برای بازیکنان تنیس و پدل.', 'بازیکنان در راکت هم‌بازی پیدا می‌کنند، مسابقه می‌سازند یا به آن می‌پیوندند و نتایج، اعلان‌ها و فعالیت دیگر بازیکنان را دنبال می‌کنند.'],
+            'fa' => ['شبکه اجتماعی موبایل برای بازیکنان تنیس و پدل.', 'بازیکنان در راکت هم‌بازی پیدا می‌کنند، مسابقه می‌سازند یا به آن می‌پیوندند و نتایج، اعلان‌ها و فعالیت دیگر بازیکنان را دنبال می‌کنند.'],
             'gallery' => 10,
         ],
     ],

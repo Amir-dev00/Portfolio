@@ -124,7 +124,7 @@ class AssistantDecision
     {
         return $this->answer(
             $locale === 'fa'
-                ? 'نتونستم اون صفحه را باز کنم. دربارهٔ کار امیرحسین بپرسید، یا بگویید نمونه‌کارها، درباره، تماس یا رزومه.'
+                ? 'نتونستم اون صفحه را باز کنم. درباره کار امیرحسین بپرسید، یا بگویید نمونه‌کارها، درباره، تماس یا رزومه.'
                 : 'I couldn’t open that page. Ask about Amirhossein’s work, or say Work, About, Contact, or CV.'
         );
     }

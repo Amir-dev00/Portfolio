@@ -29,7 +29,7 @@
   @else
   </span>
   @endif
-  <label class="az-assistant__sr" for="{{ $inputId }}" data-i18n="assistant.prompt">{{ $strings['assistant.prompt'] ?? ($locale === 'fa' ? 'دربارهٔ امیرحسین بپرس' : 'Ask about Amirhossein') }}</label>
+  <label class="az-assistant__sr" for="{{ $inputId }}" data-i18n="assistant.prompt">{{ $strings['assistant.prompt'] ?? ($locale === 'fa' ? 'درباره امیرحسین بپرس' : 'Ask about Amirhossein') }}</label>
   <input
     id="{{ $inputId }}" data-az-assistant-input
     class="az-assistant__input"
@@ -41,7 +41,7 @@
     dir="{{ ($locale ?? 'en') === 'fa' ? 'rtl' : 'ltr' }}"
     lang="{{ ($locale ?? 'en') === 'fa' ? 'fa' : 'en' }}"
     data-i18n-attr="placeholder:assistant.prompt"
-    placeholder="{{ $strings['assistant.prompt'] ?? ($locale === 'fa' ? 'دربارهٔ امیرحسین بپرس' : 'Ask about Amirhossein') }}"
+    placeholder="{{ $strings['assistant.prompt'] ?? ($locale === 'fa' ? 'درباره امیرحسین بپرس' : 'Ask about Amirhossein') }}"
   />
   <button type="submit" class="az-assistant__send" data-az-assistant-send disabled aria-label="{{ $locale === 'fa' ? 'ارسال پرسش' : 'Send question' }}" data-i18n-attr="aria-label:assistant.send">
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

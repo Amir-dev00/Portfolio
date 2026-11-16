@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\SiteState;
+use App\Support\PersianCopy;
 
 class PortfolioContent
 {
@@ -28,7 +29,18 @@ class PortfolioContent
                 $experience[] = $entry;
             }
         }
-        $payload['experience'] = collect($experience)->sortByDesc('start_month')->values()->all();
+        $payload['experience'] = collect($experience)
+            ->sortByDesc('start_month')
+            ->map(static function (array $entry): array {
+                foreach (['company_fa', 'role_fa', 'description_fa', 'start_label_fa'] as $field) {
+                    if (isset($entry[$field])) {
+                        $entry[$field] = PersianCopy::simplify($entry[$field]);
+                    }
+                }
+
+                return $entry;
+            })
+            ->values()->all();
 
         $bundled = array_column($this->bundledProjects(), null, 'slug');
         $projects = array_map(static function (array $project) use ($bundled): array {
@@ -45,7 +57,21 @@ class PortfolioContent
                 $projects[] = $project;
             }
         }
-        $payload['projects'] = $projects;
+        $payload['projects'] = array_map(static function (array $project): array {
+            if (isset($project['fa'])) {
+                $project['fa'] = PersianCopy::simplify($project['fa']);
+            }
+
+            return $project;
+        }, $projects);
+
+        if (isset($payload['seo']['fa'])) {
+            array_walk_recursive($payload['seo']['fa'], static function (&$value, $key): void {
+                if ($key === 'title' || $key === 'description') {
+                    $value = PersianCopy::simplify($value);
+                }
+            });
+        }
 
         return $payload;
     }
@@ -93,6 +119,8 @@ class PortfolioContent
             $strings['fa'],
         );
 
+        $strings['fa'] = PersianCopy::simplify($strings['fa']);
+
         return $strings;
     }
 
@@ -117,7 +145,7 @@ class PortfolioContent
         $projects = [];
         $categories = [
             'website' => ['en' => 'Website', 'fa' => 'طراحی سایت'],
-            'design' => ['en' => 'UI/UX Design', 'fa' => 'طراحی رابط و تجربهٔ کاربری'],
+            'design' => ['en' => 'UI/UX Design', 'fa' => 'طراحی رابط و تجربه کاربری'],
             'app' => ['en' => 'Mobile App', 'fa' => 'اپلیکیشن موبایل'],
             'tool' => ['en' => 'Web Tool', 'fa' => 'ابزار تحت وب'],
             'pwa' => ['en' => 'Progressive Web App', 'fa' => 'وب‌اپ پیش‌رونده'],

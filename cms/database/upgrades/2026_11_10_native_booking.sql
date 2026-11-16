@@ -83,7 +83,7 @@ INSERT IGNORE INTO `content_entries` (`group`,`key`,`value_en`,`value_fa`,`is_di
 ('ui','booking.step.details','Your details','اطلاعات شما',1,NOW(),NOW()),
 ('ui','booking.step.done','You’re booked','رزرو شد',1,NOW(),NOW()),
 ('ui','booking.continue','Continue','ادامه',1,NOW(),NOW()),
-('ui','booking.confirm','Confirm booking','تأیید رزرو',1,NOW(),NOW()),
+('ui','booking.confirm','Confirm booking','تایید رزرو',1,NOW(),NOW()),
 ('ui','booking.name','Full name','نام و نام خانوادگی',1,NOW(),NOW()),
 ('ui','booking.email','Email','ایمیل',1,NOW(),NOW()),
 ('ui','booking.phone','Phone (optional)','تلفن (اختیاری)',1,NOW(),NOW()),
@@ -93,8 +93,8 @@ INSERT IGNORE INTO `content_entries` (`group`,`key`,`value_en`,`value_fa`,`is_di
 ('ui','booking.noSlots','No times left on this day. Pick another date.','برای این روز زمانی باقی نمانده. روز دیگری انتخاب کنید.',1,NOW(),NOW()),
 ('ui','booking.downloadIcs','Add to calendar','افزودن به تقویم',1,NOW(),NOW()),
 ('ui','booking.reference','Reference','کد پیگیری',1,NOW(),NOW()),
-('ui','booking.unavailable','That time was just taken. Please choose another slot.','این زمان همین حالا رزرو شد. لطفاً زمان دیگری انتخاب کنید.',1,NOW(),NOW()),
-('ui','booking.disabled','Online booking is paused. Email me and we’ll find a time.','رزرو آنلاین موقتاً غیرفعال است. ایمیل بزنید تا زمانی پیدا کنیم.',1,NOW(),NOW()),
+('ui','booking.unavailable','That time was just taken. Please choose another slot.','این زمان همین حالا رزرو شد. لطفا زمان دیگری انتخاب کنید.',1,NOW(),NOW()),
+('ui','booking.disabled','Online booking is paused. Email me and we’ll find a time.','رزرو آنلاین موقتا غیرفعال است. ایمیل بزنید تا زمانی پیدا کنیم.',1,NOW(),NOW()),
 ('ui','booking.role','Software Engineer','مهندس نرم‌افزار',1,NOW(),NOW());
 
 UPDATE `content_entries`

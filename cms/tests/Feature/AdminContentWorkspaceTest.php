@@ -177,7 +177,7 @@ class AdminContentWorkspaceTest extends TestCase
             'texts' => [
                 ['key' => 'about.team.name', 'en' => 'Studio Example', 'fa' => 'استودیو نمونه'],
                 ['key' => 'contact.github.sub', 'en' => 'Code & repositories', 'fa' => 'کد و مخازن'],
-                ['key' => 'contact.telegram.sub', 'en' => 'A custom tagline', 'fa' => 'برای یه گپ کوتاه'],
+                ['key' => 'contact.telegram.sub', 'en' => 'A custom tagline', 'fa' => 'برای یه گپ کوتاه دربارهٔ سؤال‌ها'],
             ],
             'team' => ['url' => 'https://example.com/team'],
         ])->assertRedirect()->assertSessionHasNoErrors();
@@ -189,9 +189,9 @@ class AdminContentWorkspaceTest extends TestCase
             ->assertDontSee('Code & repositories');
 
         $this->getJson('/fa/contact', ['X-AZ-Fragment' => '1'])->assertOk()
-            ->assertJsonPath('html', fn (string $html) => str_contains($html, 'ایدهٔ پروژه‌ات رو برام بنویس')
+            ->assertJsonPath('html', fn (string $html) => str_contains($html, 'ایده پروژه‌ات رو برام بنویس')
                 && str_contains($html, 'کدها و تجربه‌های برنامه‌نویسی من')
-                && str_contains($html, 'برای یه چت کوتاه')
+                && str_contains($html, 'برای یه چت کوتاه درباره سوال‌ها')
                 && str_contains($html, 'استودیو نمونه')
                 && str_contains($html, 'با تیمی که باهاش کار می‌کنم آشنا شو')
                 && str_contains($html, 'href="https://example.com/team"'));

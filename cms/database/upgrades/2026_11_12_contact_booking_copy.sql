@@ -54,7 +54,7 @@ WHERE `group` = 'ui' AND `key` = 'booking.eyebrow';
 
 UPDATE `content_entries`
 SET `value_en` = 'Your call is confirmed. You can download the calendar file below.',
-    `value_fa` = 'تماس شما تأیید شد. می‌توانید فایل تقویم را از پایین دانلود کنید.',
+    `value_fa` = 'تماس شما تایید شد. می‌توانید فایل تقویم را از پایین دانلود کنید.',
     `is_dirty` = 1,
     `updated_at` = NOW()
 WHERE `group` = 'ui' AND `key` = 'booking.confirmed';
@@ -64,7 +64,7 @@ VALUES (
   'ui',
   'booking.confirmed.email',
   'Your call is confirmed. A confirmation email is on its way, and you can download the calendar file below.',
-  'تماس شما تأیید شد. ایمیل تأیید هم ارسال شد و می‌توانید فایل تقویم را از پایین دانلود کنید.',
+  'تماس شما تایید شد. ایمیل تایید هم ارسال شد و می‌توانید فایل تقویم را از پایین دانلود کنید.',
   1,
   NOW(),
   NOW()

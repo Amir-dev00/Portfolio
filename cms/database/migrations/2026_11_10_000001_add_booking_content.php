@@ -26,14 +26,14 @@ return new class extends Migration
         'booking.preferEmail' => ['Prefer email?', 'ایمیل را ترجیح می‌دهید؟'],
         'booking.confirmed' => [
             'You’re booked. Check your inbox for the confirmation and calendar invite.',
-            'جلسه رزرو شد. تأیید و دعوت‌نامه‌ی تقویم را در ایمیل خود ببینید.',
+            'جلسه رزرو شد. تایید و دعوت‌نامه‌ی تقویم را در ایمیل خود ببینید.',
         ],
         'booking.emailInstead' => ['Email me instead', 'به جای آن ایمیل بزنید'],
         'booking.openExternal' => ['Open scheduling page', 'باز کردن صفحه‌ی رزرو'],
         'booking.setup.title' => ['Online booking is almost ready', 'رزرو آنلاین به‌زودی فعال می‌شود'],
         'booking.setup.body' => [
             'Scheduling isn’t open yet. Send me an email and we’ll find a time that works for both of us.',
-            'فعلاً امکان رزرو آنلاین باز نیست. ایمیل بزنید تا زمانی مناسب برای هر دو پیدا کنیم.',
+            'فعلا امکان رزرو آنلاین باز نیست. ایمیل بزنید تا زمانی مناسب برای هر دو پیدا کنیم.',
         ],
         'booking.setup.admin' => [
             'Admin: add your Cal.com or Calendly link in Admin → Site content → Booking, then click Publish live.',

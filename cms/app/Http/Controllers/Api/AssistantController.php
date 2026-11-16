@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\Assistant\AssistantService;
+use App\Support\PersianCopy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -68,11 +69,11 @@ class AssistantController extends Controller
 
         return response()->json([
             'ok' => true,
-            'reply' => $result['reply'],
+            'reply' => $locale === 'fa' ? PersianCopy::simplify($result['reply']) : $result['reply'],
             'action' => $result['action'] ?? 'answer',
             'destination' => $result['destination'] ?? null,
             'url' => $result['url'] ?? null,
-            'label' => $result['label'] ?? null,
+            'label' => $locale === 'fa' ? PersianCopy::simplify($result['label'] ?? null) : ($result['label'] ?? null),
             'mode' => $result['mode'] ?? null,
             'locale' => $locale,
             // Client keeps a mirrored transcript; server session is the source of truth for continuity.
@@ -125,14 +126,14 @@ class AssistantController extends Controller
             'fa' => [
                 'empty' => 'اول یک پرسش کوتاه بنویسید.',
                 'missing_config' => 'دستیار هنوز روی این سرور پیکربندی نشده است. از تماس یا رزرو تماس استفاده کنید.',
-                'rate_limit' => 'فعلاً تعداد پرسش‌ها زیاد شده است. کمی صبر کنید و دوباره تلاش کنید.',
-                'global_cap' => 'ظرفیت امروز دستیار پر شده است. لطفاً ایمیل بزنید یا تماس رزرو کنید.',
+                'rate_limit' => 'فعلا تعداد پرسش‌ها زیاد شده است. کمی صبر کنید و دوباره تلاش کنید.',
+                'global_cap' => 'ظرفیت امروز دستیار پر شده است. لطفا ایمیل بزنید یا تماس رزرو کنید.',
                 'duplicate' => 'همین پرسش در حال ارسال است — کمی صبر کنید.',
-                'timeout' => 'پاسخ طول کشید. لطفاً دوباره تلاش کنید.',
+                'timeout' => 'پاسخ طول کشید. لطفا دوباره تلاش کنید.',
                 'provider_rate' => 'دستیار الان شلوغ است. یک دقیقه دیگر دوباره تلاش کنید.',
-                'provider_error' => 'دستیار موقتاً در دسترس نیست. دوباره تلاش کنید یا از صفحه تماس استفاده کنید.',
-                'provider_empty' => 'پاسخی برنگشت. لطفاً دوباره تلاش کنید.',
-                'provider_incomplete' => 'پاسخ کامل نشد. دوباره امتحان کن یا دربارهٔ یک بخش از داستان بپرس.',
+                'provider_error' => 'دستیار موقتا در دسترس نیست. دوباره تلاش کنید یا از صفحه تماس استفاده کنید.',
+                'provider_empty' => 'پاسخی برنگشت. لطفا دوباره تلاش کنید.',
+                'provider_incomplete' => 'پاسخ کامل نشد. دوباره امتحان کن یا درباره یک بخش از داستان بپرس.',
             ],
         ];
 

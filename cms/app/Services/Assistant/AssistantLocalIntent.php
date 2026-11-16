@@ -29,7 +29,7 @@ class AssistantLocalIntent
         if ($this->isGreeting($message)) {
             return $this->decisions->answer(
                 $locale === 'fa'
-                    ? 'سلام! دوست داری دربارهٔ امیرحسین چی بدونی؟'
+                    ? 'سلام! دوست داری درباره امیرحسین چی بدونی؟'
                     : 'Hey! What would you like to know about Amirhossein?'
             );
         }
@@ -59,7 +59,7 @@ class AssistantLocalIntent
 
             return $this->decisions->answer(
                 $locale === 'fa'
-                    ? 'رزومه الان در دسترس نیست. از صفحه تماس استفاده کنید یا بعداً دوباره تلاش کنید.'
+                    ? 'رزومه الان در دسترس نیست. از صفحه تماس استفاده کنید یا بعدا دوباره تلاش کنید.'
                     : 'The CV isn’t available right now. Use Contact, or try again later.'
             );
         }
@@ -120,12 +120,12 @@ class AssistantLocalIntent
         $rank = preg_match('/(?:رتبه|رنک)(?:ش|اش)?|\b(?:rank|ranking|placement)\b/u', $question);
         $exam = preg_match('/کنکور|\bkonkur\b|\b(?:university |college )?entrance exam\b/u', $question);
 
-        if ($rank && $exam && ! preg_match('/کوئرا|\bquera\b/u', $question)) {
+        if ($rank && $exam && ! preg_match('/کوئرا|کویرا|\bquera\b/u', $question)) {
             return 'entrance_exam_rank';
         }
 
         if (preg_match('/(?:^| )(?:دوس(?:ت)? *دختر(?:ش|اش)?|پارتنر(?:ش|اش)?|مجرده|مجرد است|تو رابطه|در رابطه|رابطه عاطفی)(?= |$)|\b(?:girlfriend|romantic partner|in a relationship|dating anyone|is he single)\b/u', $question)) {
-            if (preg_match('/(?:بیشتر|جزئیات|آدرس|شماره|قد|سن|چند سال|سالشه|تولد|متولد|کجا|کی آشنا|از کی|چند وقته|چند وقت)|\b(?:more|details|age|how old|where|when|since|how long|phone|address|birthday|birthdate|height|contact|instagram)\b/u', $question)) {
+            if (preg_match('/(?:بیشتر|جزئیات|جزییات|آدرس|شماره|قد|سن|چند سال|سالشه|تولد|متولد|کجا|کی آشنا|از کی|چند وقته|چند وقت)|\b(?:more|details|age|how old|where|when|since|how long|phone|address|birthday|birthdate|height|contact|instagram)\b/u', $question)) {
                 return null;
             }
 

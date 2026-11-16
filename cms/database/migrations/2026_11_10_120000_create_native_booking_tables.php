@@ -111,7 +111,7 @@ return new class extends Migration
             'booking.step.details' => ['Your details', 'اطلاعات شما'],
             'booking.step.done' => ['You’re booked', 'رزرو شد'],
             'booking.continue' => ['Continue', 'ادامه'],
-            'booking.confirm' => ['Confirm booking', 'تأیید رزرو'],
+            'booking.confirm' => ['Confirm booking', 'تایید رزرو'],
             'booking.name' => ['Full name', 'نام و نام خانوادگی'],
             'booking.email' => ['Email', 'ایمیل'],
             'booking.phone' => ['Phone (optional)', 'تلفن (اختیاری)'],
@@ -124,8 +124,8 @@ return new class extends Migration
             'booking.noSlots' => ['No times left on this day. Pick another date.', 'برای این روز زمانی باقی نمانده. روز دیگری انتخاب کنید.'],
             'booking.downloadIcs' => ['Add to calendar', 'افزودن به تقویم'],
             'booking.reference' => ['Reference', 'کد پیگیری'],
-            'booking.unavailable' => ['That time was just taken. Please choose another slot.', 'این زمان همین حالا رزرو شد. لطفاً زمان دیگری انتخاب کنید.'],
-            'booking.disabled' => ['Online booking is paused. Email me and we’ll find a time.', 'رزرو آنلاین موقتاً غیرفعال است. ایمیل بزنید تا زمانی پیدا کنیم.'],
+            'booking.unavailable' => ['That time was just taken. Please choose another slot.', 'این زمان همین حالا رزرو شد. لطفا زمان دیگری انتخاب کنید.'],
+            'booking.disabled' => ['Online booking is paused. Email me and we’ll find a time.', 'رزرو آنلاین موقتا غیرفعال است. ایمیل بزنید تا زمانی پیدا کنیم.'],
             'booking.role' => ['Software Engineer', 'مهندس نرم‌افزار'],
             'booking.setup.admin' => [
                 'Admin: set your weekly hours under Admin → Bookings.',
@@ -147,13 +147,13 @@ return new class extends Migration
         // Refresh intro/setup copy for the native system.
         DB::table('content_entries')->where('group', 'ui')->where('key', 'booking.intro')->update([
             'value_en' => 'A relaxed video call about your project, role, or idea. Pick a time that works — confirmation is instant.',
-            'value_fa' => 'یک تماس تصویری کوتاه درباره‌ی پروژه، موقعیت شغلی یا ایده‌ی شما. زمانی مناسب انتخاب کنید؛ تأیید فوری است.',
+            'value_fa' => 'یک تماس تصویری کوتاه درباره‌ی پروژه، موقعیت شغلی یا ایده‌ی شما. زمانی مناسب انتخاب کنید؛ تایید فوری است.',
             'is_dirty' => true,
             'updated_at' => $now,
         ]);
         DB::table('content_entries')->where('group', 'ui')->where('key', 'booking.setup.body')->update([
             'value_en' => 'Scheduling isn’t open yet. Send me an email and we’ll find a time that works for both of us.',
-            'value_fa' => 'فعلاً امکان رزرو آنلاین باز نیست. ایمیل بزنید تا زمانی مناسب برای هر دو پیدا کنیم.',
+            'value_fa' => 'فعلا امکان رزرو آنلاین باز نیست. ایمیل بزنید تا زمانی مناسب برای هر دو پیدا کنیم.',
             'updated_at' => $now,
         ]);
     }

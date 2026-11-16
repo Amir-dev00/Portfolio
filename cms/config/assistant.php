@@ -41,7 +41,7 @@ return [
     'daily_global_cap' => (int) env('ASSISTANT_DAILY_GLOBAL_CAP', 400),
 
     'entrance_exam_rank' => [
-        'fa' => 'امیرحسین در کنکور رتبهٔ ۷۹۰ منطقهٔ ۳ را به دست آورد.',
+        'fa' => 'امیرحسین در کنکور رتبه ۷۹۰ منطقه ۳ را به دست آورد.',
         'en' => 'Amirhossein ranked 790th in Region 3 in Iran’s national university entrance exam (Konkur).',
     ],
 
