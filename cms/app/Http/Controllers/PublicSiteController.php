@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SiteSetting;
 use App\Services\PortfolioContent;
+use App\Support\ProfilePortrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -160,8 +161,8 @@ class PublicSiteController extends Controller
             return asset($path).(is_file($file) ? '?v='.filemtime($file) : '');
         };
 
-        $bundledProfile = 'assets/img/amir/profile.webp';
-        $profilePhoto = $this->assetUrl($profile['photo'] ?? '', $bundledProfile);
+        $bundledProfile = ProfilePortrait::DEFAULT_PATH;
+        $profilePhoto = $this->assetUrl(ProfilePortrait::path($profile['photo'] ?? null));
         $usesBundledProfile = $profilePhoto === asset($bundledProfile);
 
         $pages = ['home', 'work', 'about', 'ask', 'contact'];

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Project;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,6 +11,19 @@ use Tests\TestCase;
 class AdminContentWorkspaceTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_public_views_and_booking_use_the_bundled_portrait_for_a_legacy_profile_path(): void
+    {
+        SiteSetting::query()->updateOrCreate(['key' => 'profile'], [
+            'value' => ['photo' => 'media/published/img/profile.jpg'],
+        ]);
+
+        $this->get('/')->assertOk()->assertSee('/assets/img/amir/profile-360.webp?v=', false);
+        $this->get('/about')->assertOk()->assertSee('/assets/img/amir/profile.webp?v=', false);
+        $this->get('/fa/contact')->assertOk()->assertSee('/assets/img/amir/profile.webp?v=', false);
+        $this->getJson('/api/booking/bootstrap?locale=fa')->assertOk()
+            ->assertJsonPath('config.profile.photo', fn (string $url) => str_contains($url, '/assets/img/amir/profile.webp?v='));
+    }
 
     public function test_bundled_project_import_edit_and_archive_follow_publication(): void
     {

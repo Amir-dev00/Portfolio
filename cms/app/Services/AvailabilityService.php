@@ -6,6 +6,7 @@ use App\Models\AvailabilityRule;
 use App\Models\BlockedSlot;
 use App\Models\Booking;
 use App\Support\Jalali;
+use App\Support\ProfilePortrait;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -60,7 +61,7 @@ final class AvailabilityService
                     'name_en' => $profile['name'] ?? 'Amirhossein Zamanzade',
                     'name_fa' => $profile['name_fa'] ?? 'امیرحسین زمان زاده',
                     // Root-absolute URL so /fa/* pages do not resolve relative CMS paths under /fa/.
-                    'photo' => $this->publicAssetUrl($profile['photo'] ?? null, 'assets/img/amir/profile.webp'),
+                    'photo' => $this->profilePhotoUrl($profile['photo'] ?? null),
                     'email' => $social['email'] ?? null,
                 ],
                 'now' => CarbonImmutable::now('UTC')->toIso8601String(),
@@ -343,16 +344,16 @@ final class AvailabilityService
         return $a->equalTo($b) ? 30 : 29;
     }
 
-    protected function publicAssetUrl(?string $path, string $fallback): string
+    protected function profilePhotoUrl(?string $path): string
     {
-        $path = trim((string) $path);
-        if ($path === '') {
-            return asset($fallback);
-        }
+        $path = ProfilePortrait::path($path);
         if (preg_match('#^https?://#i', $path) || str_starts_with($path, '//')) {
             return $path;
         }
 
-        return asset(ltrim($path, '/'));
+        $path = ltrim($path, '/');
+        $file = public_path($path);
+
+        return asset($path).(is_file($file) ? '?v='.filemtime($file) : '');
     }
 }

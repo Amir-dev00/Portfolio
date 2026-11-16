@@ -7,7 +7,7 @@
                       class="az-profile__photo"
                       src="{{ $profilePhoto }}"
                       @if ($profilePhotoThumbnail ?? null)
-                        srcset="{{ $profilePhotoThumbnail }} 360w, {{ $profilePhoto }} 2048w"
+                        srcset="{{ $profilePhotoThumbnail }} 360w, {{ $profilePhoto }} 1254w"
                         sizes="(max-width: 767px) clamp(90px, 24vw, 112px), clamp(120px, 11vw, 152px)"
                       @endif
                       width="640"
