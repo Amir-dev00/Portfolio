@@ -98,9 +98,10 @@
   }
 }
 
-/* Hide only while the AZ preloader covers the hero — monogram stays on mobile + desktop routes. */
+/* Show the header monogram only on Home, after the preloader closes. */
 html.az-preloader-open #page-header .header__col-left,
-html.az-preloader-open #page-header .az-brand-logo {
+html.az-preloader-open #page-header .az-brand-logo,
+html[data-az-route]:not([data-az-route="home"]) #page-header :is(.header__col-left, .az-brand-logo) {
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;

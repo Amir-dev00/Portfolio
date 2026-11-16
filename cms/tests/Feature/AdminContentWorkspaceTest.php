@@ -18,7 +18,7 @@ class AdminContentWorkspaceTest extends TestCase
             'value' => ['photo' => 'media/published/img/profile.jpg'],
         ]);
 
-        $this->get('/')->assertOk()->assertSee('/assets/img/amir/profile-360.webp?v=', false);
+        $this->get('/')->assertOk()->assertSee('/assets/img/amir/profile-home.webp?v=', false);
         $this->get('/about')->assertOk()->assertSee('src="'.asset('assets/img/amir/profile.webp').'"', false);
         $this->get('/fa/contact')->assertOk()->assertSee('/assets/img/amir/profile.webp?v=', false);
         $this->getJson('/api/booking/bootstrap?locale=fa')->assertOk()

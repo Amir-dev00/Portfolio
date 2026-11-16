@@ -1289,6 +1289,7 @@
       showView(route, mode === "replace");
       if (route.name === "work" && !workBrowser.dataset.ready) renderWorkGrid();
       setDocumentTitle(route);
+      if (token === requestedRoute) reportRouteStatus("");
       return true;
     }).catch(function () {
       if (token === requestedRoute) {

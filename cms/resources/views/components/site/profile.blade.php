@@ -5,11 +5,7 @@
                   <div class="az-profile__glass">
                     <img
                       class="az-profile__photo"
-                      src="{{ $profilePhoto }}"
-                      @if ($profilePhotoThumbnail ?? null)
-                        srcset="{{ $profilePhotoThumbnail }} 360w, {{ $profilePhoto }} 1254w"
-                        sizes="(max-width: 767px) clamp(90px, 24vw, 112px), clamp(120px, 11vw, 152px)"
-                      @endif
+                      src="{{ $homePortrait }}"
                       width="640"
                       height="640"
                       alt="Portrait of Amirhossein Zamanzade"

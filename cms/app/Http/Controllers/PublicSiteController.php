@@ -235,7 +235,7 @@ class PublicSiteController extends Controller
             'teamUrl' => $payload['settings']['team']['url'] ?? config('novin.url'),
             'indexablePortrait' => $profilePhoto,
             'profilePhoto' => $usesBundledProfile ? $assetV($bundledProfile) : $profilePhoto,
-            'profilePhotoThumbnail' => $usesBundledProfile ? $assetV('assets/img/amir/profile-360.webp') : null,
+            'homePortrait' => $usesBundledProfile ? $assetV('assets/img/amir/profile-home.webp') : $profilePhoto,
             'booking' => $booking,
             'bookingAdmin' => (bool) $request->user()?->isOwner(),
         ];
