@@ -7,7 +7,8 @@ Cinematic personal portfolio with bilingual EN/FA support.
 **`cms/`** is the Laravel + Blade application (public site + `/admin` CMS).
 
 - Local docs: [`cms/README.md`](cms/README.md)
-- cPanel install: [`INSTALL-CPANEL.md`](INSTALL-CPANEL.md)
+- cPanel deploy (recommended): [`DEPLOY-CPANEL.md`](DEPLOY-CPANEL.md) for `itsamirzamani.ir`
+- Extra cPanel notes: [`INSTALL-CPANEL.md`](INSTALL-CPANEL.md)
 - Packaged outputs: `dist/portfolio-cpanel.zip`, `dist/portfolio-final.sql`
 
 Root `css/` + `js/` + `assets/` are the editable frontend source. `scripts/build-cpanel-package.ps1` syncs them into `cms/public` before packaging — keep both copies in sync.
