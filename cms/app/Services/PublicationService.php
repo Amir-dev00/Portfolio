@@ -68,7 +68,9 @@ class PublicationService
             'projects' => $projects,
             'managed_bundled_projects' => array_values(array_filter(array_column($projectDetails, 'bundled_slug'))),
             'managed_bundled_experience' => $experience->keys()->map(fn (string $key) => substr($key, strlen(SiteSetting::EXPERIENCE_PREFIX)))->all(),
-            'experience' => $experience->reject(fn (array $entry) => ! empty($entry['removed']))->sortByDesc('start_month')->map(function (array $entry) use ($logos) {
+            'experience' => $experience->reject(fn (array $entry, string $key) => ! empty($entry['removed'])
+                || $key === SiteSetting::EXPERIENCE_PREFIX.'medpip'
+                || SiteSetting::isRemovedEmployer($entry))->sortByDesc('start_month')->map(function (array $entry) use ($logos) {
                 $entry['logo_path'] = $logos->get($entry['logo_id'] ?? 0)?->public_path ?? $entry['logo_path'] ?? null;
 
                 return $entry;

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\SiteSetting;
 use App\Models\SiteState;
 use App\Support\PersianCopy;
 
@@ -30,6 +31,7 @@ class PortfolioContent
             }
         }
         $payload['experience'] = collect($experience)
+            ->reject(SiteSetting::isRemovedEmployer(...))
             ->sortByDesc('start_month')
             ->map(static function (array $entry): array {
                 foreach (['company_fa', 'role_fa', 'description_fa', 'start_label_fa'] as $field) {
@@ -85,11 +87,13 @@ class PortfolioContent
                 'contact.linkedin.sub' => ['Professional profile', 'Start a conversation'],
                 'contact.github.sub' => ['Projects and code', 'Code & repositories'],
                 'contact.telegram.sub' => ['Send a message', 'Quick chat · @Amir_dev00'],
+                'assistant.suggestions.work.reply' => ['You can explore his selected projects and work experience on the Work page.'],
             ],
             'fa' => [
                 'contact.linkedin.sub' => ['ارتباط حرفه‌ای', 'شروع گفتگو'],
                 'contact.github.sub' => ['پروژه‌ها و کد', 'کد و مخازن'],
                 'contact.telegram.sub' => ['ارسال پیام', 'گفتگوی سریع · @Amir_dev00'],
+                'assistant.suggestions.work.reply' => ['پروژه‌های منتخب و سوابق کاری امیرحسین رو می‌تونی توی صفحه کارها ببینی.'],
             ],
         ];
 

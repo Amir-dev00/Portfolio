@@ -774,10 +774,10 @@ class AssistantChatTest extends TestCase
         return [
             'Persian question on English site' => ['رتبهٔ امیرحسین در کوئرا چند بود؟', 'en', 'fa', ['رتبه ۶۷', 'پارسا'], ['Relationship fixture', 'اسم شریک عاطفی']],
             'English question on Persian site' => ['What was his first paid project?', 'fa', 'en', ['first paid project, CourseScan', 'with Amir'], ['Relationship fixture']],
-            'Persian with English company name' => ['پروژهٔ MedPip چیه؟', 'en', 'fa', ['پل ایده‌آل پارس', 'این مهاجرت در حد برنامه است'], ['Relationship fixture', 'اسم شریک عاطفی']],
-            'General biography' => ['Tell me his career journey', 'en', 'en', ['childhood interests in hardware and robotics', 'became a C teaching assistant', 'built many robots', 'Urmia University', '790th in Region 3', 'CS50X Iran Python', 'practice projects on his laptop', 'were paid for their work', 'getting an office', 'medpip.com'], ['Relationship fixture']],
+            'Persian question about the removed employer' => ['پروژهٔ MedPip چیه؟', 'en', 'fa', ['Use only the verified facts for current employment'], ['پل ایده‌آل پارس', 'مدپیپ', 'medpip.com', 'Relationship fixture']],
+            'General biography' => ['Tell me his career journey', 'en', 'en', ['childhood interests in hardware and robotics', 'became a C teaching assistant', 'built many robots', 'Urmia University', '790th in Region 3', 'CS50X Iran Python', 'practice projects on his laptop', 'were paid for their work', 'getting an office'], ['Relationship fixture', 'medpip.com', 'Pol Ideal Pars']],
             'Informal Persian question without a topic keyword' => ['اون موقع چی شد که جا نزد؟', 'en', 'fa', ['بانک سوال Quera', 'رتبه ۷۹۰ منطقه ۳', 'دستمزدشان را دریافت کردند'], ['Relationship fixture', 'اسم شریک عاطفی']],
-            'Unmarked English follow-up' => ['Did that work out?', 'en', 'en', ['Urmia University', 'were paid for their work', 'medpip.com'], ['Relationship fixture']],
+            'Unmarked English follow-up' => ['Did that work out?', 'en', 'en', ['Urmia University', 'were paid for their work'], ['Relationship fixture', 'medpip.com']],
             'English relationship identity' => ['Who is Hasti?', 'en', 'en', ['Relationship fixture'], ['CS50X Iran Python']],
             'Business partner question' => ['Who is his business partner at Novin Coders?', 'en', 'en', ['revived Novin Coders'], ['Relationship fixture']],
             'Unrelated project question' => ['Which Laravel projects has he built?', 'en', 'en', ['Clinic Booking Portal'], ['Verified biographical facts from the owner:', 'Relationship fixture']],

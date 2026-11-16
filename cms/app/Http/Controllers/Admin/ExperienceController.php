@@ -27,7 +27,9 @@ class ExperienceController extends Controller
                 $entries->put($key, new SiteSetting(['key' => $key, 'value' => $value]));
             }
         }
-        $entries = $entries->reject(fn (SiteSetting $entry) => ! empty($entry->value['removed']))
+        $entries = $entries->reject(fn (SiteSetting $entry) => ! empty($entry->value['removed'])
+            || $entry->key === SiteSetting::EXPERIENCE_PREFIX.'medpip'
+            || SiteSetting::isRemovedEmployer($entry->value))
             ->sortByDesc(fn (SiteSetting $entry) => $entry->value['start_month']);
 
         return view('admin.experience.index', compact('entries'));
@@ -71,7 +73,7 @@ class ExperienceController extends Controller
         $key = SiteSetting::EXPERIENCE_PREFIX.$experience;
         $entry = SiteSetting::query()->where('key', $key)->first();
         if ($entry) {
-            abort_if(! empty($entry->value['removed']), 404);
+            abort_if(! empty($entry->value['removed']) || $experience === 'medpip' || SiteSetting::isRemovedEmployer($entry->value), 404);
 
             return $entry;
         }

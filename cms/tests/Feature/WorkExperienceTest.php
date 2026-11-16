@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Publication;
 use App\Models\SiteSetting;
+use App\Models\SiteState;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -49,34 +51,37 @@ class WorkExperienceTest extends TestCase
         $this->get('/work')->assertDontSee('Example Studio');
     }
 
-    public function test_bundled_employment_is_live_and_edits_keep_the_logo_and_persian_month(): void
+    public function test_removed_company_stays_off_the_site_with_legacy_draft_and_published_content(): void
     {
-        $this->get('/work')->assertOk()->assertSee('Pol Ideal Pars')->assertSee('Nov 2026')
-            ->assertSee('Present')->assertSee('https://medpip.com/')->assertSee('assets/img/experience/medpip.webp');
-        $this->get('/fa/work')->assertOk()->assertSee('آبان ۱۴۰۵')->assertSee('تا امروز');
-        $this->assertFileExists(public_path('assets/img/experience/medpip.webp'));
-
-        $this->actingAs(User::factory()->create(['is_owner' => true]));
-        $this->get(route('admin.experience.edit', 'medpip'))->assertOk()->assertSee('medpip.webp');
-        $this->post(route('admin.publish'))->assertRedirect();
-        $this->put(route('admin.experience.update', 'medpip'), [
+        $oldEntry = [
             'company_en' => 'Pol Ideal Pars (MedPIP)',
             'company_fa' => 'پل ایده‌آل پارس',
             'role_en' => 'Software Engineer',
             'role_fa' => 'مهندس نرم‌افزار',
             'start_month' => '2026-11',
             'website' => 'https://medpip.com/',
-            'description_en' => 'Updated work description',
-        ])->assertRedirect()->assertSessionHasNoErrors();
+        ];
+        SiteSetting::query()->create(['key' => SiteSetting::EXPERIENCE_PREFIX.'medpip', 'value' => $oldEntry]);
+        $snapshot = Publication::query()->create([
+            'label' => 'Legacy experience',
+            'payload' => ['experience' => [$oldEntry]],
+            'published_at' => now(),
+        ]);
+        $state = SiteState::current();
+        $state->current_publication_id = $snapshot->id;
+        $state->save();
 
-        $this->get('/work')->assertDontSee('Updated work description');
-        $this->get('/work?preview=1')->assertSee('Updated work description')->assertSee('medpip.webp');
+        $this->get('/work')->assertOk()->assertSee('id="work-projects"', false)
+            ->assertDontSee('id="work-experience"', false)->assertDontSee('Pol Ideal Pars');
+        $this->getJson('/fa/work', ['X-AZ-Fragment' => '1'])->assertOk()
+            ->assertJsonPath('html', fn (string $html) => ! str_contains($html, 'پل ایده‌آل پارس')
+                && ! str_contains($html, 'id="work-experience"'));
+
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->get('/work?preview=1')->assertOk()->assertDontSee('Pol Ideal Pars');
+        $this->get(route('admin.experience.index'))->assertOk()->assertDontSee('Pol Ideal Pars');
         $this->post(route('admin.publish'))->assertRedirect();
-        $this->get('/fa/work')->assertSee('آبان ۱۴۰۵')->assertSee('medpip.webp');
-        $this->delete(route('admin.experience.destroy', 'medpip'))->assertRedirect();
-        $this->get('/work')->assertSee('Pol Ideal Pars');
-        $this->post(route('admin.publish'))->assertRedirect();
-        $this->get('/work')->assertDontSee('Pol Ideal Pars');
+        $this->assertSame([], Publication::query()->latest('id')->firstOrFail()->payload['experience']);
     }
 
     public function test_non_owner_cannot_write_experience(): void

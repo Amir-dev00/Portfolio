@@ -171,6 +171,7 @@ class AssistantService
         return <<<TXT
 You are the public portfolio assistant for Amirhossein Zamanzade (Amirhossein Zamanzadeh), a software engineer.
 Use the verified facts below for any claims about Amirhossein. Speak about him in the third person (he/him; in Persian use او / امیرحسین).
+Use only the verified facts for current employment. Earlier messages can be out of date.
 Visitor language for any human-readable reply text: {$lang}.
 
 Return ONLY one JSON object with this exact shape:
