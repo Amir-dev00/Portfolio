@@ -353,21 +353,23 @@ html.cursor-disabled button {
   margin-top: -4px;
   margin-bottom: -4px;
   border-radius: 50%;
-  color: var(--glass-fg);
+  color: var(--az-text-secondary);
   transform: translateY(var(--mag-y, 0)) translateX(var(--mag-x, 0));
-  transition: transform 180ms var(--ease-spring);
+  transition:
+    color 160ms var(--ease-out),
+    transform 180ms var(--ease-spring);
 }
 
 .glass-nav__home-glass {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: var(--az-accent-softer);
+  background: color-mix(in srgb, var(--az-text) 7%, transparent);
   border: 1px solid var(--az-line);
   box-shadow:
     0 10px 24px var(--az-shadow),
     inset 0 1px 0 color-mix(in srgb, var(--az-text) 28%, transparent),
-    inset 0 -8px 18px color-mix(in srgb, var(--az-accent) 8%, transparent);
+    inset 0 -8px 18px color-mix(in srgb, var(--az-text) 5%, transparent);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   backdrop-filter: blur(20px) saturate(1.4);
   transition:
@@ -495,6 +497,9 @@ html.cursor-disabled button {
 
   .glass-nav__home:hover .glass-nav__home-glass {
     transform: scale(1.06);
+  }
+
+  .glass-nav__home:not(.is-active):hover .glass-nav__home-glass {
     background: rgba(255, 255, 255, 0.16);
     box-shadow:
       0 14px 30px rgba(0, 0, 0, 0.4),
