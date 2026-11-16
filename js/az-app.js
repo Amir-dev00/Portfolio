@@ -341,76 +341,17 @@
       return;
     }
 
-    var bar = nav.querySelector(".glass-nav__bar");
-    if (!bar) return;
-
     var isHome = navKey === "home";
-    var icon =
-      (isHome && target.querySelector(".glass-nav__home-glass")) ||
-      target.querySelector(".glass-nav__icon, .glass-nav__action-icon, .glass-nav__home-icon") ||
-      target;
-    var label = target.querySelector(".glass-nav__name");
-
-    // Neutralize magnet/press transforms and measure layout sizes (offset*),
-    // so pressed icons or avatar landings cannot shift the active oval.
-    var prevMagX = target.style.getPropertyValue("--mag-x");
-    var prevMagY = target.style.getPropertyValue("--mag-y");
-    var prevTransform = target.style.transform;
-    target.style.setProperty("--mag-x", "0px");
-    target.style.setProperty("--mag-y", "0px");
-    target.style.transform = "none";
-
-    var slotW = target.offsetWidth;
-    var slotH = target.offsetHeight;
-    var slotLeft = target.offsetLeft;
-    var slotTop = target.offsetTop;
-    var iconLeft = icon.offsetLeft;
-    var iconTop = icon.offsetTop;
-    var iconW = icon.offsetWidth;
-    var iconH = icon.offsetHeight;
-    var labelLeft = label ? label.offsetLeft : iconLeft;
-    var labelTop = label ? label.offsetTop : iconTop;
-    var labelW = label ? label.offsetWidth : iconW;
-    var labelH = label ? label.offsetHeight : iconH;
-
-    target.style.setProperty("--mag-x", prevMagX || "0px");
-    target.style.setProperty("--mag-y", prevMagY || "0px");
-    target.style.transform = prevTransform;
-
-    var ovalW;
-    var ovalH;
-    var x;
-    var y;
-
-    if (isHome) {
-      ovalW = Math.round(iconW);
-      ovalH = Math.round(iconH);
-      x = slotLeft + iconLeft + iconW / 2 - ovalW / 2;
-      y = slotTop + iconTop + iconH / 2 - ovalH / 2;
-    } else {
-      var contentLeft = Math.min(iconLeft, labelLeft);
-      var contentRight = Math.max(iconLeft + iconW, labelLeft + labelW);
-      var contentTop = Math.min(iconTop, labelTop);
-      var contentBottom = Math.max(iconTop + iconH, labelTop + labelH);
-      var contentW = contentRight - contentLeft;
-      var contentH = contentBottom - contentTop;
-      var padX = 8;
-      var padY = 6;
-      var maxW = Math.max(24, slotW - 4);
-      var maxH = Math.max(24, slotH - 2);
-      ovalW = Math.min(maxW, Math.round(contentW + padX * 2));
-      ovalH = Math.min(maxH, Math.round(contentH + padY * 2));
-      // Center the oval on icon+label, then clamp inside the slot.
-      x = slotLeft + contentLeft + contentW / 2 - ovalW / 2;
-      y = slotTop + contentTop + contentH / 2 - ovalH / 2;
-      x = Math.min(Math.max(slotLeft + 1, x), slotLeft + slotW - ovalW - 1);
-      y = Math.min(Math.max(slotTop + 1, y), slotTop + slotH - ovalH - 1);
-    }
+    // Use the slot box so labels, icon motion and integer font metrics do not resize the pill.
+    var inset = isHome ? 0 : 2.5;
+    var width = target.offsetWidth - inset * 2;
+    var x = target.offsetLeft + inset;
+    var y = target.offsetTop;
 
     indicator.classList.toggle("is-home", isHome);
-    indicator.style.width = ovalW + "px";
-    indicator.style.height = ovalH + "px";
-    indicator.style.transform = "translate3d(" + x.toFixed(2) + "px," + y.toFixed(2) + "px,0)";
+    indicator.style.width = width + "px";
+    indicator.style.height = target.offsetHeight + "px";
+    indicator.style.transform = "translate3d(" + x + "px," + y + "px,0)";
     indicator.classList.add("is-on");
   }
 
@@ -428,9 +369,6 @@
       else item.removeAttribute("aria-current");
     });
     moveIndicator(activeKey);
-    window.requestAnimationFrame(function () {
-      moveIndicator(activeKey);
-    });
   }
 
   function escapeHtml(value) {
