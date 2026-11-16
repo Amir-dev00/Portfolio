@@ -1,0 +1,17 @@
+# Place this block above the legacy site's existing rewrite rules.
+RewriteEngine On
+
+RewriteCond %{HTTP_HOST} ^(?:www\.)?itsamirdev\.ir$ [NC]
+RewriteRule ^(?:index\.html)?$ https://itsamirzamani.ir/ [R=301,L,NC]
+
+RewriteCond %{HTTP_HOST} ^(?:www\.)?itsamirdev\.ir$ [NC]
+RewriteRule ^(?:about|resume)(?:\.html|/)?$ https://itsamirzamani.ir/about [R=301,L,NC]
+
+RewriteCond %{HTTP_HOST} ^(?:www\.)?itsamirdev\.ir$ [NC]
+RewriteRule ^portfolio(?:\.html|/)?$ https://itsamirzamani.ir/work [R=301,L,NC]
+
+RewriteCond %{HTTP_HOST} ^(?:www\.)?itsamirdev\.ir$ [NC]
+RewriteRule ^contact(?:\.html|/)?$ https://itsamirzamani.ir/contact [R=301,L,NC]
+
+RewriteCond %{HTTP_HOST} ^(?:www\.)?itsamirdev\.ir$ [NC]
+RewriteRule ^assets/img/profile-img\.jpg$ https://itsamirzamani.ir/assets/img/amir/profile.webp [R=301,L,NC]

@@ -181,6 +181,19 @@
         var node = document.querySelector(entry[0]);
         if (node) node.setAttribute(entry[1], entry[2]);
       });
+
+      var profileSchema = document.getElementById("az-profile-schema");
+      if (activeRouteData.profileSchema) {
+        if (!profileSchema) {
+          profileSchema = document.createElement("script");
+          profileSchema.id = "az-profile-schema";
+          profileSchema.type = "application/ld+json";
+          document.head.appendChild(profileSchema);
+        }
+        profileSchema.textContent = JSON.stringify(activeRouteData.profileSchema);
+      } else if (profileSchema) {
+        profileSchema.remove();
+      }
       return;
     }
     if (route.name === "work") document.title = tt("title.work");

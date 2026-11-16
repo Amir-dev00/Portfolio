@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 class PublicSiteController extends Controller
 {
@@ -51,24 +52,28 @@ class PublicSiteController extends Controller
 
     public function sitemap(): Response
     {
-        $locales = ['en', 'fa'];
-        $pages = ['home', 'work', 'about', 'contact'];
-        $projects = $this->content->projectsFor('en');
+        $payload = $this->content->payload();
+        $portrait = $this->assetUrl(ProfilePortrait::path($payload['profile']['photo'] ?? null));
         $urls = [];
-        foreach ($locales as $locale) {
-            foreach ($pages as $page) {
-                $urls[] = [
-                    'loc' => $this->urlFor($locale, $page),
-                    'changefreq' => 'weekly',
-                    'priority' => $page === 'home' ? '1.0' : '0.8',
-                ];
+
+        foreach (['en', 'fa'] as $locale) {
+            foreach (['home', 'work', 'about', 'ask', 'contact'] as $page) {
+                if ($this->isIndexable($this->seoFor($payload, $locale, 'page', $page))) {
+                    $urls[] = [
+                        'loc' => $this->urlFor($locale, $page),
+                        'images' => $page === 'about' ? [$portrait] : [],
+                    ];
+                }
             }
-            foreach ($projects as $project) {
-                $urls[] = [
-                    'loc' => $this->urlFor($locale, 'project', $project['slug']),
-                    'changefreq' => 'monthly',
-                    'priority' => '0.7',
-                ];
+
+            foreach ($payload['projects'] ?? [] as $project) {
+                if ($this->isIndexable($this->seoFor($payload, $locale, 'project', $project['slug']))) {
+                    $images = array_filter([$project['image'] ?? null, ...($project['gallery'] ?? [])]);
+                    $urls[] = [
+                        'loc' => $this->urlFor($locale, 'project', $project['slug']),
+                        'images' => array_unique(array_map(fn (string $path) => $this->assetUrl($path), $images)),
+                    ];
+                }
             }
         }
 
@@ -98,9 +103,7 @@ class PublicSiteController extends Controller
         $strings = $payload['strings'][$locale] ?? $payload['strings']['en'] ?? [];
         $scope = $view === 'project' ? 'project' : 'page';
         $scopeKey = $view === 'project' ? $slug : $view;
-        $seo = $payload['seo'][$locale][$scope][$scopeKey]
-            ?? $payload['seo']['en'][$scope][$scopeKey]
-            ?? [];
+        $seo = $this->seoFor($payload, $locale, $scope, $scopeKey);
 
         $projects = match ($view) {
             'work' => $payload['projects'] ?? [],
@@ -132,13 +135,31 @@ class PublicSiteController extends Controller
 
         if ($view === 'project') {
             abort_unless($project, 404);
-            $seo['title'] = $seo['title'] ?? $project['title'];
-        } elseif ($view === 'ask') {
-            $seo['title'] ??= $strings['title.ask'] ?? ($locale === 'fa'
-                ? 'گفتگو — امیرحسین زمان‌زاده'
-                : 'Ask — Amirhossein Zamanzade');
         }
-        $seo['title'] ??= $strings['title.'.$view] ?? $strings['title.base'] ?? 'Portfolio';
+
+        $description = match ($view) {
+            'project' => $project['shortDescription'] ?: $project['fullDescription'],
+            'work' => $strings['work.lead'] ?? '',
+            'about' => $strings['about.p1'] ?? '',
+            'ask' => $strings['assistant.title'] ?? '',
+            'contact' => $strings['contact.intro'] ?? '',
+            default => '',
+        };
+        $seo['title'] = ($seo['title'] ?? '') ?: ($project
+            ? str_replace('{name}', $project['title'], $strings['title.project'] ?? '{name}')
+            : ($strings['title.'.$view] ?? $strings['title.base'] ?? 'Portfolio'));
+        $seo['description'] = ($seo['description'] ?? '') ?: Str::limit(
+            (string) Str::squish(strip_tags($description ?: ($strings['meta.description'] ?? ''))),
+            160,
+            '…'
+        );
+        $seo['robots'] = ($seo['robots'] ?? '') ?: 'index,follow';
+        $previewRequested = $request->boolean('preview');
+        if ($previewRequested) {
+            $seo['robots'] = 'noindex,nofollow';
+        } elseif ($this->isIndexable($seo) && ! str_contains(strtolower($seo['robots']), 'max-image-preview')) {
+            $seo['robots'] .= ',max-image-preview:large';
+        }
 
         $hreflang = [
             'en' => $this->urlFor('en', $view, $slug),
@@ -147,12 +168,27 @@ class PublicSiteController extends Controller
 
         $cvHref = $this->assetUrl($payload['resume']['url'] ?? '', 'assets/cv/Amirhossein-Zamanzade-CV.pdf');
         $profile = $payload['profile'] ?? [];
+        $profilePhoto = $this->assetUrl(ProfilePortrait::path($profile['photo'] ?? null));
+        $social = array_merge([
+            'email' => 'itsamirzamani@gmail.com',
+            'linkedin' => 'https://linkedin.com/in/amirhossein-zamanzade',
+            'github' => 'https://github.com/Amir-dev00',
+            ...config('portfolio.contact'),
+        ], array_filter((array) ($payload['social'] ?? []), fn ($value) => is_string($value) && trim($value) !== ''));
         $booking = $this->bookingConfig((array) ($payload['booking'] ?? $payload['settings']['booking'] ?? []));
+        $ogImage = $this->assetUrl(
+            $seo['og_image'] ?? '',
+            $project['image'] ?? (in_array($view, ['home', 'about'], true) ? $profilePhoto : 'assets/img/amir/az-monogram-blue.webp')
+        );
+        $profileSchema = $view === 'about' && $this->isIndexable($seo)
+            ? $this->profileSchema($hreflang, $locale, $payload['strings'], $profilePhoto, $social)
+            : null;
         $routeData = [
             'projects' => $projects,
             'seo' => $seo,
             'hreflang' => $hreflang,
-            'ogImage' => $this->assetUrl($seo['og_image'] ?? '', 'assets/img/amir/az-monogram-blue.webp'),
+            'ogImage' => $ogImage,
+            'profileSchema' => $profileSchema,
         ];
 
         $assetV = static function (string $path): string {
@@ -162,7 +198,6 @@ class PublicSiteController extends Controller
         };
 
         $bundledProfile = ProfilePortrait::DEFAULT_PATH;
-        $profilePhoto = $this->assetUrl(ProfilePortrait::path($profile['photo'] ?? null));
         $usesBundledProfile = $profilePhoto === asset($bundledProfile);
 
         $pages = ['home', 'work', 'about', 'ask', 'contact'];
@@ -173,6 +208,10 @@ class PublicSiteController extends Controller
             'activeView' => $view,
             'slug' => $slug,
             'project' => $view === 'project' ? $project : null,
+            'workProjects' => $view === 'work' ? $projects : [],
+            'projectUrl' => fn (string $projectSlug) => $this->urlFor($locale, 'project', $projectSlug).($preview ? '?preview=1' : ''),
+            'profileSchema' => $profileSchema,
+            'ogImage' => $ogImage,
             'experience' => $view === 'work' ? $this->workExperience($payload['experience'] ?? [], $locale, (bool) $preview) : [],
             'strings' => $strings,
             'seo' => $seo,
@@ -181,12 +220,7 @@ class PublicSiteController extends Controller
             'cvHref' => $cvHref,
             'assetV' => $assetV,
             'navPaths' => array_combine($pages, array_map(fn (string $page) => $this->urlFor($locale, $page).($preview ? '?preview=1' : ''), $pages)),
-            'social' => array_merge([
-                'email' => 'itsamirzamani@gmail.com',
-                'linkedin' => 'https://linkedin.com/in/amirhossein-zamanzade',
-                'github' => 'https://github.com/Amir-dev00',
-                ...config('portfolio.contact'),
-            ], array_filter((array) ($payload['social'] ?? []), fn ($value) => is_string($value) && trim($value) !== '')),
+            'social' => $social,
             'profile' => $profile,
             'homeBackgrounds' => array_map(function (int $slide) use ($payload) {
                 $paths = $payload['settings']['home_backgrounds'][$slide] ?? [];
@@ -199,6 +233,7 @@ class PublicSiteController extends Controller
             }, range(1, 4)),
             'aboutSkills' => array_replace(config('portfolio.about_skills'), $payload['settings']['about_skills'] ?? []),
             'teamUrl' => $payload['settings']['team']['url'] ?? config('novin.url'),
+            'indexablePortrait' => $profilePhoto,
             'profilePhoto' => $usesBundledProfile ? $assetV($bundledProfile) : $profilePhoto,
             'profilePhotoThumbnail' => $usesBundledProfile ? $assetV('assets/img/amir/profile-360.webp') : null,
             'booking' => $booking,
@@ -206,7 +241,11 @@ class PublicSiteController extends Controller
         ];
 
         $headers = ['Vary' => 'X-AZ-Fragment', 'Cache-Control' => 'private, no-store'];
+        if ($previewRequested) {
+            $headers['X-Robots-Tag'] = 'noindex, nofollow';
+        }
         if ($request->header('X-AZ-Fragment') === '1') {
+            $headers['X-Robots-Tag'] ??= 'noindex';
             return response()->json($routeData + [
                 'html' => view('pages.'.$view, $viewData)->render(),
             ], 200, $headers);
@@ -222,6 +261,40 @@ class PublicSiteController extends Controller
         ];
 
         return response()->view('site.app', $viewData, 200, $headers);
+    }
+
+    private function seoFor(array $payload, string $locale, string $scope, string $key): array
+    {
+        return $payload['seo'][$locale][$scope][$key] ?? $payload['seo']['en'][$scope][$key] ?? [];
+    }
+
+    private function isIndexable(array $seo): bool
+    {
+        return ! preg_match('/\b(?:noindex|none)\b/i', $seo['robots'] ?? '');
+    }
+
+    private function profileSchema(array $urls, string $locale, array $strings, string $portrait, array $social): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'ProfilePage',
+            '@id' => $urls[$locale].'#profile',
+            'url' => $urls[$locale],
+            'inLanguage' => $locale,
+            'mainEntity' => [
+                '@type' => 'Person',
+                '@id' => $urls['en'].'#person',
+                'name' => $strings['en']['home.profile.name'] ?? 'Amirhossein Zamanzade',
+                'alternateName' => $strings['fa']['home.profile.name'] ?? 'امیرحسین زمان زاده',
+                'jobTitle' => $strings[$locale]['home.profile.role'] ?? 'Software Engineer',
+                'image' => $portrait,
+                'url' => $urls['en'],
+                'sameAs' => array_values(array_filter(
+                    [$social['linkedin'], $social['github']],
+                    fn (string $link) => str_starts_with($link, 'https://')
+                )),
+            ],
+        ];
     }
 
     private function workExperience(array $entries, string $locale, bool $preview): array

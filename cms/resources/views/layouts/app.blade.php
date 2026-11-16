@@ -30,12 +30,15 @@
     <link rel="alternate" hreflang="x-default" href="{{ $hreflang['en'] }}"/>
     <meta property="og:title" content="{{ $seo['title'] ?? '' }}"/>
     <meta property="og:description" content="{{ $seo['description'] ?? '' }}"/>
-    <meta property="og:image" content="{{ url($seo['og_image'] ?? 'assets/img/amir/az-monogram-blue.webp') }}"/>
+    <meta property="og:image" content="{{ $ogImage }}"/>
     <meta property="og:url" content="{{ $canonical }}"/>
     <meta property="og:type" content="{{ ($viewName ?? '') === 'project' ? 'article' : 'website' }}"/>
     <meta property="og:locale" content="{{ $locale === 'fa' ? 'fa_IR' : 'en_US' }}"/>
     <meta property="og:locale:alternate" content="{{ $locale === 'fa' ? 'en_US' : 'fa_IR' }}"/>
     <meta name="twitter:card" content="summary_large_image"/>
+    @if ($profileSchema)
+      <script type="application/ld+json" id="az-profile-schema">{!! json_encode($profileSchema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+    @endif
     <script>
       /* Open before any stylesheet/script so cached reloads still paint the AZ loader. */
       document.documentElement.classList.add("az-preloader-open", "az-loading");

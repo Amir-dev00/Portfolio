@@ -9,7 +9,7 @@
                 </header>
 
                 <figure class="az-about__portrait">
-                  <img src="{{ $profilePhoto ?? asset('assets/img/amir/profile.webp') }}" width="596" height="596" alt="{{ $strings['about.portrait.alt'] ?? 'Portrait of Amirhossein Zamanzade' }}" decoding="async" data-i18n-attr="alt:about.portrait.alt"/>
+                  <img src="{{ $indexablePortrait }}" width="596" height="596" alt="{{ $strings['about.portrait.alt'] ?? 'Portrait of Amirhossein Zamanzade' }}" decoding="async" data-i18n-attr="alt:about.portrait.alt"/>
                 </figure>
 
                 <div class="az-about__copy">

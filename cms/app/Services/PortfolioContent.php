@@ -67,6 +67,8 @@ class PortfolioContent
             return $project;
         }, $projects);
 
+        $payload['seo'] = $this->withHomeSeoDefaults($payload['seo'] ?? []);
+
         if (isset($payload['seo']['fa'])) {
             array_walk_recursive($payload['seo']['fa'], static function (&$value, $key): void {
                 if ($key === 'title' || $key === 'description') {
@@ -76,6 +78,39 @@ class PortfolioContent
         }
 
         return $payload;
+    }
+
+    private function withHomeSeoDefaults(array $seo): array
+    {
+        $defaults = [
+            'en' => [
+                'title' => ['Amirhossein Zamanzade | Developer', 'Amirhossein Zamanzade | Software Engineer'],
+                'description' => [
+                    'Portfolio of Amirhossein Zamanzade — Full-Stack Developer, Programmer, and Designer.',
+                    'Amirhossein Zamanzade is a full-stack software engineer and CTO and co-founder of Novin Coders. Explore his projects, technical skills, and résumé.',
+                ],
+            ],
+            'fa' => [
+                'title' => ['امیرحسین زمان‌زاده | توسعه‌دهنده', 'امیرحسین زمان زاده | مهندس نرم‌افزار'],
+                'description' => [
+                    'نمونه‌کارهای امیرحسین زمان‌زاده — توسعه‌دهنده فول‌استک، برنامه‌نویس و طراح.',
+                    'امیرحسین زمان زاده، مهندس نرم‌افزار فول‌استک و هم‌بنیان‌گذار و مدیر ارشد فناوری نوین کدرز. نمونه‌کارها، مهارت‌ها و رزومه او را ببینید.',
+                ],
+            ],
+        ];
+
+        foreach ($defaults as $locale => $fields) {
+            $home = $seo[$locale]['page']['home'] ?? $seo['en']['page']['home'] ?? [];
+            foreach ($fields as $field => [$previous, $replacement]) {
+                $value = $seo[$locale]['page']['home'][$field] ?? null;
+                if ($value === null || $value === '' || $value === $previous) {
+                    $home[$field] = $replacement;
+                }
+            }
+            $seo[$locale]['page']['home'] = $home;
+        }
+
+        return $seo;
     }
 
     private function withPublicCopy(array $strings): array

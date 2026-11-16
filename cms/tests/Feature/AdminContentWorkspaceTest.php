@@ -19,7 +19,7 @@ class AdminContentWorkspaceTest extends TestCase
         ]);
 
         $this->get('/')->assertOk()->assertSee('/assets/img/amir/profile-360.webp?v=', false);
-        $this->get('/about')->assertOk()->assertSee('/assets/img/amir/profile.webp?v=', false);
+        $this->get('/about')->assertOk()->assertSee('src="'.asset('assets/img/amir/profile.webp').'"', false);
         $this->get('/fa/contact')->assertOk()->assertSee('/assets/img/amir/profile.webp?v=', false);
         $this->getJson('/api/booking/bootstrap?locale=fa')->assertOk()
             ->assertJsonPath('config.profile.photo', fn (string $url) => str_contains($url, '/assets/img/amir/profile.webp?v='));
