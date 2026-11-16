@@ -16,6 +16,10 @@
     </script>
     <script src="{{ $assetV('js/az-i18n.js') }}" defer></script>
     <script src="{{ $assetV('js/navbar-glass.js') }}" defer></script>
+    @if ($viewName === 'contact' && ($booking['enabled'] ?? true))
+      <script src="{{ $assetV('js/az-jalali.js') }}" defer></script>
+      <script src="{{ $assetV('js/az-booking.js') }}" defer></script>
+    @endif
     @if($viewName === 'home')
       <script src="{{ $assetV('js/az-profile.js') }}" async data-az-home-profile
         onerror="this.remove()"></script>

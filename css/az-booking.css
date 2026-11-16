@@ -473,6 +473,8 @@ html[dir="rtl"] .az-booking__back svg {
 }
 
 @media (max-width: 760px) {
+  .az-booking__blur { display: none; }
+
   .az-booking {
     place-items: end center;
     padding: 0;

@@ -25,6 +25,7 @@
   var workProjects = [];
   var activeRoute = null;
   var rhyeRequested = false;
+  var bookingFeatureReady = false;
 
   var desktopHome = window.matchMedia("(width > 767px)");
   var connection = window.navigator.connection;
@@ -1025,7 +1026,16 @@
     setHomeSliderLive(isHome && (!serverRouted || desktopHome.matches));
     if (serverRouted && isHome) startHomeFeatures();
     if (window.AZ_HOME_ARROWS && window.AZ_HOME_ARROWS.sync) window.AZ_HOME_ARROWS.sync();
-    if (!isHome && window.AZ_booking && route.name !== "contact") window.AZ_booking.close();
+    if (serverRouted && route.name === "contact") {
+      var bookingTrigger = viewFor(route).querySelector("[data-az-booking-open]");
+      if (bookingTrigger) {
+        loadBookingFeature().then(function () {
+          if (activeRoute && activeRoute.name === "contact") return window.AZ_booking.prefetch(bookingTrigger);
+        }).catch(function () {});
+      }
+    } else if (window.AZ_booking) {
+      window.AZ_booking.close();
+    }
     window.scrollTo(0, 0);
     observeAboutSkills();
     if (route.name === "ask" && document.documentElement.classList.contains("az-app-ready")) {
@@ -1171,6 +1181,18 @@
     return promise;
   }
 
+  function loadBookingFeature() {
+    if (bookingFeatureReady) return Promise.resolve();
+    var stylesheet = document.querySelector("link[data-az-booking-style]");
+    return Promise.all([
+      stylesheet && stylesheet.sheet ? Promise.resolve() : loadFeature("bookingCss", true),
+      window.AZ_jalali ? Promise.resolve() : loadFeature("jalali"),
+      window.AZ_booking ? Promise.resolve() : loadFeature("booking"),
+    ]).then(function () {
+      bookingFeatureReady = true;
+    });
+  }
+
   function startDesktopSlider() {
     if (rhyeRequested || REDUCE || !desktopHome.matches || !activeRoute || activeRoute.name !== "home") return;
     if (document.documentElement.classList.contains("az-loading") || document.hidden) return;
@@ -1281,6 +1303,7 @@
   function loadRoute(route, mode, locale) {
     var url = routeUrl(route, locale);
     var token = ++requestedRoute;
+    var bookingFeature = route.name === "contact" ? loadBookingFeature().catch(function () {}) : null;
     var pendingStatus = window.setTimeout(function () {
       if (token === requestedRoute) reportRouteStatus(locale === "fa" ? "در حال بارگذاری…" : "Loading…");
     }, 180);
@@ -1289,6 +1312,9 @@
     return fetchRoute(url).then(function (data) {
       if (token !== requestedRoute) return false;
       if (!data.seo || !data.hreflang || !Array.isArray(data.projects)) throw new Error("Incomplete route");
+      if (bookingFeature && data.html.indexOf("data-az-booking-open") !== -1) {
+        return bookingFeature.then(function () { return data; });
+      }
       return (route.name === "home" || route.name === "ask") && !window.AZ_assistant
         ? loadFeature("assistant").then(function () { return data; }) : data;
     }).then(function (data) {
@@ -1499,12 +1525,13 @@
       if (!trigger) return;
       event.preventDefault();
       if (trigger.disabled) return;
+      if (bookingFeatureReady) {
+        window.AZ_booking.open(trigger);
+        return;
+      }
       trigger.disabled = true;
       trigger.setAttribute("aria-busy", "true");
-      Promise.all([
-        loadFeature("bookingCss", true),
-        loadFeature("jalali").then(function () { return loadFeature("booking"); }),
-      ]).then(function () {
+      loadBookingFeature().then(function () {
         if (activeRoute.name === "contact" && !trigger.closest(".az-view").hidden) window.AZ_booking.open(trigger);
       }).catch(function () {
         reportRouteStatus(currentLang() === "fa" ? "تقویم باز نشد." : "Couldn’t open the calendar.", function () {

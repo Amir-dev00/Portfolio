@@ -55,6 +55,9 @@
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-profile.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-app.css') }}"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-i18n.css') }}"/>
+    @if (($viewName ?? '') === 'contact' && ($booking['enabled'] ?? true))
+      <link rel="stylesheet" href="{{ $assetV('css/az-booking.css') }}" data-az-booking-style/>
+    @endif
     {{-- Noncritical feature CSS: fetch without blocking first paint. --}}
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-home-arrows.css') }}" media="print" onload="this.media='all'"/>
     <link rel="stylesheet" type="text/css" href="{{ $assetV('css/az-assistant.css') }}" media="print" onload="this.media='all'"/>

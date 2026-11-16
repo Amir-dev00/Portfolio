@@ -3,6 +3,7 @@
   "use strict";
 
   var TRIGGER = "[data-az-booking-open]";
+  var BOOTSTRAP_TTL = 45 * 1000;
   var state = {
     root: null,
     dialog: null,
@@ -18,11 +19,9 @@
     selectedSlot: null,
     slots: [],
     inerted: [],
-    timeline: null,
     monthToken: 0,
     slotsToken: 0,
-    bootstrapPromise: null,
-    bootstrapKey: "",
+    bootstrap: null,
     prefetchBound: false,
     formDraft: null,
   };
@@ -159,7 +158,7 @@
     return ((el && el.getAttribute("data-booking-api")) || state.api || "/api/booking").replace(/\/$/, "");
   }
 
-  function api(path, opts) {
+  function api(path, opts, base) {
     opts = opts || {};
     var headers = Object.assign({ Accept: "application/json", "X-Requested-With": "XMLHttpRequest" }, opts.headers || {});
     if (opts.method && opts.method.toUpperCase() !== "GET") {
@@ -167,7 +166,7 @@
       headers["X-XSRF-TOKEN"] = csrf();
       if (!(opts.body instanceof FormData)) headers["Content-Type"] = "application/json";
     }
-    return fetch(state.api + path, Object.assign({ credentials: "same-origin" }, opts, { headers: headers })).then(function (res) {
+    return fetch((base || state.api) + path, Object.assign({ credentials: "same-origin" }, opts, { headers: headers })).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) {
         if (!res.ok) {
           var err = new Error((data && data.message) || "Request failed");
@@ -261,7 +260,7 @@
     state.root.querySelector(".az-booking__back").hidden = state.step === "date" || state.step === "done";
   }
 
-  function setStep(step) {
+  function setStep(step, animate) {
     state.step = step;
     renderSteps();
     var stage = state.root.querySelector(".az-booking__stage");
@@ -269,7 +268,7 @@
     else if (step === "time") renderTimes(stage);
     else if (step === "details") renderForm(stage);
     else if (step === "done") renderDone(stage);
-    animateStage(stage);
+    if (animate !== false) animateStage(stage);
   }
 
   function goBack() {
@@ -489,6 +488,7 @@
     btn.disabled = true;
     api("/", { method: "POST", body: JSON.stringify(payload) })
       .then(function (data) {
+        state.bootstrap = null;
         state.confirmed = data.booking;
         setStep("done");
       })
@@ -545,22 +545,37 @@
     }
   }
 
-  function fetchBootstrap(force) {
-    state.api = resolveApi(state.trigger);
-    var key = state.api + "|" + lang();
-    if (!force && state.bootstrapPromise && state.bootstrapKey === key) {
-      return state.bootstrapPromise;
+  function cachedBootstrap(base, locale) {
+    var entry = state.bootstrap;
+    return entry && entry.key === base + "|" + locale && (!entry.data || entry.expires > Date.now()) ? entry : null;
+  }
+
+  function fetchBootstrap(force, trigger) {
+    var base = resolveApi(trigger || state.trigger);
+    var locale = lang();
+    var cached = cachedBootstrap(base, locale);
+    if (!force && cached) {
+      return cached.promise;
     }
-    state.bootstrapKey = key;
-    state.bootstrapPromise = api("/bootstrap?locale=" + encodeURIComponent(lang()))
+    var entry = { key: base + "|" + locale, data: null, expires: 0 };
+    state.bootstrap = entry;
+    entry.promise = api("/bootstrap?locale=" + encodeURIComponent(locale), null, base)
       .then(function (data) {
+        if (!data || !data.config || (data.config.enabled && !data.month)) throw new Error("Invalid bootstrap");
+        entry.data = data;
+        entry.expires = Date.now() + BOOTSTRAP_TTL;
         return data;
       })
       .catch(function (err) {
-        if (state.bootstrapKey === key) state.bootstrapPromise = null;
+        if (state.bootstrap === entry) state.bootstrap = null;
         throw err;
       });
-    return state.bootstrapPromise;
+    return entry.promise;
+  }
+
+  function prefetch(trigger) {
+    ensureRoot();
+    return fetchBootstrap(false, trigger);
   }
 
   function loadMonth() {
@@ -613,26 +628,6 @@
     }
   }
 
-  function animateIn() {
-    if (reducedMotion() || !window.gsap) {
-      state.root.hidden = false;
-      state.root.classList.add("is-open");
-      return;
-    }
-    state.root.hidden = false;
-    var shade = state.root.querySelector(".az-booking__shade");
-    var blur = state.root.querySelector(".az-booking__blur");
-    var dialog = state.dialog;
-    window.gsap.set([shade, blur], { opacity: 0 });
-    window.gsap.set(dialog, { opacity: 0, y: 24, scale: 0.96 });
-    state.timeline = window.gsap.timeline();
-    state.timeline
-      .to(shade, { opacity: 1, duration: 0.22, ease: "power2.out" }, 0)
-      .to(blur, { opacity: 1, duration: 0.26, ease: "power2.out" }, 0.02)
-      .to(dialog, { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "power3.out" }, 0.04);
-    state.root.classList.add("is-open");
-  }
-
   function animateStage(stage) {
     if (reducedMotion() || !window.gsap) return;
     window.gsap.fromTo(stage, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out" });
@@ -649,59 +644,59 @@
     state.selectedSlot = null;
     state.confirmed = null;
     state.formDraft = null;
+    state.config = null;
+    state.monthData = null;
     state.monthToken += 1;
     var openToken = state.monthToken;
     trigger.setAttribute("aria-expanded", "true");
     state.trigger = trigger;
-    lockPage(true);
-    renderAside(trigger);
-    renderSteps();
+    var cached = cachedBootstrap(state.api, lang());
     var stage = state.root.querySelector(".az-booking__stage");
-    renderCalendarSkeleton(stage);
-    animateIn();
-    document.addEventListener("keydown", onKey);
-    if (window.AZ_i18n && window.AZ_i18n.apply) window.AZ_i18n.apply(state.root);
+    lockPage(true);
 
-    fetchBootstrap(false)
-      .then(function (data) {
-        if (!state.open || openToken !== state.monthToken) return;
+    function showMonth(data) {
+      if (!state.open || openToken !== state.monthToken) return;
+      try {
         applyBootstrapPayload(data);
         renderAside(trigger);
-        setStep("date");
-      })
-      .catch(function (err) {
+        setStep("date", false);
+      } catch (err) {
+        renderAside(trigger);
+        renderSteps();
+        showBootstrapError(stage, trigger, err);
+      }
+    }
+
+    if (cached && cached.data) {
+      showMonth(cached.data);
+    } else {
+      renderAside(trigger);
+      renderSteps();
+      renderCalendarSkeleton(stage);
+      fetchBootstrap(false, trigger).then(showMonth).catch(function (err) {
         if (!state.open || openToken !== state.monthToken) return;
         showBootstrapError(stage, trigger, err);
       });
+    }
+
+    state.root.hidden = false;
+    state.root.classList.add("is-open");
+    applyI18n(state.root);
+    state.dialog.focus({ preventScroll: true });
+    document.addEventListener("keydown", onKey);
   }
 
   function close() {
     if (!state.open) return;
     state.open = false;
     document.removeEventListener("keydown", onKey);
-    if (state.trigger) state.trigger.setAttribute("aria-expanded", "false");
-    function done() {
-      state.root.hidden = true;
-      state.root.classList.remove("is-open");
-      lockPage(false);
-      if (state.trigger) state.trigger.focus();
+    state.root.hidden = true;
+    state.root.classList.remove("is-open");
+    lockPage(false);
+    if (state.trigger) {
+      state.trigger.setAttribute("aria-expanded", "false");
+      state.trigger.focus({ preventScroll: true });
     }
-    if (reducedMotion() || !window.gsap) {
-      done();
-      return;
-    }
-    window.gsap.to(state.dialog, {
-      opacity: 0,
-      y: 16,
-      scale: 0.97,
-      duration: 0.2,
-      ease: "power2.in",
-      onComplete: done,
-    });
-    window.gsap.to([state.root.querySelector(".az-booking__shade"), state.root.querySelector(".az-booking__blur")], {
-      opacity: 0,
-      duration: 0.2,
-    });
   }
 
   function onKey(e) {
@@ -730,8 +725,7 @@
     var run = function () {
       var trigger = document.querySelector(TRIGGER);
       if (!trigger) return;
-      state.api = resolveApi(trigger);
-      fetchBootstrap(false).catch(function () {});
+      prefetch(trigger).catch(function () {});
     };
     var kick = function () {
       if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: 1800 });
@@ -787,10 +781,8 @@
   }
 
   window.addEventListener("az:langchange", function () {
-    state.bootstrapPromise = null;
-    state.bootstrapKey = "";
     if (!state.open) {
-      schedulePrefetch();
+      if (!window.AZ_ASSETS) schedulePrefetch();
       return;
     }
     syncDialogLocale();
@@ -854,5 +846,5 @@
     }
   });
 
-  window.AZ_booking = { open: open, close: close, bind: bind, prefetch: fetchBootstrap };
+  window.AZ_booking = { open: open, close: close, bind: bind, prefetch: prefetch };
 })();
