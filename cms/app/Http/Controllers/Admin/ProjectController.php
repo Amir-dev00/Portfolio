@@ -344,6 +344,6 @@ class ProjectController extends Controller
 
     private function lines(?string $text): array
     {
-        return array_values(array_filter(array_map('trim', preg_split('/\R/', $text ?? ''))));
+        return array_values(array_filter(array_map('trim', preg_split('/\R/u', $text ?? ''))));
     }
 }

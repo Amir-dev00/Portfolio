@@ -127,8 +127,12 @@ class ExperienceController extends Controller
                 if (! $removeLogo && ! $file && ! empty($record->value['logo_path'])) {
                     $data['logo_path'] = $record->value['logo_path'];
                 }
-                if (($record->value['start_month'] ?? null) === $data['start_month'] && ! empty($record->value['start_label_fa'])) {
-                    $data['start_label_fa'] = $record->value['start_label_fa'];
+                if (($record->value['start_month'] ?? null) === $data['start_month']) {
+                    foreach (['start_label_en', 'start_label_fa'] as $label) {
+                        if (! empty($record->value[$label])) {
+                            $data[$label] = $record->value[$label];
+                        }
+                    }
                 }
                 if ($file) {
                     $path = $file->store('media/drafts/img', 'local');

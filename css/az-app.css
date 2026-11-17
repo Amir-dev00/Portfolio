@@ -1080,16 +1080,67 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   padding-block-start: clamp(24px, 4vw, 42px);
   border-block-start: 1px solid var(--az-line);
 }
+.az-experience__timeline {
+  --az-experience-date-width: clamp(142px, 18vw, 208px);
+  --az-experience-column-gap: 14px;
+  --az-experience-axis: 18px;
+  --az-experience-row-gap: 20px;
+  display: grid;
+  gap: var(--az-experience-row-gap);
+  margin: clamp(22px, 4vw, 38px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.az-experience__event {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--az-experience-date-width) var(--az-experience-axis) minmax(0, 1fr);
+  gap: var(--az-experience-column-gap);
+  align-items: start;
+}
+.az-experience__event:not(:last-child)::before {
+  position: absolute;
+  inset-block: 28px calc(-1 * var(--az-experience-row-gap) - 27px);
+  inset-inline-start: calc(var(--az-experience-date-width) + var(--az-experience-column-gap) + var(--az-experience-axis) / 2);
+  width: 1px;
+  background: var(--az-line-strong);
+  content: "";
+}
+.az-experience__period {
+  margin: 0;
+  padding-block-start: 20px;
+  color: var(--az-text-secondary);
+  font-size: .82rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+.az-experience__ongoing { color: var(--az-accent); font-weight: 650; }
+.az-experience__marker {
+  z-index: 1;
+  justify-self: center;
+  width: 10px;
+  height: 10px;
+  margin-block-start: 23px;
+  border: 2px solid var(--az-line-strong);
+  border-radius: 50%;
+  background: var(--az-bg);
+  box-shadow: 0 0 0 4px var(--az-bg);
+}
+.az-experience__marker[data-ongoing] {
+  border-color: var(--az-accent);
+  background: var(--az-accent);
+  box-shadow: 0 0 0 4px var(--az-bg), 0 0 14px var(--az-accent-soft);
+}
 .az-experience__card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: clamp(12px, 3vw, 22px);
-  margin-block-start: 14px;
+  min-width: 0;
   padding: clamp(14px, 3vw, 22px);
   border: 1px solid var(--az-line);
   border-radius: 20px;
-  background: var(--az-glass-translucent);
+  background: linear-gradient(145deg, var(--az-accent-softer), transparent 65%), var(--az-glass-translucent);
 }
 .az-experience__logo {
   display: grid;
@@ -1180,50 +1231,43 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
     line-height: 1.2;
   }
 
+  .az-experience__timeline {
+    --az-experience-date-width: 0px;
+    --az-experience-axis: 14px;
+    --az-experience-column-gap: 10px;
+    --az-experience-row-gap: 17px;
+  }
+
+  .az-experience__event {
+    grid-template-columns: var(--az-experience-axis) minmax(0, 1fr);
+    gap: 8px var(--az-experience-column-gap);
+  }
+
+  .az-experience__event:not(:last-child)::before {
+    inset-block: 9px calc(-1 * var(--az-experience-row-gap) - 8px);
+    inset-inline-start: calc(var(--az-experience-axis) / 2);
+  }
+
+  .az-experience__period { grid-area: 1 / 2; padding: 0; }
+  .az-experience__marker { grid-area: 1 / 1; margin-block-start: 5px; }
+
   .az-experience__card {
-    grid-template-columns: 46px minmax(0, 1fr);
-    align-items: center;
-    column-gap: 12px;
-    row-gap: 4px;
-    padding: 15px;
-    border-inline-start: 2px solid var(--az-line-strong);
-    border-radius: 18px;
-    background: linear-gradient(145deg, var(--az-accent-softer), transparent 68%), var(--az-glass-translucent);
+    grid-area: 2 / 2;
+    grid-template-columns: clamp(31px, 10vw, 43px) minmax(0, 1fr);
+    gap: 10px;
+    padding: 13px;
+    border-radius: 16px;
   }
 
-  .az-experience__logo {
-    grid-row: 1 / span 2;
-    width: 46px;
-  }
-
-  .az-experience__copy { display: contents; }
-
-  .az-experience__copy h3,
-  .az-experience__copy > p:not(.az-experience__description) {
-    grid-column: 2;
-    margin: 0;
-    line-height: 1.35;
-    overflow-wrap: anywhere;
-  }
-
-  .az-experience__meta,
-  .az-experience__copy .az-experience__description {
-    grid-column: 1 / -1;
-  }
-
-  .az-experience__meta {
-    gap: 6px 10px;
-    margin-block-start: 8px;
-    padding-block-start: 10px;
-    border-block-start: 1px solid var(--az-line);
-    line-height: 1.5;
-  }
+  .az-experience__logo { width: 100%; }
+  .az-experience__copy h3 { line-height: 1.35; }
+  .az-experience__copy > p { font-size: .88rem; }
+  .az-experience__meta { margin-block-start: 7px; }
 
   .az-experience__copy .az-experience__description {
-    margin-block-start: 6px;
+    margin-block-start: 9px;
     font-size: .86rem;
-    line-height: 1.6;
-    overflow-wrap: anywhere;
+    line-height: 1.56;
   }
 
   .az-experience + #work-projects {

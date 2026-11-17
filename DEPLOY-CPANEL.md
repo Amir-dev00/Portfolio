@@ -21,9 +21,9 @@ Related files in this repository:
 
 ### PHP
 
-Laravel 13 in this repo requires **PHP 8.3 or newer** (`composer.json`: `"php": "^8.3"`).
+The dependencies currently locked in `cms/composer.lock` require **PHP 8.4.1 or newer**.
 
-cPanel → **MultiPHP Manager** / **Select PHP Version** → set the domain to **8.3+** (8.4 is fine if offered).
+cPanel → **MultiPHP Manager** / **Select PHP Version** → set the domain to **8.4 or 8.5**.
 
 ### PHP extensions
 
@@ -274,6 +274,25 @@ Re-run the [first-deploy checklist](#3-first-deploy-checklist). If something fai
 - **CV**: Admin → Resume → upload PDF → Publish live.
 
 ---
+
+## Automatic code deploys from GitHub
+
+This workflow updates an existing installation when a commit lands on `main`. For the first installation, use the ZIP and setup instructions above.
+
+1. In cPanel → **FTP Accounts**, create a dedicated account whose directory is the parent that contains both `portfolio-app/` and `public_html/`. Check that logging in with **explicit FTP over TLS** shows both folders under `/`. Use the hostname listed in **Configure FTP Client**, or ask the host for the hostname on its TLS certificate.
+2. In GitHub → **Settings → Secrets and variables → Actions → Secrets**, add three repository secrets.
+
+   | Secret | Value |
+   | --- | --- |
+   | `FTPS_HOST` | FTPS server hostname, without a protocol or path |
+   | `FTPS_USERNAME` | Full FTP account name, including the domain if cPanel shows one |
+   | `FTPS_PASSWORD` | Password for the dedicated FTP account |
+
+   The workflow uses explicit FTPS on port 21. If the host specifies another explicit FTPS port, add a repository variable named `FTPS_PORT`.
+
+3. Open **Actions → Deploy portfolio to cPanel → Run workflow** and select `main` for the first run. Check the upload and live-site checks in the run log. Review `/work` and `/fa/work` after the first deployment.
+
+This workflow expects PHP 8.4.1 or newer on the host, as required by the current Composer lockfile. The upload preserves production `.env`, `storage/`, `public_html/media/`, `public_html/.htaccess`, and the live database. It uploads bundled code and assets and clears only generated Laravel bootstrap caches. Each file is uploaded to a temporary name before it is renamed into place. An interrupted upload can be rerun. A change that requires database migrations still needs its documented manual upgrade step.
 
 ## 7. Rollback
 

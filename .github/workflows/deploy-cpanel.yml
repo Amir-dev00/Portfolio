@@ -1,0 +1,80 @@
+name: Deploy portfolio to cPanel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-cpanel-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out main
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP 8.4 and Composer
+        uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea # v2
+        with:
+          php-version: '8.4'
+          extensions: dom, gd, mbstring, pdo_mysql, zip
+          tools: composer:v2
+          coverage: none
+
+      - name: Install locked production dependencies
+        working-directory: cms
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist --no-scripts
+
+      - name: Build deployment files
+        run: bash scripts/stage-cpanel-deploy.sh "$RUNNER_TEMP/portfolio-release"
+
+      - name: Check FTPS configuration
+        id: ftps
+        env:
+          FTPS_HOST: ${{ secrets.FTPS_HOST }}
+          FTPS_USERNAME: ${{ secrets.FTPS_USERNAME }}
+          FTPS_PASSWORD: ${{ secrets.FTPS_PASSWORD }}
+        run: |
+          if [[ -z "$FTPS_HOST" && -z "$FTPS_USERNAME" && -z "$FTPS_PASSWORD" ]]; then
+            echo '::notice::Build passed. FTPS deployment is waiting for the three repository secrets.'
+            echo 'configured=false' >> "$GITHUB_OUTPUT"
+          elif [[ -z "$FTPS_HOST" || -z "$FTPS_USERNAME" || -z "$FTPS_PASSWORD" ]]; then
+            echo '::error::Set FTPS_HOST, FTPS_USERNAME, and FTPS_PASSWORD together.'
+            exit 1
+          else
+            echo 'configured=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install the FTPS client
+        if: steps.ftps.outputs.configured == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends lftp
+
+      - name: Upload code and bundled assets
+        if: steps.ftps.outputs.configured == 'true'
+        env:
+          FTPS_HOST: ${{ secrets.FTPS_HOST }}
+          FTPS_USERNAME: ${{ secrets.FTPS_USERNAME }}
+          FTPS_PASSWORD: ${{ secrets.FTPS_PASSWORD }}
+          FTPS_PORT: ${{ vars.FTPS_PORT || '21' }}
+        run: bash scripts/deploy-cpanel-ftps.sh "$RUNNER_TEMP/portfolio-release"
+
+      - name: Check the live portfolio
+        if: steps.ftps.outputs.configured == 'true'
+        run: |
+          for path in /work /fa/work; do
+            curl --fail --silent --show-error --location --max-time 30 \
+              --retry 3 "https://itsamirzamani.ir$path" -o "$RUNNER_TEMP/portfolio-health.html"
+            grep -Fq 'id="view-work"' "$RUNNER_TEMP/portfolio-health.html"
+          done

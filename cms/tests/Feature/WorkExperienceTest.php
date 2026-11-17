@@ -51,8 +51,23 @@ class WorkExperienceTest extends TestCase
         $this->get('/work')->assertDontSee('Example Studio');
     }
 
+    public function test_bundled_experience_is_a_bilingual_timeline_before_projects(): void
+    {
+        $this->get('/work')->assertOk()
+            ->assertSeeInOrder(['Work experience', 'Aug–Sep 2026', 'Fitnet', 'May–Jun 2026', 'Novin Coders', 'Teaching Assistant', 'id="work-projects"'], false)
+            ->assertSee('class="az-experience__timeline"', false)
+            ->assertSee('<time datetime="2025-12">Dec 2025</time>', false);
+
+        $this->getJson('/fa/work', ['X-AZ-Fragment' => '1'])->assertOk()
+            ->assertJsonPath('html', fn (string $html) => str_contains($html, 'شهریور ۱۴۰۵')
+                && str_contains($html, 'نوین کدرز')
+                && str_contains($html, 'دستیار آموزشی'));
+    }
+
     public function test_removed_company_stays_off_the_site_with_legacy_draft_and_published_content(): void
     {
+        config(['work-experience' => []]);
+
         $oldEntry = [
             'company_en' => 'Pol Ideal Pars (MedPIP)',
             'company_fa' => 'پل ایده‌آل پارس',
