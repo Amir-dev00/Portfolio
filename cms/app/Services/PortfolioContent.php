@@ -16,7 +16,7 @@ class PortfolioContent
         if ($payload === null) {
             $payload = $this->publications->buildDraftPayload((bool) $preview);
             if (! $preview) {
-                unset($payload['experience']);
+                unset($payload['experience'], $payload['managed_bundled_experience']);
             }
         }
 
@@ -32,7 +32,7 @@ class PortfolioContent
         }
         $payload['experience'] = collect($experience)
             ->reject(SiteSetting::isRemovedEmployer(...))
-            ->sortByDesc('start_month')
+            ->sort(SiteSetting::compareExperience(...))
             ->map(static function (array $entry): array {
                 foreach (['company_fa', 'role_fa', 'description_fa', 'start_label_fa'] as $field) {
                     if (isset($entry[$field])) {

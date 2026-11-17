@@ -20,6 +20,12 @@ class SiteSetting extends Model
 
     protected $fillable = ['key', 'value'];
 
+    public static function compareExperience(array $first, array $second): int
+    {
+        return (($first['sort_order'] ?? PHP_INT_MAX) <=> ($second['sort_order'] ?? PHP_INT_MAX))
+            ?: strcmp($second['start_month'] ?? '', $first['start_month'] ?? '');
+    }
+
     public static function isRemovedEmployer(array $entry): bool
     {
         $host = strtolower((string) parse_url($entry['website'] ?? '', PHP_URL_HOST));

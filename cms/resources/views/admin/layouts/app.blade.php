@@ -57,6 +57,20 @@
     .admin-shortcuts a { display:grid; gap:4px; margin:0; }
     .admin-shortcuts a:hover { border-color:var(--accent); }
     .admin-shortcuts span { color:var(--muted); font-size:13px; }
+    .admin-experience-list { display:grid; gap:10px; margin:0; padding:0; list-style:none; }
+    .admin-experience-card { display:grid; grid-template-columns:48px minmax(0,1fr) auto; align-items:center; gap:12px; margin:0; direction:ltr; }
+    .admin-experience-logo { display:grid; place-items:center; width:48px; height:48px; border-radius:10px; overflow:hidden; background:#232b3a; color:var(--accent); }
+    .admin-experience-logo img { display:block; object-fit:contain; }
+    .admin-experience-copy { min-width:0; overflow-wrap:anywhere; }
+    .admin-experience-copy h3, .admin-experience-copy p { margin:0; }
+    .admin-experience-copy p + p { margin-block-start:3px; }
+    html[dir="rtl"] .admin-experience-card :is(.admin-experience-copy,.admin-pills) { direction:rtl; }
+    .admin-experience-card .admin-pills { margin:0; }
+    .admin-experience-card button:disabled { opacity:.35; cursor:default; }
+    @media (max-width:680px) {
+      .admin-experience-card { grid-template-columns:48px minmax(0,1fr); }
+      .admin-experience-card .admin-pills { grid-column:1 / -1; }
+    }
     @media (max-width:900px) {
       .shell { grid-template-columns:minmax(0,1fr); }
       aside { border-inline-end:0; border-bottom:1px solid var(--line); }

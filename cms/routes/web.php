@@ -86,6 +86,7 @@ Route::prefix('admin')->name('admin.')->middleware(\App\Http\Middleware\AdminLoc
         Route::post('/bookings/{booking}/cancel', [BookingAdminController::class, 'cancel'])->name('bookings.cancel');
         Route::post('/bookings/{booking}/complete', [BookingAdminController::class, 'complete'])->name('bookings.complete');
 
+        Route::post('/experience/reorder', [ExperienceController::class, 'reorder'])->name('experience.reorder');
         Route::resource('experience', ExperienceController::class)->except('show');
 
         Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');

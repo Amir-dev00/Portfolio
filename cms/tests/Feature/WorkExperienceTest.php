@@ -51,6 +51,42 @@ class WorkExperienceTest extends TestCase
         $this->get('/work')->assertDontSee('Example Studio');
     }
 
+    public function test_owner_can_reorder_and_remove_bundled_experience(): void
+    {
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->post(route('admin.publish'))->assertRedirect();
+
+        $original = ['experience/fitnet.webp', 'experience/novin-coders.webp', 'experience/amirkabir.webp'];
+        $order = ['amirkabir-programming-ta', 'fitnet', 'novin-coders'];
+        $updated = [$original[2], $original[0], $original[1]];
+
+        $this->post(route('admin.experience.reorder'), ['order' => ['fitnet', 'novin-coders', 'stale']])
+            ->assertSessionHasErrors('order');
+        $this->post(route('admin.experience.reorder'), ['order' => $order])
+            ->assertRedirect(route('admin.experience.index'));
+
+        $this->get(route('admin.experience.index'))->assertOk()
+            ->assertSeeInOrder(array_map(fn (string $id) => 'name="order[]" value="'.$id.'"', $order), false)
+            ->assertSee('Save experience order');
+        $this->get('/work')->assertSeeInOrder($original, false);
+        $this->get('/work?preview=1')->assertSeeInOrder($updated, false);
+
+        $edit = array_replace(config('work-experience.fitnet'), ['role_en' => 'Engineering Partner']);
+        $this->put(route('admin.experience.update', 'fitnet'), $edit)->assertRedirect();
+        $this->get('/work?preview=1')->assertSeeInOrder($updated, false)->assertSee('Engineering Partner');
+
+        $this->post(route('admin.publish'))->assertRedirect();
+        $this->get('/work')->assertSeeInOrder($updated, false)->assertSee('Engineering Partner');
+        $this->get('/fa/work')->assertSeeInOrder($updated, false);
+
+        $this->delete(route('admin.experience.destroy', 'novin-coders'))->assertRedirect();
+        $this->get('/work')->assertSee($original[1], false);
+        $this->get('/work?preview=1')->assertDontSee($original[1], false);
+        $this->post(route('admin.publish'))->assertRedirect();
+        $this->get('/work')->assertSeeInOrder([$updated[0], $updated[1]], false)
+            ->assertDontSee($original[1], false);
+    }
+
     public function test_bundled_experience_shows_bilingual_cards_and_logos_before_projects(): void
     {
         $this->get('/work')->assertOk()
@@ -76,6 +112,7 @@ class WorkExperienceTest extends TestCase
             $this->assertStringContainsString('class="az-work-mobile__track"', $html);
             $this->assertStringContainsString('data-mobile-step="-1"', $html);
             $this->assertStringContainsString('data-mobile-step="1"', $html);
+            $this->assertStringContainsString('class="az-work-mobile__progress"', $html);
             $this->assertStringContainsString($locale === 'fa' ? 'aria-label="پروژه بعدی"' : 'aria-label="Next project"', $html);
             foreach ($data['projects'] as $project) {
                 if ($project['image']) {
@@ -125,5 +162,6 @@ class WorkExperienceTest extends TestCase
         $this->actingAs(User::factory()->create(['is_owner' => false]))
             ->post(route('admin.experience.store'))
             ->assertForbidden();
+        $this->post(route('admin.experience.reorder'))->assertForbidden();
     }
 }

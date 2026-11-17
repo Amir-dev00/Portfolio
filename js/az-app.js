@@ -133,6 +133,9 @@
   var workAutoTimer = 0;
   var workInView = !("IntersectionObserver" in window);
   var WORK_AUTO_MS = 6500;
+  var MOBILE_WORK_AUTO_MS = 5000;
+  var refreshMobileWorkAuto = function () {};
+  var disposeMobileWorkAuto = function () {};
   var WORK_ROW_H = 48;
   var WORK_VISIBLE = 5;
 
@@ -514,7 +517,10 @@
     }, WORK_AUTO_MS);
   }
 
-  document.addEventListener("visibilitychange", scheduleWorkAuto);
+  document.addEventListener("visibilitychange", function () {
+    scheduleWorkAuto();
+    refreshMobileWorkAuto();
+  });
 
   function updateWorkWheel() {
     if (!workBrowser) return;
@@ -746,16 +752,48 @@
     var controls = carousel.querySelector(".az-work-mobile__controls");
     if (!track || !controls || !track.clientWidth) return;
 
+    disposeMobileWorkAuto();
     var cards = Array.from(track.children);
     var previous = controls.querySelector('[data-mobile-step="-1"]');
     var next = controls.querySelector('[data-mobile-step="1"]');
     var count = controls.querySelector(".az-work-mobile__count");
+    var progress = controls.querySelector(".az-work-mobile__progress span");
     var numbers = new Intl.NumberFormat(carousel.lang);
     var rtl = carousel.dir === "rtl";
     var edge = rtl ? "right" : "left";
     var current = -1;
     var destination = null;
     var frame = 0;
+    var autoTimer = 0;
+    var progressAnimation = null;
+    var visible = !("IntersectionObserver" in window);
+    var touching = false;
+    var hovering = false;
+    var automatic = false;
+
+    function stopAuto() {
+      window.clearTimeout(autoTimer);
+      if (progressAnimation) progressAnimation.cancel();
+      progressAnimation = null;
+    }
+
+    function scheduleAuto() {
+      stopAuto();
+      var focus = document.activeElement;
+      if (REDUCE || touching || hovering || !visible || document.hidden ||
+          !carousel.isConnected || !mobileWork.matches || !activeRoute || activeRoute.name !== "work" ||
+          (focus && carousel.contains(focus) && focus.matches(":focus-visible"))) return;
+      if (progress && progress.animate) {
+        progressAnimation = progress.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }],
+          { duration: MOBILE_WORK_AUTO_MS, fill: "forwards" });
+      }
+      autoTimer = window.setTimeout(function () {
+        automatic = true;
+        count.setAttribute("aria-live", "off");
+        moveTo(((destination ?? current) + 1) % cards.length, current < cards.length - 1);
+        scheduleAuto();
+      }, MOBILE_WORK_AUTO_MS);
+    }
 
     function select(index) {
       if (destination === index) destination = null;
@@ -765,6 +803,7 @@
       count.textContent = numbers.format(index + 1) + " / " + numbers.format(cards.length);
       previous.setAttribute("aria-disabled", String(index === 0));
       next.setAttribute("aria-disabled", String(index === cards.length - 1));
+      if (!automatic) scheduleAuto();
     }
 
     function moveTo(index, smooth) {
@@ -776,8 +815,15 @@
       if (!smooth || REDUCE || Math.abs(distance) < 1) select(index);
     }
 
+    function takeControl() {
+      automatic = false;
+      count.setAttribute("aria-live", "polite");
+    }
+
     function step(amount) {
+      takeControl();
       moveTo((destination ?? current) + amount, true);
+      scheduleAuto();
     }
 
     track.addEventListener("scroll", function () {
@@ -798,7 +844,43 @@
         select(closest);
       });
     }, { passive: true });
-    track.addEventListener("pointerdown", function () { destination = null; });
+    track.addEventListener("pointerdown", function (event) {
+      takeControl();
+      destination = null;
+      touching = event.pointerType !== "mouse";
+      scheduleAuto();
+    });
+    function endTouch() {
+      touching = false;
+      scheduleAuto();
+    }
+    track.addEventListener("wheel", function (event) {
+      if (!event.deltaX && !event.shiftKey) return;
+      takeControl();
+      destination = null;
+      scheduleAuto();
+    }, { passive: true });
+    track.addEventListener("pointerup", endTouch);
+    track.addEventListener("pointercancel", endTouch);
+    carousel.addEventListener("pointerenter", function (event) {
+      if (event.pointerType === "mouse") {
+        hovering = true;
+        stopAuto();
+      }
+    });
+    carousel.addEventListener("pointerleave", function (event) {
+      if (event.pointerType === "mouse") {
+        hovering = false;
+        scheduleAuto();
+      }
+    });
+    carousel.addEventListener("focusin", function () {
+      takeControl();
+      scheduleAuto();
+    });
+    carousel.addEventListener("focusout", function () {
+      window.requestAnimationFrame(scheduleAuto);
+    });
     track.addEventListener("keydown", function (event) {
       if (event.target !== track || event.altKey || event.ctrlKey || event.metaKey) return;
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
@@ -809,6 +891,22 @@
     previous.addEventListener("click", function () { step(-1); });
     next.addEventListener("click", function () { step(1); });
 
+    if (REDUCE) progress.parentElement.hidden = true;
+
+    var observer = null;
+    if ("IntersectionObserver" in window) {
+      observer = new IntersectionObserver(function (entries) {
+        visible = entries[0].intersectionRatio >= 0.45;
+        scheduleAuto();
+      }, { threshold: 0.45 });
+      observer.observe(track);
+    }
+    refreshMobileWorkAuto = scheduleAuto;
+    disposeMobileWorkAuto = function () {
+      if (observer) observer.disconnect();
+      stopAuto();
+    };
+
     var restore = cards.findIndex(function (card) { return card.dataset.mobileProject === workLastSlug; });
     moveTo(Math.max(0, restore), false);
     controls.hidden = false;
@@ -816,6 +914,7 @@
   }
 
   mobileWork.addEventListener("change", function () {
+    refreshMobileWorkAuto();
     if (!activeRoute || activeRoute.name !== "work") return;
     if (mobileWork.matches && workBrowser && workBrowser.hasAttribute("data-az-desktop-work")) {
       window.clearTimeout(workAutoTimer);
@@ -1063,6 +1162,7 @@
     // Home: restore smooth-scrollbar + Swiper mousewheel/touch.
     setNativePageScroll(!isHome);
     if (route.name === "work") bindMobileWork();
+    refreshMobileWorkAuto();
     scheduleWorkAuto();
     setHomeSliderLive(isHome && (!serverRouted || desktopHome.matches));
     if (serverRouted && isHome) startHomeFeatures();

@@ -18,7 +18,7 @@
     @if(count($unmanaged))
       <p class="admin-hint">{{ __('Import existing portfolio projects above to put them in the same order list.') }}</p>
     @endif
-    <form method="post" action="{{ route('admin.projects.reorder') }}" data-project-order>
+    <form method="post" action="{{ route('admin.projects.reorder') }}" data-admin-order>
       @csrf
       <ol>
         @foreach($orderableProjects as $item)
@@ -35,32 +35,7 @@
       <button type="submit">{{ __('Save project order') }}</button>
     </form>
   </details>
-  <script>
-    (() => {
-      const form = document.querySelector('[data-project-order]');
-      const list = form.querySelector('ol');
-
-      form.addEventListener('click', (event) => {
-        const button = event.target.closest('button[data-move]');
-        if (!button) return;
-
-        const row = button.closest('li');
-        const moveUp = button.dataset.move === 'up';
-        const neighbor = moveUp ? row.previousElementSibling : row.nextElementSibling;
-        if (!neighbor) return;
-
-        if (moveUp) list.insertBefore(row, neighbor);
-        else list.insertBefore(neighbor, row);
-
-        for (const item of list.children) {
-          item.querySelector('[data-move="up"]').disabled = item === list.firstElementChild;
-          item.querySelector('[data-move="down"]').disabled = item === list.lastElementChild;
-        }
-
-        (button.disabled ? row.querySelector('button:not(:disabled)') : button).focus();
-      });
-    })();
-  </script>
+  @include('admin.partials.reorder-script')
 @endif
 <form method="get" class="card">
   <div class="row">

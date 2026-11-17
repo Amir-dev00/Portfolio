@@ -46,6 +46,7 @@
                         <button type="button" data-mobile-step="1" aria-controls="az-work-mobile-track" aria-label="{{ $locale === 'fa' ? 'پروژه بعدی' : 'Next project' }}">
                           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m10 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </button>
+                        <div class="az-work-mobile__progress" aria-hidden="true"><span></span></div>
                       </div>
                     @endif
                   </div>

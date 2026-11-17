@@ -1280,7 +1280,23 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
   .az-work-mobile__controls button[aria-disabled="true"] { opacity: .4; }
   .az-work-mobile__controls button:active:not([aria-disabled="true"]) { background: var(--az-accent-soft); }
-  .az-work-mobile[dir="rtl"] .az-work-mobile__controls svg { transform: scaleX(-1); }
+  .az-work-mobile[dir="rtl"] [data-mobile-step] svg { transform: scaleX(-1); }
+  .az-work-mobile__progress {
+    grid-column: 1 / -1;
+    height: 3px;
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--az-line);
+  }
+  .az-work-mobile__progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--az-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .az-work-mobile[dir="rtl"] .az-work-mobile__progress span { transform-origin: right; }
   .az-work-mobile__count {
     color: var(--az-text-secondary);
     font-size: .83rem;
