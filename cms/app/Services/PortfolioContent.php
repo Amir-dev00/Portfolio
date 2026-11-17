@@ -84,15 +84,20 @@ class PortfolioContent
     {
         $defaults = [
             'en' => [
-                'title' => ['Amirhossein Zamanzade | Developer', 'Amirhossein Zamanzade | Software Engineer'],
+                'title' => ['Amirhossein Zamanzade | Software Engineer', 'Amirhossein Zamanzade | Developer'],
                 'description' => [
-                    'Portfolio of Amirhossein Zamanzade — Full-Stack Developer, Programmer, and Designer.',
                     'Amirhossein Zamanzade is a full-stack software engineer and CTO and co-founder of Novin Coders. Explore his projects, technical skills, and résumé.',
+                    'Portfolio of Amirhossein Zamanzade — Full-Stack Developer, Programmer, and Designer.',
                 ],
             ],
             'fa' => [
-                'title' => ['امیرحسین زمان‌زاده | توسعه‌دهنده', 'امیرحسین زمان زاده | مهندس نرم‌افزار'],
+                'title' => [
+                    'امیرحسین زمان زاده | برنامه‌نویس و توسعه‌دهنده فول‌استک',
+                    'امیرحسین زمان‌زاده | توسعه‌دهنده',
+                    'امیرحسین زمان زاده | مهندس نرم‌افزار',
+                ],
                 'description' => [
+                    'امیرحسین زمان زاده، برنامه‌نویس و مهندس نرم‌افزار فول‌استک. پروژه‌های توسعه وب با Laravel و Next.js، سوابق کاری و رزومه‌اش را ببینید.',
                     'نمونه‌کارهای امیرحسین زمان‌زاده — توسعه‌دهنده فول‌استک، برنامه‌نویس و طراح.',
                     'امیرحسین زمان زاده، مهندس نرم‌افزار فول‌استک و هم‌بنیان‌گذار و مدیر ارشد فناوری نوین کدرز. نمونه‌کارها، مهارت‌ها و رزومه او را ببینید.',
                 ],
@@ -101,10 +106,10 @@ class PortfolioContent
 
         foreach ($defaults as $locale => $fields) {
             $home = $seo[$locale]['page']['home'] ?? $seo['en']['page']['home'] ?? [];
-            foreach ($fields as $field => [$previous, $replacement]) {
+            foreach ($fields as $field => $values) {
                 $value = $seo[$locale]['page']['home'][$field] ?? null;
-                if ($value === null || $value === '' || $value === $previous) {
-                    $home[$field] = $replacement;
+                if ($value === null || $value === '' || in_array($value, array_slice($values, 1), true)) {
+                    $home[$field] = $values[0];
                 }
             }
             $seo[$locale]['page']['home'] = $home;
