@@ -1235,10 +1235,57 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
 
   .az-work-mobile {
     display: grid;
-    gap: 16px;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .az-work-mobile__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    gap: 12px;
+    min-width: 0;
     margin: 0;
     padding: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
     list-style: none;
+  }
+
+  .az-work-mobile__track::-webkit-scrollbar { display: none; }
+  .az-work-mobile__track > li { min-width: 0; scroll-snap-align: start; }
+
+  .az-work-mobile__controls {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .az-work-mobile__controls[hidden] { display: none; }
+
+  .az-work-mobile__controls button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--az-line-strong);
+    border-radius: 13px;
+    background: var(--az-glass-translucent);
+    color: var(--az-text);
+  }
+
+  .az-work-mobile__controls button[aria-disabled="true"] { opacity: .4; }
+  .az-work-mobile__controls button:active:not([aria-disabled="true"]) { background: var(--az-accent-soft); }
+  .az-work-mobile[dir="rtl"] .az-work-mobile__controls svg { transform: scaleX(-1); }
+  .az-work-mobile__count {
+    color: var(--az-text-secondary);
+    font-size: .83rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
   }
 
   .az-work-mobile__card {
@@ -1250,9 +1297,11 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
     color: var(--az-text);
   }
 
-  .az-work-mobile__card:focus-visible {
+  .az-work-mobile__track:focus-visible,
+  .az-work-mobile__card:focus-visible,
+  .az-work-mobile__controls button:focus-visible {
     outline: 2px solid var(--az-accent);
-    outline-offset: 3px;
+    outline-offset: -3px;
   }
 
   .az-work-mobile__cover {
@@ -1292,6 +1341,10 @@ html[data-az-route]:not([data-az-route="home"]) .az-profile {
   }
 
   .az-work-mobile__copy .az-work-mobile__description {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     margin-block-start: 5px;
     color: var(--az-text-secondary);
     font-size: .83rem;

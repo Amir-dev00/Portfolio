@@ -506,6 +506,7 @@
     var focus = document.activeElement;
     var focusedControl = workBrowser && focus && workBrowser.contains(focus) && focus.matches(":focus-visible");
     if (REDUCE || !activeRoute || activeRoute.name !== "work" || document.hidden ||
+        (mobileWork.matches && workBrowser && workBrowser.hasAttribute("data-az-desktop-work")) ||
         !workInView || focusedControl || getProjects().length < 2) return;
 
     workAutoTimer = window.setTimeout(function () {
@@ -737,10 +738,88 @@
     scheduleWorkAuto();
   }
 
+  function bindMobileWork() {
+    if (!mobileWork.matches || !views.work) return;
+    var carousel = views.work.querySelector(".az-work-mobile");
+    if (!carousel || carousel.dataset.ready) return;
+    var track = carousel.querySelector(".az-work-mobile__track");
+    var controls = carousel.querySelector(".az-work-mobile__controls");
+    if (!track || !controls || !track.clientWidth) return;
+
+    var cards = Array.from(track.children);
+    var previous = controls.querySelector('[data-mobile-step="-1"]');
+    var next = controls.querySelector('[data-mobile-step="1"]');
+    var count = controls.querySelector(".az-work-mobile__count");
+    var numbers = new Intl.NumberFormat(carousel.lang);
+    var rtl = carousel.dir === "rtl";
+    var edge = rtl ? "right" : "left";
+    var current = -1;
+    var destination = null;
+    var frame = 0;
+
+    function select(index) {
+      if (destination === index) destination = null;
+      if (current === index) return;
+      current = index;
+      workLastSlug = cards[index].dataset.mobileProject;
+      count.textContent = numbers.format(index + 1) + " / " + numbers.format(cards.length);
+      previous.setAttribute("aria-disabled", String(index === 0));
+      next.setAttribute("aria-disabled", String(index === cards.length - 1));
+    }
+
+    function moveTo(index, smooth) {
+      index = Math.max(0, Math.min(cards.length - 1, index));
+      if (index === (destination ?? current)) return;
+      destination = index;
+      var distance = cards[index].getBoundingClientRect()[edge] - track.getBoundingClientRect()[edge];
+      track.scrollBy({ left: distance, behavior: smooth && !REDUCE ? "smooth" : "instant" });
+      if (!smooth || REDUCE || Math.abs(distance) < 1) select(index);
+    }
+
+    function step(amount) {
+      moveTo((destination ?? current) + amount, true);
+    }
+
+    track.addEventListener("scroll", function () {
+      if (frame) return;
+      frame = window.requestAnimationFrame(function () {
+        frame = 0;
+        if (!track.clientWidth) return;
+        var trackEdge = track.getBoundingClientRect()[edge];
+        var closest = 0;
+        var best = Infinity;
+        cards.forEach(function (card, index) {
+          var distance = Math.abs(card.getBoundingClientRect()[edge] - trackEdge);
+          if (distance < best) {
+            best = distance;
+            closest = index;
+          }
+        });
+        select(closest);
+      });
+    }, { passive: true });
+    track.addEventListener("pointerdown", function () { destination = null; });
+    track.addEventListener("keydown", function (event) {
+      if (event.target !== track || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        step((event.key === "ArrowRight" ? 1 : -1) * (rtl ? -1 : 1));
+      }
+    });
+    previous.addEventListener("click", function () { step(-1); });
+    next.addEventListener("click", function () { step(1); });
+
+    var restore = cards.findIndex(function (card) { return card.dataset.mobileProject === workLastSlug; });
+    moveTo(Math.max(0, restore), false);
+    controls.hidden = false;
+    carousel.dataset.ready = "1";
+  }
+
   mobileWork.addEventListener("change", function () {
     if (!activeRoute || activeRoute.name !== "work") return;
     if (mobileWork.matches && workBrowser && workBrowser.hasAttribute("data-az-desktop-work")) {
       window.clearTimeout(workAutoTimer);
+      bindMobileWork();
       return;
     }
     renderWorkGrid();
@@ -983,6 +1062,7 @@
     // Work/project/about/contact: release Rhye smooth-scrollbar so the document scrolls natively.
     // Home: restore smooth-scrollbar + Swiper mousewheel/touch.
     setNativePageScroll(!isHome);
+    if (route.name === "work") bindMobileWork();
     scheduleWorkAuto();
     setHomeSliderLive(isHome && (!serverRouted || desktopHome.matches));
     if (serverRouted && isHome) startHomeFeatures();

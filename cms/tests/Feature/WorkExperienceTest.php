@@ -66,13 +66,17 @@ class WorkExperienceTest extends TestCase
                 && str_contains($html, 'دستیار آموزشی'));
     }
 
-    public function test_work_fragments_include_inline_mobile_project_covers_in_both_languages(): void
+    public function test_work_fragments_include_the_mobile_project_carousel_in_both_languages(): void
     {
         foreach (['en' => '/work', 'fa' => '/fa/work'] as $locale => $route) {
             $data = $this->getJson($route, ['X-AZ-Fragment' => '1'])->assertOk()->json();
             $html = $data['html'];
             $this->assertStringContainsString('class="az-work-mobile" lang="'.$locale.'"', $html);
             $this->assertSame(count($data['projects']), substr_count($html, 'class="az-work-mobile__card"'));
+            $this->assertStringContainsString('class="az-work-mobile__track"', $html);
+            $this->assertStringContainsString('data-mobile-step="-1"', $html);
+            $this->assertStringContainsString('data-mobile-step="1"', $html);
+            $this->assertStringContainsString($locale === 'fa' ? 'aria-label="پروژه بعدی"' : 'aria-label="Next project"', $html);
             foreach ($data['projects'] as $project) {
                 if ($project['image']) {
                     $this->assertStringContainsString('src="'.e($project['image']).'" alt="" width="960" height="540" loading="lazy"', $html);
