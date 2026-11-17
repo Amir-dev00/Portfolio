@@ -2,6 +2,7 @@
 
 return [
     'fitnet' => [
+        'logo_path' => 'assets/img/experience/fitnet.webp',
         'company_en' => 'Fitnet',
         'company_fa' => 'فیتنت',
         'role_en' => 'Technical Partner',
@@ -14,6 +15,7 @@ return [
         'description_fa' => 'در توسعه فنی فیتنت، پلتفرم پیدا کردن باشگاه و رزرو جلسات ورزشی، همکاری می‌کنم.',
     ],
     'novin-coders' => [
+        'logo_path' => 'assets/img/experience/novin-coders.webp',
         'company_en' => 'Novin Coders',
         'company_fa' => 'نوین کدرز',
         'role_en' => 'CTO & Co-founder',
@@ -26,6 +28,7 @@ return [
         'description_fa' => 'در بنیان‌گذاری تیم، هدایت توسعه پروژه‌های نرم‌افزاری و آموزش لاراول و ری‌اکت به توسعه‌دهنده‌ها نقش داشتم.',
     ],
     'amirkabir-programming-ta' => [
+        'logo_path' => 'assets/img/experience/amirkabir.webp',
         'company_en' => 'Amirkabir University of Technology',
         'company_fa' => 'دانشگاه صنعتی امیرکبیر',
         'role_en' => 'Teaching Assistant',

@@ -115,6 +115,7 @@
   };
 
   var workBrowser = document.getElementById("az-work-browser");
+  var mobileWork = window.matchMedia("(max-width: 760px)");
   var projectRoot = document.getElementById("az-project-root");
   var indicator = nav && nav.querySelector(".glass-nav__indicator");
   var currentKey = null;
@@ -723,7 +724,7 @@
   }
 
   function renderWorkGrid() {
-    if (!workBrowser) return;
+    if (!workBrowser || (mobileWork.matches && workBrowser.hasAttribute("data-az-desktop-work"))) return;
     if (workBrowser.dataset.ready !== "1") {
       buildWorkBrowser();
       bindWorkBrowser();
@@ -735,6 +736,15 @@
     updateWorkSpotlight(false);
     scheduleWorkAuto();
   }
+
+  mobileWork.addEventListener("change", function () {
+    if (!activeRoute || activeRoute.name !== "work") return;
+    if (mobileWork.matches && workBrowser && workBrowser.hasAttribute("data-az-desktop-work")) {
+      window.clearTimeout(workAutoTimer);
+      return;
+    }
+    renderWorkGrid();
+  });
 
   function bindProjectPhotos(root, photos) {
     var viewer = root.querySelector(".az-project-viewer");
@@ -1226,8 +1236,10 @@
     var existing = views[route.name];
     // Keep the mounted project browser, carousel and transcript across language switches.
     var experience = existing && route.name === "work" && existing.querySelector("#work-experience");
-    var localizeExperience = experience && experience.lang !== locale;
-    if (existing && route.name !== "project" && !localizeExperience) return;
+    var mobileProjects = existing && route.name === "work" && existing.querySelector(".az-work-mobile");
+    var workLocalized = experience || mobileProjects;
+    var localizeWork = workLocalized && workLocalized.lang !== locale;
+    if (existing && route.name !== "project" && !localizeWork) return;
     if (existing && route.name === "project" && existing.dataset.azSlug === route.slug) return;
     var fragment = document.createElement("template");
     fragment.innerHTML = data.html;
@@ -1235,9 +1247,12 @@
     if (!next || next.id !== "view-" + route.name || !next.classList.contains("az-view")) {
       throw new Error("Unexpected route view");
     }
-    if (localizeExperience) {
-      var translated = next.querySelector("#work-experience");
-      if (translated) experience.replaceWith(translated);
+    if (localizeWork) {
+      [experience, mobileProjects].forEach(function (section) {
+        if (!section) return;
+        var translated = next.querySelector(section === experience ? "#work-experience" : ".az-work-mobile");
+        if (translated) section.replaceWith(translated);
+      });
       return;
     }
     next.hidden = true;

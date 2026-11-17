@@ -51,17 +51,34 @@ class WorkExperienceTest extends TestCase
         $this->get('/work')->assertDontSee('Example Studio');
     }
 
-    public function test_bundled_experience_is_a_bilingual_timeline_before_projects(): void
+    public function test_bundled_experience_shows_bilingual_cards_and_logos_before_projects(): void
     {
         $this->get('/work')->assertOk()
-            ->assertSeeInOrder(['Work experience', 'Aug–Sep 2026', 'Fitnet', 'May–Jun 2026', 'Novin Coders', 'Teaching Assistant', 'id="work-projects"'], false)
-            ->assertSee('class="az-experience__timeline"', false)
+            ->assertSeeInOrder(['Work experience', 'experience/fitnet.webp', 'Fitnet', 'Aug–Sep 2026',
+                'experience/novin-coders.webp', 'Novin Coders', 'May–Jun 2026', 'experience/amirkabir.webp',
+                'Teaching Assistant', 'id="work-projects"'], false)
+            ->assertSee('class="az-experience__list"', false)
             ->assertSee('<time datetime="2025-12">Dec 2025</time>', false);
 
         $this->getJson('/fa/work', ['X-AZ-Fragment' => '1'])->assertOk()
             ->assertJsonPath('html', fn (string $html) => str_contains($html, 'شهریور ۱۴۰۵')
                 && str_contains($html, 'نوین کدرز')
                 && str_contains($html, 'دستیار آموزشی'));
+    }
+
+    public function test_work_fragments_include_inline_mobile_project_covers_in_both_languages(): void
+    {
+        foreach (['en' => '/work', 'fa' => '/fa/work'] as $locale => $route) {
+            $data = $this->getJson($route, ['X-AZ-Fragment' => '1'])->assertOk()->json();
+            $html = $data['html'];
+            $this->assertStringContainsString('class="az-work-mobile" lang="'.$locale.'"', $html);
+            $this->assertSame(count($data['projects']), substr_count($html, 'class="az-work-mobile__card"'));
+            foreach ($data['projects'] as $project) {
+                if ($project['image']) {
+                    $this->assertStringContainsString('src="'.e($project['image']).'" alt="" width="960" height="540" loading="lazy"', $html);
+                }
+            }
+        }
     }
 
     public function test_removed_company_stays_off_the_site_with_legacy_draft_and_published_content(): void
