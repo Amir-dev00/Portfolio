@@ -17,8 +17,6 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    env:
-      DEPLOY_STAGE: ${{ runner.temp }}/portfolio-release
     steps:
       - name: Check out main
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -55,12 +53,12 @@ jobs:
           FTPS_USERNAME: ${{ secrets.FTPS_USERNAME }}
           FTPS_PASSWORD: ${{ secrets.FTPS_PASSWORD }}
           FTPS_PORT: ${{ vars.FTPS_PORT || '21' }}
-        run: bash scripts/deploy-cpanel-ftps.sh read "$DEPLOY_STAGE"
+        run: bash scripts/deploy-cpanel-ftps.sh read "$RUNNER_TEMP/portfolio-release"
 
       - name: Plan changed files
         id: plan
         if: steps.ftps.outputs.configured == 'true'
-        run: python3 scripts/plan-cpanel-deploy.py "$DEPLOY_STAGE" "$GITHUB_OUTPUT"
+        run: python3 scripts/plan-cpanel-deploy.py "$RUNNER_TEMP/portfolio-release" "$GITHUB_OUTPUT"
 
       - name: Set up PHP 8.4 and Composer
         if: steps.plan.outputs.vendor == 'true'
@@ -76,7 +74,7 @@ jobs:
         working-directory: cms
         run: |
           composer install --no-dev --optimize-autoloader --no-interaction --no-progress --prefer-dist --no-scripts
-          mv vendor "$DEPLOY_STAGE/vendor"
+          mv vendor "$RUNNER_TEMP/portfolio-release/vendor"
 
       - name: Apply the file changes
         if: steps.plan.outputs.changed == 'true'
@@ -87,7 +85,7 @@ jobs:
           FTPS_PORT: ${{ vars.FTPS_PORT || '21' }}
           INSTALL_VENDOR: ${{ steps.plan.outputs.vendor }}
           CLEAR_APP_CACHE: ${{ steps.plan.outputs.app }}
-        run: bash scripts/deploy-cpanel-ftps.sh apply "$DEPLOY_STAGE"
+        run: bash scripts/deploy-cpanel-ftps.sh apply "$RUNNER_TEMP/portfolio-release"
 
       - name: Check the live portfolio
         if: steps.plan.outputs.changed == 'true'
@@ -105,4 +103,4 @@ jobs:
           FTPS_USERNAME: ${{ secrets.FTPS_USERNAME }}
           FTPS_PASSWORD: ${{ secrets.FTPS_PASSWORD }}
           FTPS_PORT: ${{ vars.FTPS_PORT || '21' }}
-        run: bash scripts/deploy-cpanel-ftps.sh finish "$DEPLOY_STAGE"
+        run: bash scripts/deploy-cpanel-ftps.sh finish "$RUNNER_TEMP/portfolio-release"
