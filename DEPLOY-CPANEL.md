@@ -279,7 +279,7 @@ Re-run the [first-deploy checklist](#3-first-deploy-checklist). If something fai
 
 This workflow updates an existing installation when a commit lands on `main`. For the first installation, use the ZIP and setup instructions above.
 
-1. In cPanel → **FTP Accounts**, create a dedicated account whose directory is the parent that contains both `portfolio-app/` and `public_html/`. Check that logging in with **explicit FTP over TLS** shows both folders under `/`. Use the hostname listed in **Configure FTP Client**, or ask the host for the hostname on its TLS certificate.
+1. In cPanel → **FTP Accounts**, create a dedicated account whose directory is the parent that contains both `portfolio-app/` and `public_html/`. Check that logging in with **explicit FTP over TLS** shows both folders under `/`. Use the hosting server hostname that matches the FTPS service certificate. If **Configure FTP Client** shows a domain alias, check the server hostname in the hosting welcome email or ask the hosting provider.
 2. In GitHub → **Settings → Secrets and variables → Actions → Secrets**, add three repository secrets.
 
    | Secret | Value |
@@ -292,7 +292,9 @@ This workflow updates an existing installation when a commit lands on `main`. Fo
 
 3. Open **Actions → Deploy portfolio to cPanel → Run workflow** and select `main` for the first run. Check the upload and live-site checks in the run log. Review `/work` and `/fa/work` after the first deployment.
 
-This workflow expects PHP 8.4.1 or newer on the host, as required by the current Composer lockfile. The upload preserves production `.env`, `storage/`, `public_html/media/`, `public_html/.htaccess`, and the live database. It uploads bundled code and assets and clears only generated Laravel bootstrap caches. Each file is uploaded to a temporary name before it is renamed into place. An interrupted upload can be rerun. A change that requires database migrations still needs its documented manual upgrade step.
+This workflow expects PHP 8.4.1 or newer on the host, as required by the current Composer lockfile. On the first run, the workflow uploads the managed Git files once and does not delete pre-existing files. Later runs compare Git blob IDs against the last successful deployment. Changed and added files are uploaded; removed files are deleted only if the workflow previously managed them. An interrupted run keeps a checkpoint so the next deployment can finish or undo the affected file changes. Composer runs only when dependency metadata changes, an application file removal requires refreshing the autoloader, or the initial install has different dependency metadata.
+
+The workflow preserves production `.env`, `storage/`, `public_html/media/`, `public_html/.htaccess`, and the live database. It clears generated Laravel bootstrap caches when application files change. Files are uploaded to temporary names before being renamed. Database migrations still need their documented manual upgrade step.
 
 ## 7. Rollback
 
