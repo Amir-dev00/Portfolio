@@ -57,10 +57,10 @@ class WorkExperienceTest extends TestCase
         $this->post(route('admin.publish'))->assertRedirect();
 
         $original = ['experience/fitnet.webp', 'experience/novin-coders.webp', 'experience/amirkabir.webp'];
-        $order = ['amirkabir-programming-ta', 'fitnet', 'novin-coders'];
+        $order = ['amirkabir-programming-ta', 'rondino', 'fitnet', 'novin-coders'];
         $updated = [$original[2], $original[0], $original[1]];
 
-        $this->post(route('admin.experience.reorder'), ['order' => ['fitnet', 'novin-coders', 'stale']])
+        $this->post(route('admin.experience.reorder'), ['order' => ['fitnet', 'novin-coders', 'rondino', 'stale']])
             ->assertSessionHasErrors('order');
         $this->post(route('admin.experience.reorder'), ['order' => $order])
             ->assertRedirect(route('admin.experience.index'));
@@ -90,7 +90,7 @@ class WorkExperienceTest extends TestCase
     public function test_bundled_experience_shows_bilingual_cards_and_logos_before_projects(): void
     {
         $this->get('/work')->assertOk()
-            ->assertSeeInOrder(['Work experience', 'experience/fitnet.webp', 'Fitnet', 'Aug–Sep 2026',
+            ->assertSeeInOrder(['Work experience', 'experience/rondino.webp', 'Rondino', 'Oct–Nov 2026', 'experience/fitnet.webp', 'Fitnet', 'Aug–Sep 2026',
                 'experience/novin-coders.webp', 'Novin Coders', 'May–Jun 2026', 'experience/amirkabir.webp',
                 'Teaching Assistant', 'id="work-projects"'], false)
             ->assertSee('class="az-experience__list"', false)
@@ -98,6 +98,8 @@ class WorkExperienceTest extends TestCase
 
         $this->getJson('/fa/work', ['X-AZ-Fragment' => '1'])->assertOk()
             ->assertJsonPath('html', fn (string $html) => str_contains($html, 'شهریور ۱۴۰۵')
+                && str_contains($html, 'آبان ۱۴۰۵')
+                && str_contains($html, 'روندینو')
                 && str_contains($html, 'نوین کدرز')
                 && str_contains($html, 'دستیار آموزشی'));
     }

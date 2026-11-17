@@ -1,6 +1,19 @@
 <?php
 
 return [
+    'rondino' => [
+        'logo_path' => 'assets/img/experience/rondino.webp',
+        'company_en' => 'Rondino',
+        'company_fa' => 'روندینو',
+        'role_en' => 'Technical Partner',
+        'role_fa' => 'شریک فنی',
+        'website' => 'https://github.com/Amir-dev00/Rondino',
+        'start_month' => '2026-11',
+        'start_label_en' => 'Oct–Nov 2026',
+        'start_label_fa' => 'آبان ۱۴۰۵',
+        'description_en' => 'Build search and market analysis tools for SIM listings, including digit-pattern search and price comparisons.',
+        'description_fa' => 'روی ابزارهای جستجو و تحلیل بازار سیم‌کارت، از جمله جستجو بر اساس الگوی شماره و مقایسه قیمت‌ها، کار می‌کنم.',
+    ],
     'fitnet' => [
         'logo_path' => 'assets/img/experience/fitnet.webp',
         'company_en' => 'Fitnet',

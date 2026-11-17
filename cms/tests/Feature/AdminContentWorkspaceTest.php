@@ -39,13 +39,13 @@ class AdminContentWorkspaceTest extends TestCase
             'title' => 'Inova updated',
             'slug' => $slug,
             'details' => [
-                'en' => ['overview' => 'Custom portfolio overview', 'features' => "First\nSecond", 'approach' => 'Implementation'],
+                'en' => ['overview' => 'Custom portfolio overview', 'features' => " First \r\n0\u{2028}  \nSecond ", 'approach' => 'Implementation'],
                 'fa' => ['title' => 'اینوا به‌روز', 'overview' => 'نمای تازه'],
             ],
         ])->assertRedirect()->assertSessionHasNoErrors();
         $headers = ['X-AZ-Fragment' => '1'];
         $this->getJson('/work/'.$slug.'?preview=1', $headers)->assertOk()
-            ->assertJsonPath('projects.0.caseStudy.features', ['First', 'Second'])
+            ->assertJsonPath('projects.0.caseStudy.features', ['First', '0', 'Second'])
             ->assertJsonCount(5, 'projects.0.gallery');
         $this->post('/admin/publish')->assertRedirect();
         $this->getJson('/fa/work/'.$slug, $headers)->assertOk()->assertJsonPath('projects.0.title', 'اینوا به‌روز');
