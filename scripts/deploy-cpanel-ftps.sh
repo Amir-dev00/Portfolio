@@ -36,7 +36,8 @@ fetch_optional() {
   if run_ftps "get /portfolio-app/$1 -o $2" 2>download-error; then
     return
   fi
-  if grep -Eq '550.*([Nn]o such file|[Nn]ot found|[Dd]oes not exist)' download-error; then
+  if grep -Eiq "550.*(no such file|not found|does not exist|doesn't exist)" download-error; then
+    rm -f -- "$2"
     return
   fi
   cat download-error >&2
