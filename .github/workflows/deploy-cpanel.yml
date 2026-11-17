@@ -43,8 +43,10 @@ jobs:
       - name: Install the FTPS client
         if: steps.ftps.outputs.configured == 'true'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends lftp
+          if ! command -v lftp >/dev/null && ! sudo apt-get install -y --no-install-recommends lftp; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends lftp
+          fi
 
       - name: Read the last deployment state
         if: steps.ftps.outputs.configured == 'true'

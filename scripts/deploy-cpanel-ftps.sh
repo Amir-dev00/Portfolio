@@ -33,10 +33,14 @@ LFTP
 }
 
 fetch_optional() {
-  if run_ftps "get /portfolio-app/$1 -o $2" 2>download-error; then
+  local commands="${3:-}"
+  if [[ -n "$commands" ]]; then
+    commands+=$'\n'
+  fi
+  if run_ftps "${commands}get /portfolio-app/$1 -o $2" 2>download-error; then
     return
   fi
-  if grep -Eiq "550.*(no such file|not found|does not exist|doesn't exist)" download-error; then
+  if grep -Eiq "^get:.*550.*(no such file|not found|does not exist|doesn't exist)" download-error; then
     rm -f -- "$2"
     return
   fi
@@ -47,9 +51,8 @@ fetch_optional() {
 case "$phase" in
   read)
     # Check the existing installation before interpreting a missing checkpoint.
-    run_ftps 'cd /portfolio-app/vendor/composer
+    fetch_optional .az-deploy-state.json remote-state.json 'cd /portfolio-app/vendor/composer
 cd /public_html/css'
-    fetch_optional .az-deploy-state.json remote-state.json
     if [[ ! -e remote-state.json ]]; then
       fetch_optional composer.json live-composer.json
       fetch_optional composer.lock live-composer.lock
