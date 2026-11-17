@@ -74,25 +74,12 @@
       <link rel="preload" as="image" href="{{ asset('assets/img/amir/home/home-bg-01.webp') }}" type="image/webp" fetchpriority="high" media="(width > 767px)"/>
     @endif
     <link rel="preload" href="{{ $azPreloaderLogoSrc }}" as="image"/>
-    <!-- Favicons & App Icons (regenerated from az-monogram-blue.webp) -->
-    <link rel="apple-touch-icon" sizes="57x57" href="{{ $assetV('assets/img/content/apple-icon-57x57.png') }}"/>
-    <link rel="apple-touch-icon" sizes="60x60" href="{{ $assetV('assets/img/content/apple-icon-60x60.png') }}"/>
-    <link rel="apple-touch-icon" sizes="72x72" href="{{ $assetV('assets/img/content/apple-icon-72x72.png') }}"/>
-    <link rel="apple-touch-icon" sizes="76x76" href="{{ $assetV('assets/img/content/apple-icon-76x76.png') }}"/>
-    <link rel="apple-touch-icon" sizes="114x114" href="{{ $assetV('assets/img/content/apple-icon-114x114.png') }}"/>
-    <link rel="apple-touch-icon" sizes="120x120" href="{{ $assetV('assets/img/content/apple-icon-120x120.png') }}"/>
-    <link rel="apple-touch-icon" sizes="144x144" href="{{ $assetV('assets/img/content/apple-icon-144x144.png') }}"/>
-    <link rel="apple-touch-icon" sizes="152x152" href="{{ $assetV('assets/img/content/apple-icon-152x152.png') }}"/>
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ $assetV('assets/img/content/apple-icon-180x180.png') }}"/>
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ $assetV('assets/img/content/android-icon-192x192.png') }}"/>
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ $assetV('assets/img/content/favicon-32x32.png') }}"/>
-    <link rel="icon" type="image/png" sizes="96x96" href="{{ $assetV('assets/img/content/favicon-96x96.png') }}"/>
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ $assetV('assets/img/content/favicon-16x16.png') }}"/>
+    <link rel="icon" type="image/png" sizes="278x278" href="{{ asset('assets/img/amir/favicon.png') }}"/>
+    <link rel="apple-touch-icon" href="{{ asset('assets/img/amir/favicon.png') }}"/>
     <link rel="manifest" href="{{ asset('assets/img/content/manifest.json') }}"/>
     <meta name="msapplication-TileColor" content="#0b1c2c"/>
     <meta name="msapplication-TileImage" content="{{ asset('assets/img/content/ms-icon-144x144.png') }}"/>
     <meta name="theme-color" content="#0b1c2c"/>
-    <link rel="icon" type="image/png" href="{{ $assetV('assets/img/amir/favicon.png') }}"/>
   </head>
   <body>
     <div>
