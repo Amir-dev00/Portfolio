@@ -147,6 +147,16 @@ class PortfolioContent
             }
         }
 
+        // Refresh the role wording in both seeded and previously published About copy.
+        $aboutRoles = [
+            'en' => ['Full-Stack Developer', 'full-stack software engineer'],
+            'fa' => ['توسعه‌دهنده فول‌استک', 'مهندس نرم‌افزار فول‌استک'],
+        ];
+        foreach ($aboutRoles as $locale => [$previousRole, $role]) {
+            $intro = $strings[$locale]['about.p1'] ?? $defaults[$locale]['about.p1'];
+            $strings[$locale]['about.p1'] = str_ireplace($previousRole, $role, $intro);
+        }
+
         // Normalize headings already present in published snapshots or imported data.
         foreach ($strings as &$copy) {
             foreach ($copy as $key => $value) {
