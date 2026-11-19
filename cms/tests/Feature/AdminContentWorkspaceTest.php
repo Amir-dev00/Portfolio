@@ -29,10 +29,10 @@ class AdminContentWorkspaceTest extends TestCase
     {
         $this->actingAs(User::factory()->create(['is_owner' => true]));
         $slug = 'novin-inova';
-        $this->get('/admin/projects')->assertOk()->assertSee('Import 15');
+        $this->get('/admin/projects')->assertOk()->assertSee('Import 16');
         $this->post('/admin/projects/import')->assertRedirect();
         $this->post('/admin/projects/import')->assertRedirect();
-        $this->assertDatabaseCount('projects', 15);
+        $this->assertDatabaseCount('projects', 16);
         $project = Project::query()->where('slug', $slug)->firstOrFail();
         $this->get(route('admin.projects.edit', $project))->assertOk()->assertSee('English case study');
         $this->put(route('admin.projects.update', $project), [
@@ -169,7 +169,7 @@ class AdminContentWorkspaceTest extends TestCase
                 2 => ['desktop' => null], 3 => ['desktop' => null], 4 => ['desktop' => null],
             ],
         ])->assertRedirect()->assertSessionHasNoErrors();
-        $this->getJson('/admin/export.json')->assertOk()->assertJsonCount(15, 'projects')
+        $this->getJson('/admin/export.json')->assertOk()->assertJsonCount(16, 'projects')
             ->assertJsonPath('settings.assistant_knowledge.en', 'Public portfolio fact');
         $this->post('/admin/publish')->assertRedirect();
         $this->get('/about')->assertOk()->assertSee('Studio Example')->assertSee('https://example.com/team');
@@ -330,7 +330,7 @@ class AdminContentWorkspaceTest extends TestCase
         $this->get('/work/novin-inova')->assertOk();
         $this->get('/work/novin-inova?preview=1')->assertNotFound();
         $this->post('/admin/projects/import')->assertRedirect();
-        $this->assertDatabaseCount('projects', 14);
+        $this->assertDatabaseCount('projects', 15);
         $this->post('/admin/publish')->assertRedirect();
         $this->get('/work/novin-inova')->assertNotFound();
         $this->get('/fa/work/novin-inova')->assertNotFound();

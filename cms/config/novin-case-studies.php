@@ -1,6 +1,30 @@
 <?php
 
 return [
+    'nopic' => [
+        'en' => [
+            'overview' => 'Nopic is a browser-based image optimization workspace for single files and batches. The gallery shows the live nopic.ir interface, currently branded PixelForge, with sample images during real conversion.',
+            'features' => [
+                'Convert images to WebP, JPEG or PNG, with AVIF encoding where supported.',
+                'Choose quality presets or search for a target output size.',
+                'Resize, rotate and flip images with before-and-after previews.',
+                'Process a batch with per-file results and download a ZIP archive.',
+                'Keep image processing local to the browser.',
+            ],
+            'approach' => 'Built with HTML, CSS and vanilla JavaScript. Canvas handles resizing and encoding, the File API reads selected images, and a bundled JSZip library packages batch exports. Format detection disables unsupported AVIF encoding.',
+        ],
+        'fa' => [
+            'overview' => 'نوپیک یک محیط تحت وب برای بهینه‌سازی تکی و گروهی تصاویر است. گالری، رابط واقعی nopic.ir با نام فعلی PixelForge را هنگام پردازش تصاویر نمونه نشان می‌دهد.',
+            'features' => [
+                'تبدیل تصاویر به WebP، JPEG و PNG و خروجی AVIF در مرورگرهای سازگار.',
+                'انتخاب کیفیت آماده یا تنظیم حجم هدف.',
+                'تغییر ابعاد، چرخش و قرینه‌سازی با مقایسه قبل و بعد.',
+                'پردازش گروهی با نتیجه هر فایل و دریافت خروجی ZIP.',
+                'پردازش محلی تصاویر داخل مرورگر.',
+            ],
+            'approach' => 'با HTML، CSS و جاوااسکریپت خام ساخته شده است. Canvas تغییر ابعاد و رمزگذاری تصویر را انجام می‌دهد، File API فایل‌ها را می‌خواند و نسخه محلی JSZip خروجی گروهی را بسته‌بندی می‌کند.',
+        ],
+    ],
     'document-studio' => [
         'en' => [
             'overview' => 'Document Studio is a reusable HTML workspace for proposals, reports and other paged documents. The repository separates the editor from the document styles and includes two guides for working with a coding assistant. The gallery shows the editor with the sample proposal included in the repository.',
