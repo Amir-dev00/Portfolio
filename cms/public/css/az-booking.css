@@ -166,7 +166,8 @@ html.az-booking-open body {
 }
 
 .az-booking__head {
-  display: flex;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   margin-bottom: 14px;
@@ -175,11 +176,25 @@ html.az-booking-open body {
 
 .az-booking__steps {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
   gap: 8px;
 }
 
+.az-booking__steps::-webkit-scrollbar { display: none; }
+
+/* Keep the back-button column occupied on every step. */
+.az-booking__back[hidden] {
+  display: grid;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .az-booking__step {
+  flex: 0 0 auto;
+  white-space: nowrap;
   font-size: 11px;
   letter-spacing: 0.04em;
   color: rgba(244, 241, 234, 0.4);
@@ -520,7 +535,7 @@ html[dir="rtl"] .az-booking__back svg {
     touch-action: manipulation;
   }
 
-  .az-booking__icon-btn[hidden] { display: none; }
+  .az-booking__back[hidden] { display: grid; visibility: hidden; }
 
   .az-booking__aside {
     display: grid;
@@ -595,6 +610,7 @@ html[dir="rtl"] .az-booking__back svg {
   .az-booking__main { padding: 16px 16px 22px; }
 
   .az-booking__head {
+    grid-template-columns: 44px minmax(0, 1fr);
     gap: 8px;
     padding: 0;
     margin-bottom: 16px;
@@ -603,13 +619,16 @@ html[dir="rtl"] .az-booking__back svg {
   .az-booking__steps {
     flex: 1;
     min-width: 0;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     gap: 4px;
   }
 
   .az-booking__step {
-    padding: 6px 2px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 6px 8px;
     text-align: center;
     font-size: 10px;
     line-height: 1.5;
