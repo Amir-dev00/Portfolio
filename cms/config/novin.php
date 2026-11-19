@@ -13,8 +13,8 @@ return [
             'category' => 'tool',
             'live_url' => 'https://nopic.ir/',
             'technologies' => ['HTML', 'CSS', 'JavaScript', 'Canvas API', 'JSZip'],
-            'en' => ['A local image converter with compression, resizing and batch exports.', 'Nopic processes images in the browser. Convert to WebP, JPEG or PNG, adjust quality or target file size, resize and transform images, compare results, and download individual files or a ZIP archive. AVIF output is available when supported by the browser. The current live interface uses the PixelForge name.'],
-            'fa' => ['ابزار تبدیل و فشرده‌سازی عکس با پردازش محلی و خروجی گروهی.', 'نوپیک تصاویر را داخل مرورگر پردازش می‌کند. تبدیل به WebP، JPEG یا PNG، تنظیم کیفیت یا حجم هدف، تغییر ابعاد و چرخش، مقایسه قبل و بعد و دریافت فایل یا آرشیو ZIP در دسترس است. خروجی AVIF به پشتیبانی مرورگر وابسته است. رابط فعلی سایت نام PixelForge را نمایش می‌دهد.'],
+            'en' => ['A local image converter with compression, resizing and batch exports.', 'Nopic processes images in the browser. Convert to WebP, JPEG or PNG, adjust quality or target file size, resize and transform images, compare results, and download individual files or a ZIP archive. AVIF output is available when supported by the browser.'],
+            'fa' => ['ابزار تبدیل و فشرده‌سازی عکس با پردازش محلی و خروجی گروهی.', 'نوپیک تصاویر را داخل مرورگر پردازش می‌کند. تبدیل به WebP، JPEG یا PNG، تنظیم کیفیت یا حجم هدف، تغییر ابعاد و چرخش، مقایسه قبل و بعد و دریافت فایل یا آرشیو ZIP در دسترس است. خروجی AVIF به پشتیبانی مرورگر وابسته است.'],
             'gallery' => 3,
         ],
         'document-studio' => [

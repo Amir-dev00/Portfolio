@@ -3,7 +3,7 @@
 return [
     'nopic' => [
         'en' => [
-            'overview' => 'Nopic is a browser-based image optimization workspace for single files and batches. The gallery shows the live nopic.ir interface, currently branded PixelForge, with sample images during real conversion.',
+            'overview' => 'Nopic is a browser-based image optimization workspace for single files and batches. The gallery shows the updated live nopic.ir interface with its Nopic by Novin Coders identity during real image conversion.',
             'features' => [
                 'Convert images to WebP, JPEG or PNG, with AVIF encoding where supported.',
                 'Choose quality presets or search for a target output size.',
@@ -14,7 +14,7 @@ return [
             'approach' => 'Built with HTML, CSS and vanilla JavaScript. Canvas handles resizing and encoding, the File API reads selected images, and a bundled JSZip library packages batch exports. Format detection disables unsupported AVIF encoding.',
         ],
         'fa' => [
-            'overview' => 'نوپیک یک محیط تحت وب برای بهینه‌سازی تکی و گروهی تصاویر است. گالری، رابط واقعی nopic.ir با نام فعلی PixelForge را هنگام پردازش تصاویر نمونه نشان می‌دهد.',
+            'overview' => 'نوپیک یک محیط تحت وب برای بهینه‌سازی تکی و گروهی تصاویر است. گالری، رابط واقعی و جدید nopic.ir با نشان Nopic by Novin Coders را هنگام پردازش تصاویر نمونه نشان می‌دهد.',
             'features' => [
                 'تبدیل تصاویر به WebP، JPEG و PNG و خروجی AVIF در مرورگرهای سازگار.',
                 'انتخاب کیفیت آماده یا تنظیم حجم هدف.',
