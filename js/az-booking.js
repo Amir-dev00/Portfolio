@@ -246,6 +246,7 @@
   }
 
   function renderSteps() {
+    state.root.setAttribute("data-booking-step", state.step);
     var steps = ["date", "time", "details", "done"];
     var labels = [t("booking.step.date"), t("booking.step.time"), t("booking.step.details"), t("booking.step.done")];
     var el = state.root.querySelector(".az-booking__steps");
@@ -406,20 +407,22 @@
       '<p class="az-booking__picked" aria-live="polite">' + escapeHtml(formatSelectedSummary()) + "</p>" +
       '<form class="az-booking__form" novalidate>' +
       '  <input type="text" name="company_website" class="az-booking__hp" tabindex="-1" autocomplete="off" aria-hidden="true"/>' +
+      '  <div class="az-booking__fields">' +
       '  <label><span data-i18n="booking.name"></span><input name="name" required autocomplete="name"/></label>' +
       '  <label><span data-i18n="booking.email"></span><input class="az-booking__ltr" name="email" type="email" required autocomplete="email" dir="ltr"/></label>' +
       '  <label><span data-i18n="booking.phone"></span><input class="az-booking__ltr" name="phone" type="tel" autocomplete="tel" dir="ltr"/></label>' +
       '  <label><span data-i18n="booking.topic"></span><input name="topic" maxlength="160"/></label>' +
       '  <label><span data-i18n="booking.message"></span><textarea name="message" rows="3" maxlength="2000"></textarea></label>' +
+      '  </div><div class="az-booking__footer">' +
       '  <p class="az-booking__privacy" data-i18n="booking.privacy"></p>' +
       '  <p class="az-booking__form-error" hidden></p>' +
       '  <button type="submit" class="az-contact-pill az-contact-pill_primary"><span data-i18n="booking.confirm"></span></button>' +
-      "</form>";
+      "</div></form>";
     applyI18n(stage);
     stage.querySelector("form").addEventListener("submit", onSubmit);
     restoreFormDraft();
     var nameInput = stage.querySelector('input[name="name"]');
-    if (nameInput) {
+    if (nameInput && !window.matchMedia("(max-width: 760px)").matches) {
       window.requestAnimationFrame(function () {
         try {
           nameInput.focus({ preventScroll: true });
