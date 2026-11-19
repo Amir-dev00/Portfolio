@@ -10,15 +10,15 @@ class BundledProjectImporter
 {
     public function __construct(private PortfolioContent $content) {}
 
-    public function import(): void
+    public function import(?string $slug = null): void
     {
-        DB::transaction(function () {
+        DB::transaction(function () use ($slug) {
             $order = (int) Project::query()->max('sort_order');
 
             $managed = SiteSetting::query()->where('key', 'like', SiteSetting::PROJECT_PREFIX.'%')
                 ->get()->pluck('value.bundled_slug')->filter()->all();
             foreach ($this->content->bundledProjects() as $entry) {
-                if (in_array($entry['slug'], $managed, true)) {
+                if (($slug !== null && $entry['slug'] !== $slug) || in_array($entry['slug'], $managed, true)) {
                     continue;
                 }
                 $project = Project::query()->firstOrCreate(

@@ -12,6 +12,26 @@ class AdminContentWorkspaceTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_owner_can_find_nopic_and_import_only_that_project_for_editing(): void
+    {
+        $this->actingAs(User::factory()->create(['is_owner' => true]));
+        $this->get('/admin/projects')->assertOk()->assertSee('Nopic')->assertSee('Import and edit');
+
+        $this->post('/admin/projects/import', ['slug' => 'nopic'])
+            ->assertRedirect(route('admin.projects.edit', Project::query()->where('slug', 'nopic')->firstOrFail()));
+        $this->assertDatabaseCount('projects', 1);
+        $this->get(route('admin.projects.edit', Project::query()->firstOrFail()))
+            ->assertOk()->assertSee('https://nopic.ir/', false)->assertSee('Canvas API')
+            ->assertSee('assets/img/amir/nopic/cover.webp', false)
+            ->assertSee('assets/img/amir/nopic/gallery-03.webp', false);
+        $this->assertDatabaseHas('project_translations', ['locale' => 'fa', 'short_description' => 'ابزار تبدیل و فشرده‌سازی عکس با پردازش محلی و خروجی گروهی.']);
+
+        $this->post('/admin/projects/import', ['slug' => 'nopic'])->assertRedirect();
+        $this->assertDatabaseCount('projects', 1);
+        $this->post('/admin/projects/import', ['slug' => 'missing-project'])->assertSessionHasErrors('slug');
+        $this->assertDatabaseCount('projects', 1);
+    }
+
     public function test_public_views_and_booking_use_the_bundled_portrait_for_a_legacy_profile_path(): void
     {
         SiteSetting::query()->updateOrCreate(['key' => 'profile'], [

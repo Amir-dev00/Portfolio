@@ -42,14 +42,26 @@ class ProjectController extends Controller
         return view('admin.projects.index', [
             'projects' => $projects->get(),
             'orderableProjects' => Project::query()->active()->orderBy('sort_order')->orderBy('id')->get(['id', 'title']),
+            'bundledProjects' => collect($content->bundledProjects())->keyBy('slug'),
             'unmanaged' => array_diff(array_column($content->bundledProjects(), 'slug'), Project::query()->pluck('slug')->all(),
                 SiteSetting::query()->where('key', 'like', SiteSetting::PROJECT_PREFIX.'%')->get()->pluck('value.bundled_slug')->filter()->all()),
         ]);
     }
 
-    public function import(BundledProjectImporter $importer): RedirectResponse
+    public function import(Request $request, BundledProjectImporter $importer, PortfolioContent $content): RedirectResponse
     {
-        $importer->import();
+        $data = $request->validate([
+            'slug' => ['nullable', 'string', Rule::in(array_column($content->bundledProjects(), 'slug'))],
+        ]);
+        $slug = $data['slug'] ?? null;
+        $importer->import($slug);
+
+        if ($slug !== null) {
+            $project = Project::query()->where('slug', $slug)->firstOrFail();
+
+            return redirect()->route('admin.projects.edit', $project)
+                ->with('status', __('Bundled projects are ready to edit. Publish when ready.'));
+        }
 
         return back()->with('status', __('Bundled projects are ready to edit. Publish when ready.'));
     }

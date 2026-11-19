@@ -2,6 +2,7 @@
 @section('title',__('Projects'))
 @section('heading',__('Projects'))
 @section('content')
+@php($searchText = is_string(request('q')) ? trim(request('q')) : '')
 <div class="admin-pills">
   <a class="btn" href="{{ route('admin.projects.create') }}">{{ __('Add project') }}</a>
   @if(count($unmanaged))
@@ -48,6 +49,28 @@
   </div>
   <div class="admin-pills"><button class="btn-secondary">{{ __('Filter') }}</button><a href="{{ route('admin.projects.index') }}">{{ __('Clear') }}</a></div>
 </form>
+@if(count($unmanaged) && request('status') !== 'archived')
+  <div class="card">
+    <h2>{{ __('Existing portfolio projects') }}</h2>
+    @foreach($unmanaged as $slug)
+      @php($item = $bundledProjects->get($slug))
+      @continue(!$item || ($searchText !== '' && !str_contains(mb_strtolower($item['title'].' '.$slug), mb_strtolower($searchText))))
+      <div class="admin-pills" style="align-items:center;margin:16px 0">
+        <img src="{{ asset(ltrim($item['image'], '/')) }}" width="112" height="64" alt="" style="object-fit:cover;border-radius:8px">
+        <div style="flex:1;min-width:180px">
+          <strong>{{ app()->getLocale() === 'fa' ? $item['fa']['title'] : $item['title'] }}</strong>
+          <p>{{ implode(' · ', $item['technologies']) }}</p>
+        </div>
+        <a href="{{ app()->getLocale() === 'fa' ? url('/fa/work/'.$slug) : url('/work/'.$slug) }}" target="_blank" rel="noopener">{{ __('Preview') }}</a>
+        <form method="post" action="{{ route('admin.projects.import') }}">
+          @csrf
+          <input type="hidden" name="slug" value="{{ $slug }}">
+          <button type="submit">{{ __('Import and edit') }}</button>
+        </form>
+      </div>
+    @endforeach
+  </div>
+@endif
 <div class="card admin-table">
 <table>
   <thead><tr><th>{{ __('Order') }}</th><th>{{ __('Title') }}</th><th>{{ __('Slug') }}</th><th>{{ __('Status') }}</th><th></th></tr></thead>
